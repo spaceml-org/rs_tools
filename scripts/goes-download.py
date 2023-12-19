@@ -53,6 +53,31 @@ list_of_bands: list = [1, 2, ..., 15, 16]
 # TARGET-GRID
 target_grid: xr.Dataset = ...
 
+% ===============
+HOW DO WE CHECK DAYTIME HOURS?
+* Get Centroid for SATELLITE FOV - FIXED
+* Get Radius points for SATELLITE FOV - FIXED
+* Check if centroid and/or radius points for FOV is within daytime hours
+* Add warning if chosen date is before GOES orbit was stabilized
+* True:
+  download that date
+False:
+    Skippppp / Continue
+    
+@dataclass
+class SatelliteFOV:
+    lon_min: float
+    lon_max: float
+    lat_min: float
+    lat_max: float
+    viewing_angle: ... # [0.15, -0.15] [rad]
+
+    @property
+    def get_radius(self):
+        ...
+
+class GOES16(SatelliteFOV):
+    ...
 
 =================
 ALGORITHMS
@@ -102,6 +127,7 @@ from typing import Optional, List, Union
 import os
 import xarray as xr
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 import tqdm
 import typer
@@ -109,6 +135,7 @@ from loguru import logger
 from datetime import datetime, timedelta
 
 from goes2go import GOES
+from goes2go.data import goes_nearesttime
 
 # The cadence depends on the measurement scale
 # The full disk is measured every 15 mins
@@ -128,25 +155,29 @@ def goes_download(
     time_step: Optional[str]=None,
     satellite_number: int=16,
     save_dir: Optional[str]=".",
-    num_files: Optional[int]=None,
     instrument: str = 'ABI',
     processing_level: str = 'L1b',
     data_product: str = 'Rad',
     domain: str = 'F',
-    bands: str = 'all'
-    
+    bands: str = "all",
+    daytime_only: bool = False,
 ):
+
 
     # run checks
     _check_input_processing_level(processing_level=processing_level)
     _check_instrument(instrument=instrument)
     _check_satellite_number(satellite_number=satellite_number)
+    logger.info(f"Satellite Number: {satellite_number}")
     _check_domain(domain=domain)
-    _check_bands(bands=bands)
+    # compile bands
+    list_of_bands = _check_bands(bands=bands)
+    # check data product
     data_product = f"{instrument}-{processing_level}-{data_product}"
     logger.info(f"Data Product: {data_product}")
     _check_data_product_name(data_product=data_product)
 
+    # check start/end dates/times
     if end_date is None:
         end_date = start_date
 
@@ -172,23 +203,49 @@ def goes_download(
     # Compile list of dates/times
     list_of_dates = np.arange(start_datetime, end_datetime, time_delta).astype(datetime).astype(str)
 
-    G = GOES(satellite=satellite_number, product=data_product, domain=domain)
-
-    if bands == 'all':
-        list_of_bands = list(np.arange(1, 17))
-    else:
-        list_of_bands = bands
-    # time_stamps = np.arange(t0, t1, dt)
-    logger.info(f"Satellite Number: {satellite_number}")
     files = []
-    with tqdm.tqdm(list_of_dates) as pbar_time:
-        with tqdm.tqdm(list_of_bands) as pbar_bands:
-            for itime in pbar_time:
-                pbar_time.set_description(f"{itime}")
-                for iband in pbar_bands:
-                    pbar_bands.set_description(f"{iband}")
-                    continue
-                    # files.append(G.nearesttime(itime, bands=iband, return_as='filelist', save_dir=save_dir))
+
+    # create progress bars for dates and bands
+    pbar_time = tqdm.tqdm(list_of_dates)
+    pbar_bands = tqdm.tqdm(list_of_bands)
+
+    for itime in pbar_time:
+        pbar_time.set_description(f"Time - {itime}")
+        for iband in pbar_bands:
+            pbar_bands.set_description(f"Band - {iband}")
+
+            # ignore nighttime if user wants to
+            if daytime_only:
+                # TODO: check that centroid / radius points is inside daytime
+                pass
+
+            # download file
+            logger.info(f"Bands: {iband}")
+            ifile: list[str] = goes_nearesttime(
+                attime=itime,
+                within=pd.to_timedelta(15, 'm'),
+                satellite=satellite_number, 
+                product=data_product, 
+                domain=domain, 
+                bands=iband, 
+                return_as="filelist", 
+                save_dir=save_dir
+            )
+            # append list of files to larger list of files
+            files.append(ifile)
+
+            # TODO: check if all bands exist, otherwise skip to next timesttep
+            # 
+
+            # TODO: Add functions to process data
+            
+            # - open file
+            # - change coordinate systems
+            # - resample  (Change Period)
+            # - rregrid
+            
+            break
+        break
 
     return files
 
@@ -262,7 +319,6 @@ def _check_satellite_number(satellite_number: str) -> bool:
     
 
 def _check_input_processing_level(processing_level: str) -> bool:
-
     """checks processing level for GOES datas"""
     if processing_level in ["L1b"]:
         return True
@@ -289,22 +345,27 @@ def _check_data_product_name(data_product: str) -> bool:
         msg += f"\nNeeds to be 'ABI-L1b-Rad'. Others are not yet implemented"
         raise ValueError(msg)
         
-def _check_bands(bands: Union[List[str], str]) -> bool:
-    if isinstance(bands, str):
-        if bands in ['all']:
-            return True
-        else:
-            msg = "Unrecognized bands"
-            msg += f"\nNeeds to be 'all' or list of bands."
-            raise ValueError(msg)
-    elif isinstance(bands, list):
-        criteria: lambda x: 17 > int(x) > 0
-
-        result = list(map(criteria, bands))
-        
-        assert result.sum() == len(bands)
+def _check_bands(bands: str) -> List[int]:
+    if bands in ['all']:
+        list_of_bands = list(np.arange(1, 17))
+        return list_of_bands
+    else:
+        try:
+            list_of_bands = list(set(map(int, bands.split(' '))))
+            logger.debug(f"List of str Bands to Ints: {list_of_bands}")
     
-# TODO: Move to different script?    
+            criteria = lambda x: 17 > x > 0
+            result = list(map(criteria, list_of_bands))
+            logger.debug(f"Result from criteria: {result}")
+    
+            assert sum(result) == len(list_of_bands)
+            return list_of_bands
+        except Exception as e:
+            msg = "Unrecognized bands"
+            msg += f"\nNeeds to be 'all' or string of valid bands separated by spaces"
+            msg += '\n(e.g., "13 14", \'1 2 3\').'
+            raise ValueError(msg)
+             
 def convert_str2time(time: str):
     time_list = time.split(":")
     hours = int(time_list[0])
@@ -316,13 +377,10 @@ def convert_str2time(time: str):
 def main(input: str):
 
     print(input)
-    
-
-
 
 if __name__ == '__main__':
     typer.run(goes_download)
 
     """
-    python rs_tools/scripts/goes-download.py LIST_OF_DATES "2020-10-19 00:00" "2020-10-19 12:00" SATELLITE_NUMBER 16
+    python rs_tools/scripts/goes-download.py --bands "12 13"
     """
