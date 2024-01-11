@@ -220,7 +220,7 @@ def goes_download(
                 pass
 
             # download file
-            logger.info(f"Bands: {iband}")
+            # logger.info(f"Bands: {iband}")
             ifile: list[str] = goes_nearesttime(
                 attime=itime,
                 within=pd.to_timedelta(15, 'm'),
@@ -229,7 +229,7 @@ def goes_download(
                 domain=domain, 
                 bands=iband, 
                 return_as="filelist", 
-                save_dir=save_dir
+                save_dir=save_dir,
             )
             # append list of files to larger list of files
             files.append(ifile)
@@ -244,8 +244,8 @@ def goes_download(
             # - resample  (Change Period)
             # - rregrid
             
-            break
-        break
+        #     break
+        # break
 
     return files
 
