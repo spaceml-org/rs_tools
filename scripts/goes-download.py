@@ -1,128 +1,3 @@
-"""
-Summary: The download script to interact directly with the goes2go package.
-We only want to specify what is necessary and compatible with the goes2go package.
-In general, we want to satellite, the spatial domain, and the period.
-
-Args:
-    satellite_number: 
-
-**Input Parameters**
-
-Downloading:
-- satellite number: int --> (16,17,18)
-- spatial extent: str --> full disk (F), CONUS (C), Mesoscale domains (M, M1, M2)
-- goes instrument: str --> e.g. ABI radiance (or SUVI for helio)
-- preprocessing level: str --> e.g. level-1b
-- directory: str
-- return xarray dataset or list of files --> return as file list works better?
-- band specifications: list[int] --> download all or subset only
-- start time (of range of times to be downloaded): str
-- end time: str
-- timesteps/number of files: str
-- day vs. night mode: --> e.g. for only downloading day mode images
-
-----------
-
----
-Basic Processing:
-- resolution: --> downscale all bands to common resolution (e.g. 2 km)
-- coordinate system transformations
-- etc.
-
-
-=================
-INPUT PARAMETERS
-=================
-
-# LIST OF DATES | START DATE, END DATE, STEP
-np.arange, np.linspace
-t0, t1, dt | num_files
-timestamps = [t0, t1, t2]
-# create list of dates
-list_of_dates: list = ["2020-10-19 12:00:00", "2020-10-12 12:00:00", ...]
-
-# SATELLITE INFORMATION
-satellite_number: int = (16, 17, 18)i
-instrument: str  = (ABI, ...)
-processing_level: str = (level-1b,): str = (level-1b, ...)
-data_product: str = (radiances, ...)
-
-# LIST OF BANDS
-list_of_bands: list = [1, 2, ..., 15, 16]
-
-# TARGET-GRID
-target_grid: xr.Dataset = ...
-
-% ===============
-HOW DO WE CHECK DAYTIME HOURS?
-* Get Centroid for SATELLITE FOV - FIXED
-* Get Radius points for SATELLITE FOV - FIXED
-* Check if centroid and/or radius points for FOV is within daytime hours
-* Add warning if chosen date is before GOES orbit was stabilized
-* True:
-  download that date
-False:
-    Skippppp / Continue
-    
-@dataclass
-class SatelliteFOV:
-    lon_min: float
-    lon_max: float
-    lat_min: float
-    lat_max: float
-    viewing_angle: ... # [0.15, -0.15] [rad]
-
-    @property
-    def get_radius(self):
-        ...
-
-class GOES16(SatelliteFOV):
-    ...
-
-=================
-ALGORITHMS
-=================
-
-for itime in timestamps:
-    for iband in list_of_bands:
-        # -------------------------------------------------
-        # download to folder - use GOES2GO loader
-        # -------------------------------------------------
-        
-        # open data in folder
-        
-        # -------------------------------------------------
-        # quality check 1 - did it download
-        # -------------------------------------------------
-        if download_criteria:
-            continue if allow_missing else break
-        
-        # quality check 2 - day and/or night specification
-        if day_night_criteria:
-            continue if allow_missing else break
-        
-        # -------------------------------------------------
-        # CRS Transformation (Optional, preferred)
-        # -------------------------------------------------
-        # load dataset
-        ds: xr.Dataset = xr.load_dataset(...)
-        # coordinate transformation
-        ds: xr.Dataset = crs_transform(ds, target_crs, *args, **kwargs)
-        # resave
-        ds.to_netcdf(...)
-        
-        # -------------------------------------------------
-        # downsample/upscale/lower-res (optional, preferred)
-        # -------------------------------------------------
-        # load dataset
-        ds: xr.Dataset = xr.load_dataset(...)
-        # resample
-        ds: xr.Dataset = downsample(ds, target_grid, *args, **kwargs)
-        ds: xr.Dataset = transform_coords(ds, target_coords)
-        # resave
-        ds.to_netcdf(...)
-
-"""
 from typing import Optional, List, Union
 import os
 import xarray as xr
@@ -147,6 +22,7 @@ DOMAIN_TIMESTEP = {
     'M': 1
 }
 
+
 def goes_download(
     start_date: str,
     end_date: Optional[str]=None,
@@ -162,8 +38,46 @@ def goes_download(
     data_product: str = 'Rad',
     domain: str = 'F',
     bands: str = "all",
+    check_bands_downloaded: bool = False,
 ):
-    # TODO: Add docstrings
+    """
+    Downloads GOES satellite data for a specified time period and set of bands.
+
+    Args:
+        start_date (str): The start date of the data download in the format 'YYYY-MM-DD'.
+        end_date (str, optional): The end date of the data download in the format 'YYYY-MM-DD'. If not provided, the end date will be the same as the start date.
+        start_time (str, optional): The start time of the data download in the format 'HH:MM:SS'. Default is '00:00:00'.
+        end_time (str, optional): The end time of the data download in the format 'HH:MM:SS'. Default is '23:59:00'.
+        daily_window_t0 (str, optional): The start time of the daily window in the format 'HH:MM:SS'. Default is '00:00:00'. Used if e.g., only day/night measurements are required.
+        daily_window_t1 (str, optional): The end time of the daily window in the format 'HH:MM:SS'. Default is '23:59:00'. Used if e.g., only day/night measurements are required.
+        time_step (str, optional): The time step between each data download in the format 'HH:MM:SS'. If not provided, the default is 1 hour.
+        satellite_number (int, optional): The satellite number. Default is 16.
+        save_dir (str, optional): The directory where the downloaded files will be saved. Default is the current directory.
+        instrument (str, optional): The instrument name. Default is 'ABI'.
+        processing_level (str, optional): The processing level of the data. Default is 'L1b'.
+        data_product (str, optional): The data product to download. Default is 'Rad'.
+        domain (str, optional): The domain of the data. Default is 'F' - Full Disk.
+        bands (str, optional): The bands to download. Default is 'all'.
+        check_bands_downloaded (bool, optional): Whether to check if all bands were successfully downloaded for each time step. Default is False.
+
+    Returns:
+        list: A list of file paths for the downloaded files.
+        
+    Examples:
+        # custom day
+        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01
+        # custom day + end points
+        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00
+        # custom day + end points + time window
+        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00
+        # custom day + end points + time window + timestep
+        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00 --time-step 06:00:00
+        # ====================
+        # FAILURE TEST CASES
+        # ====================
+        python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/
+        python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/ --check-bands-downloaded
+    """
 
     # run checks
     _check_input_processing_level(processing_level=processing_level)
@@ -230,27 +144,43 @@ def goes_download(
     for itime in pbar_time:
         
         pbar_time.set_description(f"Time - {itime}")
+        success_flag = True
+        sub_files_list: list[str] = []
 
-        break
         for iband in pbar_bands:
+            
             pbar_bands.set_description(f"Band - {iband}")
 
             # download file
-            logger.info(f"Bands: {iband}")
-            ifile: list[str] = goes_nearesttime(
-                attime=itime,
-                within=pd.to_timedelta(15, 'm'),
-                satellite=satellite_number, 
-                product=data_product, 
-                domain=domain, 
-                bands=iband, 
-                return_as="filelist", 
-                save_dir=save_dir
-            )
-            # append list of files to larger list of files
-            files.append(ifile)
 
-            # TODO: check if all bands exist, otherwise skip to next timesttep
+            try:
+                ifile: pd.DataFrame = goes_nearesttime(
+                    attime=itime,
+                    within=pd.to_timedelta(15, 'm'),
+                    satellite=satellite_number, 
+                    product=data_product, 
+                    domain=domain, 
+                    bands=iband, 
+                    return_as="filelist", 
+                    save_dir=save_dir,
+                )
+                # extract filepath from GOES download pandas dataframe
+                filepath: str = os.path.join(save_dir, ifile.file[0])
+                sub_files_list += [filepath]
+            
+            except IndexError:
+                logger.info(f"Band {iband} could not be downloaded for time step {itime}.")
+                if check_bands_downloaded:
+                    logger.info(f"Deleting all other bands for time step {itime}.")
+                    delete_list_of_files(sub_files_list) # delete partially downloaded bands
+                    success_flag = False
+                    break # skip to next time step
+
+            # MANUALLY TESTING - TBD (TO BE DELETED)
+            
+            # 2018 274 17 # no channel 6
+            # python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/
+            # python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/ --check-bands-downloaded
 
             # TODO: Add functions to process data
             
@@ -259,8 +189,9 @@ def goes_download(
             # - resample  (Change Period)
             # - rregrid
             
-            break
-        break
+
+        if success_flag:
+            files += sub_files_list
 
     return files
 
@@ -389,6 +320,13 @@ def convert_str2time(time: str):
 
     return hours, minutes, seconds
 
+def delete_list_of_files(file_list: List[str]) -> None:
+    for file_path in file_list:
+        try:
+            os.remove(file_path)
+        except OSError as e:
+            print(f"Error: {file_path} : {e.strerror}")
+
 def main(input: str):
 
     print(input)
@@ -403,6 +341,11 @@ if __name__ == '__main__':
     python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00
     # custom day + end points + time window
     python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00
-    # custom day + end points + time window + timestep
+    # custom day + end points + time window + time step
     python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00 --time-step 06:00:00
+    # ====================
+    # FAILURE TEST CASES
+    # ====================
+    python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/
+    python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/ --check-bands-downloaded
     """
