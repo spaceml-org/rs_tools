@@ -4,6 +4,16 @@ from pyproj import CRS
 
 
 def reproject_goes16(ds: xr.Dataset, crs_projection: str="EPSG:4326") -> xr.Dataset:
+    """
+    Reprojects a GOES-16 dataset to a desired coordinate system.
+
+    Parameters:
+        ds (xr.Dataset): The input dataset to be reprojected.
+        crs_projection (str): The desired coordinate system for reprojection. Default is "EPSG:4326".
+
+    Returns:
+        xr.Dataset: The reprojected dataset.
+    """
 
     # transpose data
     try:

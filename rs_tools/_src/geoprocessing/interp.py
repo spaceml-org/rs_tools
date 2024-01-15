@@ -29,6 +29,17 @@ RES_GOES16 = [
 
 
 def create_goes16_interp_mesh(ds: xr.Dataset, variable: str="Rad"):
+    """
+    Create an interpolation mesh using the given dataset and variable for GOES 16 
+    dataset.
+
+    Parameters:
+        ds (xr.Dataset): The dataset containing the data.
+        variable (str, optional): The variable to interpolate. Defaults to "Rad".
+
+    Returns:
+        pyinterp.RTree: The interpolation mesh.
+    """
 
     mesh = pyinterp.RTree()
 
@@ -46,6 +57,16 @@ def create_goes16_interp_mesh(ds: xr.Dataset, variable: str="Rad"):
 
 
 def create_goes16_coords(scale: float=1.0):
+    """
+    Create coordinate vector for GOES-16 data. Uses previous knowledge of the coordinate
+    system bounds and resolutions to generate a coordinate vector for the X/Y coordss
+
+    Args:
+        scale (float): Scaling factor for the coordinate vector. Default is 1.0.
+
+    Returns:
+        numpy.ndarray: Coordinate vector for GOES-16 data.
+    """
 
     DX = interp1d(RES_GOES16, DX_GOES16, kind='linear', bounds_error=False, fill_value="extrapolate")(scale)
     NX = bounds_and_step_to_points(X0, X1, DX)
@@ -57,27 +78,34 @@ def create_goes16_coords(scale: float=1.0):
 
 
 def resample_goes16(ds, scale: float=1.0):
+    """
+    Resamples a GOES-16 dataset to a specified scale using inverse distance weighting.
+    #TODO: add more options, e.g., RBF, Kriging.
 
+    Parameters:
+        ds (xarray.Dataset): The input GOES-16 dataset.
+        scale (float): The scale factor for resampling. Default is 1.0.
+
+    Returns:
+        xarray.Dataset: The resampled dataset.
+
+    """
     # create interpolation mesh
-    # print("Creating interp mesh...")
     mesh = create_goes16_interp_mesh(ds, variable="Rad")
 
     # create query coordinates
-    # print("Creating coords...")
     x_coords = create_goes16_coords(scale=scale)    
 
     # create meshgrid
-    # print("Creating meshgrid")
     X, Y = np.meshgrid(x_coords, x_coords)
 
     # Inverse Distance Weighting
-    # print("doing distance calc...")
     idw_eta, neighbors = mesh.inverse_distance_weighting(
         np.vstack((X.ravel(), Y.ravel())).T,
-        within=True,  # Extrapolation is forbidden
-        radius=5500,  # In a radius of 5.5 Km
-        k=8,  # We are looking for at most 8 neighbours
-        num_threads=0, # Parallel processing
+        within=True,
+        radius=5500,
+        k=8,
+        num_threads=0,
     )
     idw_eta = idw_eta.reshape(X.shape)
 
@@ -88,7 +116,6 @@ def resample_goes16(ds, scale: float=1.0):
                   "band": ds.band_id.values}
     )
 
-    
     ds_new.Rad.attrs = ds.Rad.attrs
     dx = interp1d(RES_GOES16, DX_GOES16, kind='linear', bounds_error=False, fill_value="extrapolate")(scale)
     ds_new.Rad.attrs["resolution"] = f"y: {dx} rad x: {dx} rad"

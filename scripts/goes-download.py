@@ -22,6 +22,7 @@ DOMAIN_TIMESTEP = {
     'M': 1
 }
 
+
 def goes_download(
     start_date: str,
     end_date: Optional[str]=None,
@@ -39,7 +40,44 @@ def goes_download(
     bands: str = "all",
     check_bands_downloaded: bool = False,
 ):
-    # TODO: Add docstrings
+    """
+    Downloads GOES satellite data for a specified time period and set of bands.
+
+    Args:
+        start_date (str): The start date of the data download in the format 'YYYY-MM-DD'.
+        end_date (str, optional): The end date of the data download in the format 'YYYY-MM-DD'. If not provided, the end date will be the same as the start date.
+        start_time (str, optional): The start time of the data download in the format 'HH:MM:SS'. Default is '00:00:00'.
+        end_time (str, optional): The end time of the data download in the format 'HH:MM:SS'. Default is '23:59:00'.
+        daily_window_t0 (str, optional): The start time of the daily window in the format 'HH:MM:SS'. Default is '00:00:00'. Used if e.g., only day/night measurements are required.
+        daily_window_t1 (str, optional): The end time of the daily window in the format 'HH:MM:SS'. Default is '23:59:00'. Used if e.g., only day/night measurements are required.
+        time_step (str, optional): The time step between each data download in the format 'HH:MM:SS'. If not provided, the default is 1 hour.
+        satellite_number (int, optional): The satellite number. Default is 16.
+        save_dir (str, optional): The directory where the downloaded files will be saved. Default is the current directory.
+        instrument (str, optional): The instrument name. Default is 'ABI'.
+        processing_level (str, optional): The processing level of the data. Default is 'L1b'.
+        data_product (str, optional): The data product to download. Default is 'Rad'.
+        domain (str, optional): The domain of the data. Default is 'F' - Full Disk.
+        bands (str, optional): The bands to download. Default is 'all'.
+        check_bands_downloaded (bool, optional): Whether to check if all bands were successfully downloaded for each time step. Default is False.
+
+    Returns:
+        list: A list of file paths for the downloaded files.
+        
+    Examples:
+        # custom day
+        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01
+        # custom day + end points
+        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00
+        # custom day + end points + time window
+        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00
+        # custom day + end points + time window + timestep
+        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00 --time-step 06:00:00
+        # ====================
+        # FAILURE TEST CASES
+        # ====================
+        python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/
+        python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/ --check-bands-downloaded
+    """
 
     # run checks
     _check_input_processing_level(processing_level=processing_level)
@@ -282,28 +320,12 @@ def convert_str2time(time: str):
 
     return hours, minutes, seconds
 
-def _check_if_file_exists(file_path: str) -> bool:
-    return os.path.isfile(file_path)
-
-
 def delete_list_of_files(file_list: List[str]) -> None:
     for file_path in file_list:
         try:
             os.remove(file_path)
         except OSError as e:
             print(f"Error: {file_path} : {e.strerror}")
-
-# Usage:
-# delete_files(["file1.txt", "file2.txt", "file3.txt"])
-
-    # def check_file_exists(file_path):
-        
-
-    # file_path = "/path/to/your/file"
-    # if check_file_exists(file_path):
-    #     print("File exists.")
-    # else:
-    #     print("File does not exist.")
 
 def main(input: str):
 
@@ -319,7 +341,7 @@ if __name__ == '__main__':
     python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00
     # custom day + end points + time window
     python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00
-    # custom day + end points + time window + timestep
+    # custom day + end points + time window + time step
     python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00 --time-step 06:00:00
     # ====================
     # FAILURE TEST CASES
