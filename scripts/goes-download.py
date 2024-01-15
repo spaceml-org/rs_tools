@@ -152,6 +152,8 @@ def goes_download(
     end_date: Optional[str]=None,
     start_time: Optional[str]='00:00:00',
     end_time: Optional[str]='23:59:00',
+    daily_window_t0: Optional[str]='00:00:00',
+    daily_window_t1: Optional[str]='23:59:00',
     time_step: Optional[str]=None,
     satellite_number: int=16,
     save_dir: Optional[str]=".",
@@ -160,9 +162,8 @@ def goes_download(
     data_product: str = 'Rad',
     domain: str = 'F',
     bands: str = "all",
-    daytime_only: bool = False,
 ):
-
+    # TODO: Add docstrings
 
     # run checks
     _check_input_processing_level(processing_level=processing_level)
@@ -201,7 +202,24 @@ def goes_download(
     _check_timedelta(time_delta=time_delta, domain=domain)
     
     # Compile list of dates/times
-    list_of_dates = np.arange(start_datetime, end_datetime, time_delta).astype(datetime).astype(str)
+    list_of_dates = np.arange(start_datetime, end_datetime + time_delta, time_delta).astype(datetime)
+    print('Times to check: ',list_of_dates[0], list_of_dates[-1])
+
+    window_date = '1991-10-19' # Add any date to convert into proper datetime object
+    start_datetime_window_str = window_date + ' ' + daily_window_t0
+    end_datetime_window_str = window_date + ' ' + daily_window_t1
+    _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
+    # datetime conversion 
+    daily_window_t0_datetime = datetime.strptime(start_datetime_window_str, "%Y-%m-%d %H:%M:%S")
+    daily_window_t1_datetime = datetime.strptime(end_datetime_window_str, "%Y-%m-%d %H:%M:%S")
+    _check_start_end_times(start_datetime=daily_window_t0_datetime, end_datetime=daily_window_t1_datetime)
+
+    # filter function - check between
+    def is_in_between(date):
+       return daily_window_t0_datetime.time() <= date.time() <= daily_window_t1_datetime.time()
+
+    # new list of dates
+    list_of_dates = list(filter(is_in_between, list_of_dates))
 
     files = []
 
@@ -210,14 +228,12 @@ def goes_download(
     pbar_bands = tqdm.tqdm(list_of_bands)
 
     for itime in pbar_time:
+        
         pbar_time.set_description(f"Time - {itime}")
+
+        break
         for iband in pbar_bands:
             pbar_bands.set_description(f"Band - {iband}")
-
-            # ignore nighttime if user wants to
-            if daytime_only:
-                # TODO: check that centroid / radius points is inside daytime
-                pass
 
             # download file
             # logger.info(f"Bands: {iband}")
@@ -235,7 +251,6 @@ def goes_download(
             files.append(ifile)
 
             # TODO: check if all bands exist, otherwise skip to next timesttep
-            # 
 
             # TODO: Add functions to process data
             
@@ -382,5 +397,12 @@ if __name__ == '__main__':
     typer.run(goes_download)
 
     """
-    python rs_tools/scripts/goes-download.py --bands "12 13"
+    # custom day
+    python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01
+    # custom day + end points
+    python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00
+    # custom day + end points + time window
+    python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00
+    # custom day + end points + time window + timestep
+    python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00 --time-step 06:00:00
     """
