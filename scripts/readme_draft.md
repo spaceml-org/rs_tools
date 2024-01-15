@@ -1,3 +1,4 @@
+"""
 Summary: The download script to interact directly with the goes2go package.
 We only want to specify what is necessary and compatible with the goes2go package.
 In general, we want to satellite, the spatial domain, and the period.
@@ -120,3 +121,5 @@ for itime in timestamps:
         ds: xr.Dataset = transform_coords(ds, target_coords)
         # resave
         ds.to_netcdf(...)
+
+"""
