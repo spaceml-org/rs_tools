@@ -33,7 +33,7 @@ def goes_download(
     time_step: Optional[str]=None,
     satellite_number: int=16,
     save_dir: Optional[str]=".",
-    instrument: str = 'ABI',
+    instrument: str = "ABI",
     processing_level: str = 'L1b',
     data_product: str = 'Rad',
     domain: str = 'F',
@@ -265,7 +265,7 @@ def _check_satellite_number(satellite_number: str) -> bool:
     
 
 def _check_input_processing_level(processing_level: str) -> bool:
-    """checks processing level for GOES datas"""
+    """checks processing level for GOES data"""
     if processing_level in ["L1b"]:
         return True
     else:
