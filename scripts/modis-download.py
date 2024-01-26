@@ -11,6 +11,12 @@ Anna Tips 4 MODIS
 - Day & Night Flag: file sizes, filler value
 - Level 1B - SWATH Product
 
+Questions:
+- Are night/day mode measurments consistent?
+    - no. They change slightly each day.
+- Are the location measurements at specific times consistent?
+    - no.
+
 
 
 potentially useful packages:
@@ -160,7 +166,6 @@ from datetime import datetime, timedelta
 # MYD - AQUA
 # XXX = 1KM (QKM, HKM)
 # server - https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/
-MOD021KM/YEAR/DAY
 
 def modis_download(
     start_date: str,
