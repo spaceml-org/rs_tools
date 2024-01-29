@@ -160,6 +160,7 @@ import tqdm
 import typer
 from loguru import logger
 from datetime import datetime, timedelta
+import earthaccess
 
 ## SAT02XXX.AYYYYDD.HHDD.061.??????????????????.hdf
 # MOD - TERRA
@@ -172,13 +173,25 @@ def modis_download(
     end_date: Optional[str]=None,
     start_time: Optional[str]='00:00:00',
     end_time: Optional[str]='23:59:00',
-    day_step: Optional[str]=None,
+    day_step: Optional[str]=1, # NOTE: suggest change from None to 1, as it is needed instead of the time_delta variable we have in the goes downloader
     satellite: str='Terra',
     save_dir: Optional[str]=".",
     processing_level: str = 'L1b',
     resolution: str = "1KM",
-    collection: str = '61'
+    # collection: str = '61', # NOTE: suggest remove as not needed for earthaccess
+    earthdata_username: Optional[str]='',
+    earthdata_password: Optional[str]='',
+    # NOTE: suggest adding daily_window_t0 and daily_window_t1 and calling earthaccess for each day separately
+    daily_window_t0: Optional[str]='00:00:00',
+    daily_window_t1: Optional[str]='23:59:00',
+    bounding_box: Optional[List[float]]=None, 
 ):
+    # check if earthdata login is available
+    _check_earthdata_login(earthdata_username=earthdata_username, earthdata_password=earthdata_password)
+
+    # check if netcdf4 backend is available
+    _check_netcdf4_backend()
+
     # run checks
     _check_input_processing_level(processing_level=processing_level)
     satellite_code = _check_satellite(satellite=satellite)
@@ -195,12 +208,51 @@ def modis_download(
 
     _check_date_format(start_date, end_date)
 
-    # datetime conversion 
+    # datetime conversion
     start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
     end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
 
     _check_start_end_dates(start_datetime=start_datetime, end_datetime=end_datetime)
-          
+    
+    # compile list of dates/times (added 1 day to end_datetime so it is included in the list)
+    day_delta = timedelta(days=day_step)
+    list_of_dates = np.arange(start_datetime, end_datetime + timedelta(days=1), day_delta).astype(datetime)
+    
+    # TODO: if daily window is provided, we can call earthaccess for each day separately
+    # and use: temporal=("yyyy-mm-dd daily_window_t0", "yyyy-mm-dd daily_window_t1"),
+    # to only download the data within the daily window
+
+    # check bounding box if provided
+    if bounding_box is not None: _check_bounding_box(bounding_box=bounding_box)
+
+
+
+    def _check_earthdata_login(earthdata_username: str, earthdata_password: str) -> bool:
+        """check if earthdata login is available in environment variables / as input arguments"""
+        if earthdata_username and earthdata_password:
+            os.environ["EARTHDATA_USERNAME"] = earthdata_username
+            os.environ["EARTHDATA_PASSWORD"] = earthdata_password
+            # TODO can we run a test with earthaccess to check if the login is valid?
+            return True
+        
+        if os.environ.get("EARTHDATA_USERNAME") is None or os.environ.get("EARTHDATA_PASSWORD") is None:
+            msg = "Please set your Earthdata credentials as environment variables using:"
+            msg += "\nexport EARTHDATA_USERNAME=<your username>"
+            msg += "\nexport EARTHDATA_PASSWORD=<your password>"
+            msg += "\nOr provide them as command line arguments using:"
+            msg += "\n--earthdata-username <your username> --earthdata-password <your password>"
+            raise ValueError(msg)
+
+
+    def _check_netcdf4_backend() -> bool:
+        """check if xarray netcdf4 backend is available"""
+        if 'netcdf4' in xr.backends.list_engines().keys():
+            return True
+        else:
+            msg = "Please install netcdf4 backend for xarray using one of the following commands:"
+            msg += "\npip install netCDF4"
+            msg += "\nconda install -c conda-forge netCDF4"
+            raise ValueError(msg)
 
     def _check_input_processing_level(processing_level: str) -> bool:
         """checks processing level for MODIS data"""
@@ -260,4 +312,21 @@ def modis_download(
             msg += f"This does not hold for start = {str(start_datetime)} and end = {str(end_datetime)}"
             raise ValueError(msg)
     
-
+    def _check_bounding_box(bounding_box: List[float]) -> bool:
+        """ check if bounding box is valid """
+        if len(bounding_box) == 4:
+            lower_left_lon, lower_left_lat , upper_right_lon, upper_right_lat = bounding_box
+            # check if the four entries form a valid bounding box
+            if lower_left_lon > upper_right_lon or lower_left_lat > upper_right_lat:
+                msg = "Bounding box must be in the format [lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat]"
+                msg += f"\nReceived: {bounding_box}"
+                raise ValueError(msg)
+            if lower_left_lon < -180 or upper_right_lon > 180 or lower_left_lat < -90 or upper_right_lat > 90:
+                msg = "Bounding box must be between -180 and 180 for longitude and -90 and 90 for latitude"
+                msg += f"\nReceived: {bounding_box}"
+                raise ValueError(msg)
+            return True
+        else:
+            msg = "Bounding box must be a list of 4 floats"
+            msg += f"\nReceived: {bounding_box}"
+            raise ValueError(msg)
