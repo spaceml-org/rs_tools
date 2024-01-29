@@ -222,9 +222,43 @@ def modis_download(
     # and use: temporal=("yyyy-mm-dd daily_window_t0", "yyyy-mm-dd daily_window_t1"),
     # to only download the data within the daily window
 
+    # TODO: we need tuples of start and end date/time when calling earthaccess search_data
+    # so we could create a list of tuples here and then iterate over them in the loop
+
+    # check if save_dir is valid before attempting to download
+    # TODO could also check if save_dir exists and otherwise create it (assuming its parent directory exists, otherwise throw error)
+    _check_save_dir(save_dir=save_dir)
+
     # check bounding box if provided
     if bounding_box is not None: _check_bounding_box(bounding_box=bounding_box)
 
+    files = []
+
+    # create progress bars for dates and bands
+    pbar_time = tqdm.tqdm(list_of_dates)
+
+    for itime in pbar_time:
+        pbar_time.set_description(f"Time - {itime}")
+        success_flag = True
+        sub_files_list: list[str] = []
+        
+        results_day = earthaccess.search_data(
+            short_name=data_product,
+            cloud_hosted=True,
+            bounding_box=bounding_box,
+            temporal='TODO', # TODO decide how to parse (start, end) 
+        )
+        
+        # TODO: check length of results. 
+        # if it is 0: log warning (no data in specified time and bounding box) and continue to next date
+
+        files_day = earthaccess.download(results_day, save_dir)
+
+        # TODO: are there any other checks we need to do here?
+        if success_flag:
+            files += files_day
+    
+        return files       
 
 
     def _check_earthdata_login(earthdata_username: str, earthdata_password: str) -> bool:
@@ -232,8 +266,6 @@ def modis_download(
         if earthdata_username and earthdata_password:
             os.environ["EARTHDATA_USERNAME"] = earthdata_username
             os.environ["EARTHDATA_PASSWORD"] = earthdata_password
-            # TODO can we run a test with earthaccess to check if the login is valid?
-            return True
         
         if os.environ.get("EARTHDATA_USERNAME") is None or os.environ.get("EARTHDATA_PASSWORD") is None:
             msg = "Please set your Earthdata credentials as environment variables using:"
@@ -242,6 +274,21 @@ def modis_download(
             msg += "\nOr provide them as command line arguments using:"
             msg += "\n--earthdata-username <your username> --earthdata-password <your password>"
             raise ValueError(msg)
+        
+        # check if credentials are valid
+        auth_obj = earthaccess.login('environment')
+
+        if auth_obj.authenticated: 
+            return True
+        else:
+            msg = "Earthdata login failed."
+            msg += "\nPlease check your credentials and set them as environment variables using:"
+            msg += "\nexport EARTHDATA_USERNAME=<your username>"
+            msg += "\nexport EARTHDATA_PASSWORD=<your password>"
+            msg += "\nOr provide them as command line arguments using:"
+            msg += "\n--earthdata-username <your username> --earthdata-password <your password>"."
+            raise ValueError(msg)
+
 
 
     def _check_netcdf4_backend() -> bool:
@@ -329,4 +376,15 @@ def modis_download(
         else:
             msg = "Bounding box must be a list of 4 floats"
             msg += f"\nReceived: {bounding_box}"
+            raise ValueError(msg)
+        
+
+    def _check_save_dir(save_dir: str) -> bool:
+        """ check if save_dir exists """
+        # TODO: should we attempt creating save_dir otherwise? and only raise an error if it failed?
+        if os.path.isdir(save_dir):
+            return True
+        else:
+            msg = "Save directory does not exist"
+            msg += f"\nReceived: {save_dir}"
             raise ValueError(msg)
