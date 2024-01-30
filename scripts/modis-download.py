@@ -56,7 +56,7 @@ Basic Processing:
 - coordinate system transformations
 - etc.
 
-
+TODO - add changes to input parameters etcetera
 =================
 INPUT PARAMETERS
 =================
@@ -171,20 +171,17 @@ import earthaccess
 def modis_download(
     start_date: str,
     end_date: Optional[str]=None,
-    start_time: Optional[str]='00:00:00',
+    start_time: Optional[str]='00:00:00', # used for daily window
     end_time: Optional[str]='23:59:00',
-    day_step: Optional[str]=1, # NOTE: suggest change from None to 1, as it is needed instead of the time_delta variable we have in the goes downloader
+    day_step: Optional[int]=1, # NOTE: suggest change default from None to 1, as it is needed instead of the time_delta variable we have in the goes downloader
     satellite: str='Terra',
     save_dir: Optional[str]=".",
     processing_level: str = 'L1b',
     resolution: str = "1KM",
-    # collection: str = '61', # NOTE: suggest remove as not needed for earthaccess
     earthdata_username: Optional[str]='',
     earthdata_password: Optional[str]='',
-    # NOTE: suggest adding daily_window_t0 and daily_window_t1 and calling earthaccess for each day separately
-    daily_window_t0: Optional[str]='00:00:00',
-    daily_window_t1: Optional[str]='23:59:00',
-    bounding_box: Optional[List[float]]=None, 
+    bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90), # TODO: extend to allow multiple regions? NOTE: earthaccess allows other ways to specify spatial extent, e.g. polygon, point
+    # day_night_flag: Optional[str]=None, NOTE: can pass day/night flag  ('day' or 'night') but if arg is passed it cannot be None - need to find a way to make it work as optional argument
 ):
     # check if earthdata login is available
     _check_earthdata_login(earthdata_username=earthdata_username, earthdata_password=earthdata_password)
@@ -206,54 +203,65 @@ def modis_download(
     if end_date is None:
         end_date = start_date
 
-    _check_date_format(start_date, end_date)
+    start_datetime_str = start_date + ' ' + start_time
+    end_datetime_str = end_date + ' ' + end_time
+    _check_datetime_format(start_datetime_str=start_datetime_str, end_datetime_str=end_datetime_str) 
 
-    # datetime conversion
-    start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
-    end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
+    # datetime conversion NOTE: adding end time ensures last day is included in list_of_dates 
+    start_datetime = datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M:%S")
+    end_datetime = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
 
     _check_start_end_dates(start_datetime=start_datetime, end_datetime=end_datetime)
     
-    # compile list of dates/times (added 1 day to end_datetime so it is included in the list)
+    # compile list of dates/times 
     day_delta = timedelta(days=day_step)
-    list_of_dates = np.arange(start_datetime, end_datetime + timedelta(days=1), day_delta).astype(datetime)
+    list_of_dates = np.arange(start_datetime, end_datetime, day_delta).astype(datetime)
     
-    # TODO: if daily window is provided, we can call earthaccess for each day separately
-    # and use: temporal=("yyyy-mm-dd daily_window_t0", "yyyy-mm-dd daily_window_t1"),
-    # to only download the data within the daily window
+    # start/end times are used as daily window
+    def get_start_end_times(day_start, end_time): # TODO better name?
+        """computes tuple of start and end date/time for each day for earthaccess call"""
+        ymd = day_start.strftime("%Y-%m-%d")
+        day_end = ymd + ' ' + end_time
+        return (day_start.strftime("%Y-%m-%d %H:%M:%S"), day_end)
+        
+    list_of_start_end_times = [get_start_end_times(day_start, end_time) for day_start in list_of_dates]
 
-    # TODO: we need tuples of start and end date/time when calling earthaccess search_data
-    # so we could create a list of tuples here and then iterate over them in the loop
 
     # check if save_dir is valid before attempting to download
     # TODO could also check if save_dir exists and otherwise create it (assuming its parent directory exists, otherwise throw error)
     _check_save_dir(save_dir=save_dir)
 
-    # check bounding box if provided
-    if bounding_box is not None: _check_bounding_box(bounding_box=bounding_box)
+    # check that bounding box is valid
+    _check_bounding_box(bounding_box=bounding_box)
 
+    # turn bounding box into a tuple
+    # bounding_box = tuple(bounding_box)
+   
     files = []
 
-    # create progress bars for dates and bands
-    pbar_time = tqdm.tqdm(list_of_dates)
+    # create progress bar for dates
+    pbar_time = tqdm.tqdm(list_of_start_end_times)
+
 
     for itime in pbar_time:
-        pbar_time.set_description(f"Time - {itime}")
+        pbar_time.set_description(f"Time - {itime[0]} to {itime[1]}")
         success_flag = True
-        sub_files_list: list[str] = []
-        
+
         results_day = earthaccess.search_data(
             short_name=data_product,
-            cloud_hosted=True,
             bounding_box=bounding_box,
-            temporal='TODO', # TODO decide how to parse (start, end) 
+            temporal=itime,
         )
         
-        # TODO: check length of results. 
-        # if it is 0: log warning (no data in specified time and bounding box) and continue to next date
 
-        files_day = earthaccess.download(results_day, save_dir)
+        if not results_day:
+            # check if any results were returned, if not: log warning and continue to next date
+            success_flag = False
+            logger.warning(f"No data found for {itime[0]} to {itime[1]} in the specified bounding box")
+            continue
 
+        files_day = earthaccess.download(results_day, save_dir) # TODO: can this fail? should we use try / except to prevent the programme from crashing if this call is unsuccessful?
+        # TODO: check file sizes - if less than X MB (ca 70MB) the download failed
         # TODO: are there any other checks we need to do here?
         if success_flag:
             files += files_day
@@ -261,130 +269,157 @@ def modis_download(
         return files       
 
 
-    def _check_earthdata_login(earthdata_username: str, earthdata_password: str) -> bool:
-        """check if earthdata login is available in environment variables / as input arguments"""
-        if earthdata_username and earthdata_password:
-            os.environ["EARTHDATA_USERNAME"] = earthdata_username
-            os.environ["EARTHDATA_PASSWORD"] = earthdata_password
-        
-        if os.environ.get("EARTHDATA_USERNAME") is None or os.environ.get("EARTHDATA_PASSWORD") is None:
-            msg = "Please set your Earthdata credentials as environment variables using:"
-            msg += "\nexport EARTHDATA_USERNAME=<your username>"
-            msg += "\nexport EARTHDATA_PASSWORD=<your password>"
-            msg += "\nOr provide them as command line arguments using:"
-            msg += "\n--earthdata-username <your username> --earthdata-password <your password>"
-            raise ValueError(msg)
-        
-        # check if credentials are valid
-        auth_obj = earthaccess.login('environment')
 
-        if auth_obj.authenticated: 
-            return True
-        else:
-            msg = "Earthdata login failed."
-            msg += "\nPlease check your credentials and set them as environment variables using:"
-            msg += "\nexport EARTHDATA_USERNAME=<your username>"
-            msg += "\nexport EARTHDATA_PASSWORD=<your password>"
-            msg += "\nOr provide them as command line arguments using:"
-            msg += "\n--earthdata-username <your username> --earthdata-password <your password>"."
-            raise ValueError(msg)
-
-
-
-    def _check_netcdf4_backend() -> bool:
-        """check if xarray netcdf4 backend is available"""
-        if 'netcdf4' in xr.backends.list_engines().keys():
-            return True
-        else:
-            msg = "Please install netcdf4 backend for xarray using one of the following commands:"
-            msg += "\npip install netCDF4"
-            msg += "\nconda install -c conda-forge netCDF4"
-            raise ValueError(msg)
-
-    def _check_input_processing_level(processing_level: str) -> bool:
-        """checks processing level for MODIS data"""
-        if processing_level in ["L1b"]:
-            return True
-        else:
-            msg = "Unrecognized processing level"
-            msg += f"\nNeeds to be 'L1b'. Others are not yet implemented"
-            raise ValueError(msg)
-
-    def _check_satellite(satellite: str) -> str:
-        if satellite == 'Aqua': 
-            return 'MYD'
-        elif satellite == 'Terra':
-            return 'MOD'
-        else:
-            msg = "Unrecognized satellite"
-            msg += f"\nNeeds to be 'Aqua' or 'Terra'. Others are not yet implemented"
-            raise ValueError(msg)
-        
-    def _check_resolution(resolution: str) -> str:
-        if resolution in ["1KM", "1Km", "1km"]:
-            return "1KM"
-        elif resolution in ["500M", "500m"]:
-            return "HKM"
-        elif resolution in ["250M", "250m"]:
-            return "QKM"
-        else: 
-            msg = "Unrecognized resolution"
-            msg += f"\nNeeds to be '1KM', '500M', '250M. Others are not available"
-            raise ValueError(msg)
-        
-    def _check_data_product_name(data_product: str) -> bool:
-        if data_product in ['MOD021KM', 'MOD02HKM', 'MOD02QKM', 'MYD021KM', 'MYD02HKM', 'MYD02QKM']:
-            return True
-        else:
-            msg = "Unrecognized data product"
-            msg += f"\nOnly implemented for TERRA/AQUA MODIS and 1KM, 500M, 250M resolution."
-            raise ValueError(msg)
-
-    def _check_date_format(start_date: str, end_date: str) -> bool:
-        try:
-            datetime.strptime(start_date, "%Y-%m-%d")
-            datetime.strptime(end_date, "%Y-%m-%d")
-            return True
-        except Exception as e:
-            msg = "Please check date/time format"
-            msg += "\nExpected date format: %Y-%m-%d"
-            raise SyntaxError(msg)
-
-    def _check_start_end_dates(start_datetime: datetime, end_datetime: datetime) -> bool:
-        """ check end_datetime is after start_datetime """
-        if start_datetime < end_datetime:
-            return True
-        else:
-            msg = "Start datetime must be before end datetime\n"
-            msg += f"This does not hold for start = {str(start_datetime)} and end = {str(end_datetime)}"
-            raise ValueError(msg)
+def _check_earthdata_login(earthdata_username: str, earthdata_password: str) -> bool:
+    """check if earthdata login is available in environment variables / as input arguments"""
+    if earthdata_username and earthdata_password:
+        os.environ["EARTHDATA_USERNAME"] = earthdata_username
+        os.environ["EARTHDATA_PASSWORD"] = earthdata_password
     
-    def _check_bounding_box(bounding_box: List[float]) -> bool:
-        """ check if bounding box is valid """
-        if len(bounding_box) == 4:
-            lower_left_lon, lower_left_lat , upper_right_lon, upper_right_lat = bounding_box
-            # check if the four entries form a valid bounding box
-            if lower_left_lon > upper_right_lon or lower_left_lat > upper_right_lat:
-                msg = "Bounding box must be in the format [lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat]"
-                msg += f"\nReceived: {bounding_box}"
-                raise ValueError(msg)
-            if lower_left_lon < -180 or upper_right_lon > 180 or lower_left_lat < -90 or upper_right_lat > 90:
-                msg = "Bounding box must be between -180 and 180 for longitude and -90 and 90 for latitude"
-                msg += f"\nReceived: {bounding_box}"
-                raise ValueError(msg)
-            return True
-        else:
-            msg = "Bounding box must be a list of 4 floats"
+    if os.environ.get("EARTHDATA_USERNAME") is None or os.environ.get("EARTHDATA_PASSWORD") is None:
+        msg = "Please set your Earthdata credentials as environment variables using:"
+        msg += "\nexport EARTHDATA_USERNAME=<your username>"
+        msg += "\nexport EARTHDATA_PASSWORD=<your password>"
+        msg += "\nOr provide them as command line arguments using:"
+        msg += "\n--earthdata-username <your username> --earthdata-password <your password>"
+        raise ValueError(msg)
+    
+    # check if credentials are valid
+    auth_obj = earthaccess.login('environment')
+
+    if auth_obj.authenticated: 
+        return True
+    else:
+        msg = "Earthdata login failed."
+        msg += "\nPlease check your credentials and set them as environment variables using:"
+        msg += "\nexport EARTHDATA_USERNAME=<your username>"
+        msg += "\nexport EARTHDATA_PASSWORD=<your password>"
+        msg += "\nOr provide them as command line arguments using:"
+        msg += "\n--earthdata-username <your username> --earthdata-password <your password>"
+        raise ValueError(msg)
+
+def _check_netcdf4_backend() -> bool:
+    """check if xarray netcdf4 backend is available"""
+    if 'netcdf4' in xr.backends.list_engines().keys():
+        return True
+    else:
+        msg = "Please install netcdf4 backend for xarray using one of the following commands:"
+        msg += "\npip install netCDF4"
+        msg += "\nconda install -c conda-forge netCDF4"
+        raise ValueError(msg)
+
+def _check_input_processing_level(processing_level: str) -> bool:
+    """checks processing level for MODIS data"""
+    if processing_level in ["L1b"]:
+        return True
+    else:
+        msg = "Unrecognized processing level"
+        msg += f"\nNeeds to be 'L1b'. Others are not yet implemented"
+        raise ValueError(msg)
+
+def _check_satellite(satellite: str) -> str:
+    if satellite == 'Aqua': 
+        return 'MYD'
+    elif satellite == 'Terra':
+        return 'MOD'
+    else:
+        msg = "Unrecognized satellite"
+        msg += f"\nNeeds to be 'Aqua' or 'Terra'. Others are not yet implemented"
+        raise ValueError(msg)
+    
+def _check_resolution(resolution: str) -> str:
+    if resolution in ["1KM", "1Km", "1km"]:
+        return "1KM"
+    elif resolution in ["500M", "500m"]:
+        return "HKM"
+    elif resolution in ["250M", "250m"]:
+        return "QKM"
+    else: 
+        msg = "Unrecognized resolution"
+        msg += f"\nNeeds to be '1KM', '500M', '250M. Others are not available"
+        raise ValueError(msg)
+    
+def _check_data_product_name(data_product: str) -> bool:
+    if data_product in ['MOD021KM', 'MOD02HKM', 'MOD02QKM', 'MYD021KM', 'MYD02HKM', 'MYD02QKM']:
+        return True
+    else:
+        msg = "Unrecognized data product"
+        msg += f"\nOnly implemented for TERRA/AQUA MODIS and 1KM, 500M, 250M resolution."
+        raise ValueError(msg)
+
+def _check_datetime_format(start_datetime_str: str, end_datetime_str: str) -> bool:
+    try:
+        datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M:%S")
+        datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
+        return True
+    except Exception as e:
+        msg = "Please check date/time format"
+        msg += "\nExpected date format: %Y-%m-%d"
+        msg += "\nExpected time format: %H:%M:%S"
+        raise SyntaxError(msg)
+
+def _check_start_end_dates(start_datetime: datetime, end_datetime: datetime) -> bool:
+    """ check end_datetime is after start_datetime """
+    if start_datetime < end_datetime:
+        return True
+    else:
+        msg = "Start datetime must be before end datetime\n"
+        msg += f"This does not hold for start = {str(start_datetime)} and end = {str(end_datetime)}"
+        raise ValueError(msg)
+
+def _check_bounding_box(bounding_box: List[float]) -> bool:
+    """ check if bounding box is valid """
+    if len(bounding_box) == 4: # TODO remove this as typing checks it contains exactly 4 floats 
+        lower_left_lon, lower_left_lat , upper_right_lon, upper_right_lat = bounding_box
+        # check if the four entries form a valid bounding box
+        if lower_left_lon > upper_right_lon or lower_left_lat > upper_right_lat:
+            msg = "Bounding box must be in the format [lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat]"
             msg += f"\nReceived: {bounding_box}"
             raise ValueError(msg)
-        
-
-    def _check_save_dir(save_dir: str) -> bool:
-        """ check if save_dir exists """
-        # TODO: should we attempt creating save_dir otherwise? and only raise an error if it failed?
-        if os.path.isdir(save_dir):
-            return True
-        else:
-            msg = "Save directory does not exist"
-            msg += f"\nReceived: {save_dir}"
+        if lower_left_lon < -180 or upper_right_lon > 180 or lower_left_lat < -90 or upper_right_lat > 90:
+            msg = "Bounding box must be between -180 and 180 for longitude and -90 and 90 for latitude"
+            msg += f"\nReceived: {bounding_box}"
             raise ValueError(msg)
+        return True
+    else:
+        msg = "Bounding box must be a list of 4 floats"
+        msg += f"\nReceived: {bounding_box}"
+        raise ValueError(msg)
+    
+
+def _check_save_dir(save_dir: str) -> bool:
+    """ check if save_dir exists """
+    # TODO: should we attempt creating save_dir otherwise? and only raise an error if it failed?
+    if os.path.isdir(save_dir):
+        return True
+    else:
+        msg = "Save directory does not exist"
+        msg += f"\nReceived: {save_dir}"
+        raise ValueError(msg)
+    
+
+
+if __name__ == '__main__':
+    typer.run(modis_download)
+
+    """
+    # one day
+    python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 13:00:00 --save-dir ./notebooks/modisdata/test_script/
+
+    # multiple days
+    python scripts/modis-download.py 2018-10-01 --end-date 2018-10-9 --day-step 3 --start-time 08:00:00 --end-time 13:00:00 --save-dir ./notebooks/modisdata/test_script/
+
+    # test bounding box
+    python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 13:00:00 --save-dir ./notebooks/modisdata/test_script/ --bounding-box -10 -10 20 5
+
+
+    # ====================
+    # FAILURE TEST CASES
+    # ====================
+    # bounding box input invalid
+    python scripts/modis-download.py 2018-10-01 --bounding-box a b c d
+
+    # end date before start date
+    python scripts/modis-download.py 2018-10-01  --end-date 2018-09-01 
+
+    """
