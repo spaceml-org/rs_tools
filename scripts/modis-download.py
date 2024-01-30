@@ -172,15 +172,15 @@ def modis_download(
     start_date: str,
     end_date: Optional[str]=None,
     start_time: Optional[str]='00:00:00', # used for daily window
-    end_time: Optional[str]='23:59:00',
-    day_step: Optional[int]=1, # NOTE: suggest change default from None to 1, as it is needed instead of the time_delta variable we have in the goes downloader
+    end_time: Optional[str]='23:59:00', # used for daily window
+    day_step: Optional[int]=1, 
     satellite: str='Terra',
     save_dir: Optional[str]=".",
     processing_level: str = 'L1b',
     resolution: str = "1KM",
     earthdata_username: Optional[str]='',
     earthdata_password: Optional[str]='',
-    bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90), # TODO: extend to allow multiple regions? NOTE: earthaccess allows other ways to specify spatial extent, e.g. polygon, point
+    bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90), # TODO: extend to allow multiple regions? NOTE: earthaccess allows other ways to specify spatial extent, e.g. polygon, point - consider extending to allow these options
     # day_night_flag: Optional[str]=None, NOTE: can pass day/night flag  ('day' or 'night') but if arg is passed it cannot be None - need to find a way to make it work as optional argument
 ):
     # check if earthdata login is available
@@ -207,7 +207,7 @@ def modis_download(
     end_datetime_str = end_date + ' ' + end_time
     _check_datetime_format(start_datetime_str=start_datetime_str, end_datetime_str=end_datetime_str) 
 
-    # datetime conversion NOTE: adding end time ensures last day is included in list_of_dates 
+    # datetime conversion
     start_datetime = datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M:%S")
     end_datetime = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
 
@@ -218,13 +218,13 @@ def modis_download(
     list_of_dates = np.arange(start_datetime, end_datetime, day_delta).astype(datetime)
     
     # start/end times are used as daily window
-    def get_start_end_times(day_start, end_time): # TODO better name?
+    def get_daily_window(daily_start, end_time):
         """computes tuple of start and end date/time for each day for earthaccess call"""
-        ymd = day_start.strftime("%Y-%m-%d")
-        day_end = ymd + ' ' + end_time
-        return (day_start.strftime("%Y-%m-%d %H:%M:%S"), day_end)
+        day = daily_start.strftime("%Y-%m-%d")
+        daily_end = day + ' ' + end_time
+        return (daily_start.strftime("%Y-%m-%d %H:%M:%S"), daily_end)
         
-    list_of_start_end_times = [get_start_end_times(day_start, end_time) for day_start in list_of_dates]
+    list_of_daily_windows = [get_daily_window(daily_start, end_time) for daily_start in list_of_dates]
 
 
     # check if save_dir is valid before attempting to download
@@ -233,14 +233,11 @@ def modis_download(
 
     # check that bounding box is valid
     _check_bounding_box(bounding_box=bounding_box)
-
-    # turn bounding box into a tuple
-    # bounding_box = tuple(bounding_box)
    
     files = []
 
     # create progress bar for dates
-    pbar_time = tqdm.tqdm(list_of_start_end_times)
+    pbar_time = tqdm.tqdm(list_of_daily_windows)
 
 
     for itime in pbar_time:
@@ -252,7 +249,6 @@ def modis_download(
             bounding_box=bounding_box,
             temporal=itime,
         )
-        
 
         if not results_day:
             # check if any results were returned, if not: log warning and continue to next date
@@ -260,13 +256,13 @@ def modis_download(
             logger.warning(f"No data found for {itime[0]} to {itime[1]} in the specified bounding box")
             continue
 
-        files_day = earthaccess.download(results_day, save_dir) # TODO: can this fail? should we use try / except to prevent the programme from crashing if this call is unsuccessful?
+        files_day = earthaccess.download(results_day, save_dir) # TODO: can this fail? if yes, use try / except to prevent the programme from crashing
         # TODO: check file sizes - if less than X MB (ca 70MB) the download failed
         # TODO: are there any other checks we need to do here?
         if success_flag:
             files += files_day
     
-        return files       
+    return files       
 
 
 
@@ -369,27 +365,32 @@ def _check_start_end_dates(start_datetime: datetime, end_datetime: datetime) -> 
 
 def _check_bounding_box(bounding_box: List[float]) -> bool:
     """ check if bounding box is valid """
-    if len(bounding_box) == 4: # TODO remove this as typing checks it contains exactly 4 floats 
-        lower_left_lon, lower_left_lat , upper_right_lon, upper_right_lat = bounding_box
-        # check if the four entries form a valid bounding box
-        if lower_left_lon > upper_right_lon or lower_left_lat > upper_right_lat:
-            msg = "Bounding box must be in the format [lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat]"
-            msg += f"\nReceived: {bounding_box}"
-            raise ValueError(msg)
-        if lower_left_lon < -180 or upper_right_lon > 180 or lower_left_lat < -90 or upper_right_lat > 90:
-            msg = "Bounding box must be between -180 and 180 for longitude and -90 and 90 for latitude"
-            msg += f"\nReceived: {bounding_box}"
-            raise ValueError(msg)
-        return True
-    else:
-        msg = "Bounding box must be a list of 4 floats"
+    lower_left_lon, lower_left_lat , upper_right_lon, upper_right_lat = bounding_box
+    
+    # check that latitudes and longitudes are within valid range
+    if lower_left_lon < -180 or upper_right_lon > 180 or lower_left_lat < -90 or upper_right_lat > 90:
+        msg = "Bounding box must be between -180 and 180 for longitude and -90 and 90 for latitude"
+        msg += f"\nReceived: [lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat] = {bounding_box} "
+        raise ValueError(msg)
+    
+    # check that upper lat is above lower lat
+    if lower_left_lat > upper_right_lat:
+        msg = "The bounding box north value ({upper_right_lat}) must be greater than the south value ({lower_left_lat})"
+        msg = "Bounding box must be in the format [lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat]"
         msg += f"\nReceived: {bounding_box}"
         raise ValueError(msg)
+    
+    # warn if bounding box crosses the dateline
+    if lower_left_lon > upper_right_lon:
+        logger.warning(f"The bounding box crosses the dateline: it ranges from {lower_left_lon} to {upper_right_lon} degrees longitude")
+
+    return True
+
+    
     
 
 def _check_save_dir(save_dir: str) -> bool:
     """ check if save_dir exists """
-    # TODO: should we attempt creating save_dir otherwise? and only raise an error if it failed?
     if os.path.isdir(save_dir):
         return True
     else:
@@ -403,23 +404,26 @@ if __name__ == '__main__':
     typer.run(modis_download)
 
     """
-    # one day
-    python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 13:00:00 --save-dir ./notebooks/modisdata/test_script/
+    # one day - successfully downloaded 4 granules (all nighttime)
+    python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 8:10:00 --save-dir ./notebooks/modisdata/test_script/
 
-    # multiple days
+    # multiple days - finds 62 granules, stopped download for times sake but seemed to work
     python scripts/modis-download.py 2018-10-01 --end-date 2018-10-9 --day-step 3 --start-time 08:00:00 --end-time 13:00:00 --save-dir ./notebooks/modisdata/test_script/
 
-    # test bounding box
+    # test bounding box - successfully downloaded 4 files (all daytime)
     python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 13:00:00 --save-dir ./notebooks/modisdata/test_script/ --bounding-box -10 -10 20 5
 
 
     # ====================
     # FAILURE TEST CASES
     # ====================
-    # bounding box input invalid
+    # bounding box input invalid - throws error as expected
     python scripts/modis-download.py 2018-10-01 --bounding-box a b c d
 
-    # end date before start date
+    # end date before start date - throws error as expected
     python scripts/modis-download.py 2018-10-01  --end-date 2018-09-01 
+
+    # empty results - warns user as expected
+    python scripts/modis-download.py 2018-10-01 --start-time 07:00:00 --end-time 7:10:00 --save-dir ./notebooks/modisdata/test_script/ --bounding-box -10 -10 -5 -5
 
     """
