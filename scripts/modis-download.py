@@ -1,155 +1,3 @@
-"""
-Anna Tips 4 MODIS
-- all bands are in a single file
-- Format: hdf5 file
-- resolution dependent [0.5km, 0.25km, 1km]
-- downloader has the correct Level!
-- time will be painful
-   * multiple files 4 multiple SWATHS
-   * very little revisit time during the day
-- Filtering Locations / Bounding Boxes / Tiles
-- Day & Night Flag: file sizes, filler value
-- Level 1B - SWATH Product
-
-Questions:
-- Are night/day mode measurments consistent?
-    - no. They change slightly each day.
-- Are the location measurements at specific times consistent?
-    - no.
-
-
-
-potentially useful packages:
-- modis-tools: https://github.com/fraymio/modis-tools
-- pyMODIS: http://www.pymodis.org and https://github.com/lucadelu/pyModis
-
-
-
--------------------------------------------------------------------------
-Summary: The download script to interact directly with the goes2go package.
-We only want to specify what is necessary and compatible with the goes2go package.
-In general, we want to satellite, the spatial domain, and the period.
-
-Args:
-    satellite_number: 
-
-**Input Parameters**
-
-Downloading:
-- satellite number: int --> (16,17,18)
-- spatial extent: str --> full disk (F), CONUS (C), Mesoscale domains (M, M1, M2)
-- goes instrument: str --> e.g. ABI radiance (or SUVI for helio)
-- preprocessing level: str --> e.g. level-1b
-- directory: str
-- return xarray dataset or list of files --> return as file list works better?
-- band specifications: list[int] --> download all or subset only
-- start time (of range of times to be downloaded): str
-- end time: str
-- timesteps/number of files: str
-- day vs. night mode: --> e.g. for only downloading day mode images
-
-----------
-
----
-Basic Processing:
-- resolution: --> downscale all bands to common resolution (e.g. 2 km)
-- coordinate system transformations
-- etc.
-
-TODO - add changes to input parameters etcetera
-=================
-INPUT PARAMETERS
-=================
-
-# LIST OF DATES | START DATE, END DATE, STEP
-np.arange, np.linspace
-t0, t1, dt | num_files
-timestamps = [t0, t1, t2]
-# create list of dates
-list_of_dates: list = ["2020-10-19 12:00:00", "2020-10-12 12:00:00", ...]
-
-# SATELLITE INFORMATION
-satellite_number: int = (16, 17, 18)i
-instrument: str  = (ABI, ...)
-processing_level: str = (level-1b,): str = (level-1b, ...)
-data_product: str = (radiances, ...)
-
-# LIST OF BANDS
-list_of_bands: list = [1, 2, ..., 15, 16]
-
-# TARGET-GRID
-target_grid: xr.Dataset = ...
-
-% ===============
-HOW DO WE CHECK DAYTIME HOURS?
-* Get Centroid for SATELLITE FOV - FIXED
-* Get Radius points for SATELLITE FOV - FIXED
-* Check if centroid and/or radius points for FOV is within daytime hours
-* Add warning if chosen date is before GOES orbit was stabilized
-* True:
-  download that date
-False:
-    Skippppp / Continue
-    
-@dataclass
-class SatelliteFOV:
-    lon_min: float
-    lon_max: float
-    lat_min: float
-    lat_max: float
-    viewing_angle: ... # [0.15, -0.15] [rad]
-
-    @property
-    def get_radius(self):
-        ...
-
-class GOES16(SatelliteFOV):
-    ...
-
-=================
-ALGORITHMS
-=================
-
-for itime in timestamps:
-    for iband in list_of_bands:
-        # -------------------------------------------------
-        # download to folder - use GOES2GO loader
-        # -------------------------------------------------
-        
-        # open data in folder
-        
-        # -------------------------------------------------
-        # quality check 1 - did it download
-        # -------------------------------------------------
-        if download_criteria:
-            continue if allow_missing else break
-        
-        # quality check 2 - day and/or night specification
-        if day_night_criteria:
-            continue if allow_missing else break
-        
-        # -------------------------------------------------
-        # CRS Transformation (Optional, preferred)
-        # -------------------------------------------------
-        # load dataset
-        ds: xr.Dataset = xr.load_dataset(...)
-        # coordinate transformation
-        ds: xr.Dataset = crs_transform(ds, target_crs, *args, **kwargs)
-        # resave
-        ds.to_netcdf(...)
-        
-        # -------------------------------------------------
-        # downsample/upscale/lower-res (optional, preferred)
-        # -------------------------------------------------
-        # load dataset
-        ds: xr.Dataset = xr.load_dataset(...)
-        # resample
-        ds: xr.Dataset = downsample(ds, target_grid, *args, **kwargs)
-        ds: xr.Dataset = transform_coords(ds, target_coords)
-        # resave
-        ds.to_netcdf(...)
-"""
-
 from typing import Optional, List, Union
 import os
 import xarray as xr
@@ -162,13 +10,9 @@ from loguru import logger
 from datetime import datetime, timedelta
 import earthaccess
 
-## SAT02XXX.AYYYYDD.HHDD.061.??????????????????.hdf
-# MOD - TERRA
-# MYD - AQUA
-# XXX = 1KM (QKM, HKM)
-# server - https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/
-
 def modis_download(
+    earthdata_username: str,
+    earthdata_password: str,
     start_date: str,
     end_date: Optional[str]=None,
     start_time: Optional[str]='00:00:00', # used for daily window
@@ -178,11 +22,51 @@ def modis_download(
     save_dir: Optional[str]=".",
     processing_level: str = 'L1b',
     resolution: str = "1KM",
-    earthdata_username: Optional[str]='',
-    earthdata_password: Optional[str]='',
-    bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90), # TODO: extend to allow multiple regions? NOTE: earthaccess allows other ways to specify spatial extent, e.g. polygon, point - consider extending to allow these options
+    bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90),
     # day_night_flag: Optional[str]=None, NOTE: can pass day/night flag  ('day' or 'night') but if arg is passed it cannot be None - need to find a way to make it work as optional argument
 ):
+    """
+    Downloads MODIS satellite data for a specified time period and location.
+
+    Args:        
+        earthdata_username (str): Username associated with the NASA Earth Data login. Required for download.
+        earthdata_password (str): Password associated with the NASA Earth Data login. Required for download.
+        start_date (str): The start date of the data download in the format 'YYYY-MM-DD'.
+        end_date (str, optional): The end date of the data download in the format 'YYYY-MM-DD'. If not provided, the end date will be the same as the start date.
+        start_time (str, optional): The start time of the data download in the format 'HH:MM:SS'. Default is '00:00:00'.
+        end_time (str, optional): The end time of the data download in the format 'HH:MM:SS'. Default is '23:59:00'.
+        day_step (int, optional): The time step (in days) between downloads. This is to allow the user to download data every e.g. 2 days. If not provided, the default is daily downloads.
+        satellite (str, optional): The satellite. Options are "Terra" and "Aqua", with "Terra" as default.
+        save_dir (str, optional): The directory where the downloaded files will be saved. Default is the current directory.
+        processing_level (str, optional): The processing level of the data. Default is 'L1b'.
+        resolution (str, optional): The resolution of the data. Options are "QKM" (250m), "HKM (500m), "1KM" (1000m), with "1KM" as default. Not all bands are measured at all resolutions.
+        bounding_box (tuple, optional): The region to be downloaded.
+    Returns:
+        list: A list of file paths for the downloaded files.
+        
+    Examples:
+    # one day - successfully downloaded 4 granules (all nighttime)
+    python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 8:10:00 --save-dir ./notebooks/modisdata/test_script/
+
+    # multiple days - finds 62 granules, stopped download for times sake but seemed to work
+    python scripts/modis-download.py 2018-10-01 --end-date 2018-10-9 --day-step 3 --start-time 08:00:00 --end-time 13:00:00 --save-dir ./notebooks/modisdata/test_script/
+
+    # test bounding box - successfully downloaded 4 files (all daytime)
+    python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 13:00:00 --save-dir ./notebooks/modisdata/test_script/ --bounding-box -10 -10 20 5
+
+    # ====================
+    # FAILURE TEST CASES
+    # ====================
+    # bounding box input invalid - throws error as expected
+    python scripts/modis-download.py 2018-10-01 --bounding-box a b c d
+
+    # end date before start date - throws error as expected
+    python scripts/modis-download.py 2018-10-01  --end-date 2018-09-01 
+
+    # empty results - warns user as expected
+    python scripts/modis-download.py 2018-10-01 --start-time 07:00:00 --end-time 7:10:00 --save-dir ./notebooks/modisdata/test_script/ --bounding-box -10 -10 -5 -5
+
+    """
     # check if earthdata login is available
     _check_earthdata_login(earthdata_username=earthdata_username, earthdata_password=earthdata_password)
 
@@ -190,6 +74,7 @@ def modis_download(
     _check_netcdf4_backend()
 
     # run checks
+    # translate str inputs to modis specific names
     _check_input_processing_level(processing_level=processing_level)
     satellite_code = _check_satellite(satellite=satellite)
     resolution_code = _check_resolution(resolution=resolution)
@@ -203,42 +88,33 @@ def modis_download(
     if end_date is None:
         end_date = start_date
 
+    # combine date and time information
     start_datetime_str = start_date + ' ' + start_time
     end_datetime_str = end_date + ' ' + end_time
     _check_datetime_format(start_datetime_str=start_datetime_str, end_datetime_str=end_datetime_str) 
-
     # datetime conversion
     start_datetime = datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M:%S")
     end_datetime = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
-
     _check_start_end_dates(start_datetime=start_datetime, end_datetime=end_datetime)
     
     # compile list of dates/times 
     day_delta = timedelta(days=day_step)
     list_of_dates = np.arange(start_datetime, end_datetime, day_delta).astype(datetime)
     
-    # start/end times are used as daily window
-    def get_daily_window(daily_start, end_time):
-        """computes tuple of start and end date/time for each day for earthaccess call"""
-        day = daily_start.strftime("%Y-%m-%d")
-        daily_end = day + ' ' + end_time
-        return (daily_start.strftime("%Y-%m-%d %H:%M:%S"), daily_end)
-        
     list_of_daily_windows = [get_daily_window(daily_start, end_time) for daily_start in list_of_dates]
 
-
     # check if save_dir is valid before attempting to download
-    # TODO could also check if save_dir exists and otherwise create it (assuming its parent directory exists, otherwise throw error)
     _check_save_dir(save_dir=save_dir)
 
     # check that bounding box is valid
+    # TODO: Add option to add multiple location requests
+    # NOTE: earthaccess allows other ways to specify spatial extent, e.g. polygon, point - consider extending to allow these options
     _check_bounding_box(bounding_box=bounding_box)
    
     files = []
 
     # create progress bar for dates
     pbar_time = tqdm.tqdm(list_of_daily_windows)
-
 
     for itime in pbar_time:
         pbar_time.set_description(f"Time - {itime[0]} to {itime[1]}")
@@ -251,20 +127,31 @@ def modis_download(
         )
 
         if not results_day:
-            # check if any results were returned, if not: log warning and continue to next date
+            # check if any results were returned
+            # if not: log warning and continue to next date
             success_flag = False
             logger.warning(f"No data found for {itime[0]} to {itime[1]} in the specified bounding box")
             continue
 
-        files_day = earthaccess.download(results_day, save_dir) # TODO: can this fail? if yes, use try / except to prevent the programme from crashing
+        files_day = earthaccess.download(results_day, save_dir) 
+        # TODO: can this fail? if yes, use try / except to prevent the programme from crashing
         # TODO: check file sizes - if less than X MB (ca 70MB) the download failed
-        # TODO: are there any other checks we need to do here?
+        # TODO: Add check for day/night/mixed mode measurements
         if success_flag:
             files += files_day
     
-    return files       
+    return files    
 
+    # TODO: Implement downloading
+    # TODO: Implement pre-processing (e.g. matching coordinates?, transforming coordinate systems etc.)
 
+# start/end times are used as daily window
+def get_daily_window(daily_start, end_time):
+    """computes tuple of start and end date/time for each day for earthaccess call"""
+    day = daily_start.strftime("%Y-%m-%d")
+    daily_end = day + ' ' + end_time
+    return (daily_start.strftime("%Y-%m-%d %H:%M:%S"), daily_end)
+    
 
 def _check_earthdata_login(earthdata_username: str, earthdata_password: str) -> bool:
     """check if earthdata login is available in environment variables / as input arguments"""
@@ -387,18 +274,18 @@ def _check_bounding_box(bounding_box: List[float]) -> bool:
     return True
 
     
-    
-
 def _check_save_dir(save_dir: str) -> bool:
     """ check if save_dir exists """
     if os.path.isdir(save_dir):
         return True
     else:
-        msg = "Save directory does not exist"
-        msg += f"\nReceived: {save_dir}"
-        raise ValueError(msg)
-    
-
+        try:
+            os.mkdir(save_dir)
+        except:
+            msg = "Save directory does not exist"
+            msg += f"\nReceived: {save_dir}"
+            msg += "\nCould not create directory"
+            raise ValueError(msg)
 
 if __name__ == '__main__':
     typer.run(modis_download)

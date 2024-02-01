@@ -104,7 +104,6 @@ def goes_download(
     # datetime conversion 
     start_datetime = datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M:%S")
     end_datetime = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
-
     _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
 
     # define time step for data query                       
@@ -138,6 +137,9 @@ def goes_download(
 
     # compile new list of dates within desired time window
     list_of_dates = list(filter(is_in_between, list_of_dates))
+
+    # check if save_dir is valid before attempting to download
+    _check_save_dir(save_dir=save_dir)
 
     files = []
 
@@ -245,7 +247,6 @@ def _check_timedelta(time_delta: datetime, domain: str) -> bool:
 
 def _check_domain(domain: str) -> bool:
     """checks domain GOES data"""
-    # TODO: Check mesoscale
     if str(domain) in ["F", "C", "M"]:
         return True
     else:
@@ -328,6 +329,19 @@ def delete_list_of_files(file_list: List[str]) -> None:
             os.remove(file_path)
         except OSError as e:
             print(f"Error: {file_path} : {e.strerror}")
+
+def _check_save_dir(save_dir: str) -> bool:
+    """ check if save_dir exists """
+    if os.path.isdir(save_dir):
+        return True
+    else:
+        try:
+            os.mkdir(save_dir)
+        except:
+            msg = "Save directory does not exist"
+            msg += f"\nReceived: {save_dir}"
+            msg += "\nCould not create directory"
+            raise ValueError(msg)
 
 def main(input: str):
 
