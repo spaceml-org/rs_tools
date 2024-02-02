@@ -113,7 +113,8 @@ def modis_download(
 
     # check that bounding box is valid
     # TODO: Add option to add multiple location requests
-    # NOTE: earthaccess allows other ways to specify spatial extent, e.g. polygon, point - consider extending to allow these options
+    # NOTE: earthaccess allows other ways to specify spatial extent, e.g. polygon, point 
+    # NOTE: extend to allow these options
     _check_bounding_box(bounding_box=bounding_box)
 
     # create dictionary of earthaccess search parameters
@@ -128,7 +129,7 @@ def modis_download(
         # add day_night_flag to search parameters
         search_params["day_night_flag"] = day_night_flag
 
-    # TODO remove - logging search_params for testing
+    # TODO: remove - logging search_params for testing
     logger.info(f"Search parameters: {search_params}")
    
     files = []
@@ -158,7 +159,6 @@ def modis_download(
         files_day = earthaccess.download(results_day, save_dir) 
         # TODO: can this fail? if yes, use try / except to prevent the programme from crashing
         # TODO: check file sizes - if less than X MB (ca 70MB) the download failed
-        # TODO: Add check for day/night/mixed mode measurements
         if success_flag:
             files += files_day
     
