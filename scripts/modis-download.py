@@ -23,7 +23,7 @@ def modis_download(
     bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90), # TODO: Add polygon option
     earthdata_username: Optional[str]="",
     earthdata_password: Optional[str]="",
-    # day_night_flag: Optional[str]=None, NOTE: can pass day/night flag  ('day' or 'night') but if arg is passed it cannot be None - need to find a way to make it work as optional argument
+    day_night_flag: Optional[str]=None, 
 ):
     """
     Downloads MODIS satellite data for a specified time period and location.
@@ -54,6 +54,10 @@ def modis_download(
 
     # test bounding box - successfully downloaded 4 files (all daytime)
     python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 13:00:00 --save-dir ./notebooks/modisdata/test_script/ --bounding-box -10 -10 20 5
+
+    # test day/night flag - successfully downloaded 1 file (daytime only)
+    python scripts/modis-download.py 2018-10-15 --save-dir ./notebooks/modisdata/test_script/ --bounding-box -10 10 -5 15 --day-night-flag day
+
 
     # ====================
     # FAILURE TEST CASES
@@ -111,6 +115,21 @@ def modis_download(
     # TODO: Add option to add multiple location requests
     # NOTE: earthaccess allows other ways to specify spatial extent, e.g. polygon, point - consider extending to allow these options
     _check_bounding_box(bounding_box=bounding_box)
+
+    # create dictionary of earthaccess search parameters
+    search_params = {
+        "short_name": data_product,
+        "bounding_box": bounding_box,
+    }
+
+    # if day_night_flag was provided, check that day_night_flag is valid
+    if day_night_flag: 
+        _check_day_night_flag(day_night_flag=day_night_flag)
+        # add day_night_flag to search parameters
+        search_params["day_night_flag"] = day_night_flag
+
+    # TODO remove - logging search_params for testing
+    logger.info(f"Search parameters: {search_params}")
    
     files = []
 
@@ -121,17 +140,19 @@ def modis_download(
         pbar_time.set_description(f"Time - {itime[0]} to {itime[1]}")
         success_flag = True
 
-        results_day = earthaccess.search_data(
-            short_name=data_product,
-            bounding_box=bounding_box,
-            temporal=itime,
-        )
+        # add daytime window to search parameters
+        search_params["temporal"] = itime
 
+        # search for data
+        results_day = earthaccess.search_data(**search_params)
+
+        # check if any results were returned
         if not results_day:
-            # check if any results were returned
             # if not: log warning and continue to next date
             success_flag = False
-            logger.warning(f"No data found for {itime[0]} to {itime[1]} in the specified bounding box")
+            warn = f"No data found for {itime[0]} to {itime[1]} in the specified bounding box"
+            if day_night_flag: warn += f" for {day_night_flag}-time measurements only"
+            logger.warning(warn)
             continue
 
         files_day = earthaccess.download(results_day, save_dir) 
@@ -285,6 +306,17 @@ def _check_save_dir(save_dir: str) -> bool:
             msg += f"\nReceived: {save_dir}"
             msg += "\nCould not create directory"
             raise ValueError(msg)
+        
+def _check_day_night_flag(day_night_flag: str) -> bool:
+    """ check if day_night_flag is valid """
+    if day_night_flag in ["day", "night"]:
+        return True
+    else:
+        msg = "Unrecognized day/night flag"
+        msg += f"\nReceived: {day_night_flag}"
+        msg += f"\nIf provided, it needs to be 'day' or 'night'."
+        raise ValueError(msg)
+
 
 if __name__ == '__main__':
     typer.run(modis_download)
