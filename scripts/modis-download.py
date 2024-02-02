@@ -11,8 +11,6 @@ from datetime import datetime, timedelta
 import earthaccess
 
 def modis_download(
-    earthdata_username: str,
-    earthdata_password: str,
     start_date: str,
     end_date: Optional[str]=None,
     start_time: Optional[str]='00:00:00', # used for daily window
@@ -23,14 +21,14 @@ def modis_download(
     processing_level: str = 'L1b',
     resolution: str = "1KM",
     bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90),
+    earthdata_username: Optional[str]="",
+    earthdata_password: Optional[str]="",
     # day_night_flag: Optional[str]=None, NOTE: can pass day/night flag  ('day' or 'night') but if arg is passed it cannot be None - need to find a way to make it work as optional argument
 ):
     """
     Downloads MODIS satellite data for a specified time period and location.
 
     Args:        
-        earthdata_username (str): Username associated with the NASA Earth Data login. Required for download.
-        earthdata_password (str): Password associated with the NASA Earth Data login. Required for download.
         start_date (str): The start date of the data download in the format 'YYYY-MM-DD'.
         end_date (str, optional): The end date of the data download in the format 'YYYY-MM-DD'. If not provided, the end date will be the same as the start date.
         start_time (str, optional): The start time of the data download in the format 'HH:MM:SS'. Default is '00:00:00'.
@@ -41,6 +39,9 @@ def modis_download(
         processing_level (str, optional): The processing level of the data. Default is 'L1b'.
         resolution (str, optional): The resolution of the data. Options are "QKM" (250m), "HKM (500m), "1KM" (1000m), with "1KM" as default. Not all bands are measured at all resolutions.
         bounding_box (tuple, optional): The region to be downloaded.
+        earthdata_username (str): Username associated with the NASA Earth Data login. Required for download.
+        earthdata_password (str): Password associated with the NASA Earth Data login. Required for download.
+        
     Returns:
         list: A list of file paths for the downloaded files.
         
