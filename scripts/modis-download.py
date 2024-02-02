@@ -20,7 +20,7 @@ def modis_download(
     save_dir: Optional[str]=".",
     processing_level: str = 'L1b',
     resolution: str = "1KM",
-    bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90),
+    bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90), # TODO: Add polygon option
     earthdata_username: Optional[str]="",
     earthdata_password: Optional[str]="",
     # day_night_flag: Optional[str]=None, NOTE: can pass day/night flag  ('day' or 'night') but if arg is passed it cannot be None - need to find a way to make it work as optional argument
@@ -142,9 +142,6 @@ def modis_download(
             files += files_day
     
     return files    
-
-    # TODO: Implement downloading
-    # TODO: Implement pre-processing (e.g. matching coordinates?, transforming coordinate systems etc.)
 
 # start/end times are used as daily window
 def get_daily_window(daily_start, end_time):
@@ -282,6 +279,7 @@ def _check_save_dir(save_dir: str) -> bool:
     else:
         try:
             os.mkdir(save_dir)
+            return True
         except:
             msg = "Save directory does not exist"
             msg += f"\nReceived: {save_dir}"
