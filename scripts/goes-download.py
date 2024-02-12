@@ -32,12 +32,12 @@ def goes_download(
     daily_window_t1: Optional[str]='23:59:00',
     time_step: Optional[str]=None,
     satellite_number: int=16,
-    save_dir: Optional[str]=".",
+    save_dir: Optional[str] = ".",
     instrument: str = "ABI",
     processing_level: str = 'L1b',
     data_product: str = 'Rad',
     domain: str = 'F',
-    bands: str = "all",
+    bands: Optional[str] = "all",
     check_bands_downloaded: bool = False,
 ):
     """
@@ -64,14 +64,22 @@ def goes_download(
         list: A list of file paths for the downloaded files.
         
     Examples:
+        # =========================
+        # GOES LEVEL 1B Test Cases
+        # =========================
         # custom day
-        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01
+        python scripts/goes-download.py 2020-10-01 --end-date 2020-10-01
         # custom day + end points
-        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00
+        python scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00
         # custom day + end points + time window
-        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00
+        python scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00
         # custom day + end points + time window + timestep
-        python rs_tools/scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00 --time-step 06:00:00
+        python scripts/goes-download.py 2020-10-01 --end-date 2020-10-01 --start-time 00:00:00 --end-time 23:00:00 --daily-window-t0 08:30:00 --daily-window-t1 21:30:00 --time-step 06:00:00
+        # ===================================
+        # GOES LEVEL 2 CLOUD MASK Test Cases
+        # ===================================
+        python scripts/goes-download.py 2020-10-01 --start-time 10:00:00 --end-time 11:00:00 --processing-level L2 --data-product ACM
+        
         # ====================
         # FAILURE TEST CASES
         # ====================
@@ -87,9 +95,14 @@ def goes_download(
     logger.info(f"Satellite Number: {satellite_number}")
     _check_domain(domain=domain)
     # compile bands
-    list_of_bands = _check_bands(bands=bands)
+    if processing_level == 'L1b':
+        list_of_bands = _check_bands(bands=bands)
+    elif processing_level == 'L2':
+        list_of_bands = None
+    else:
+        raise ValueError('bands not correctly specified for given processing level')
     # check data product
-    data_product = f"{instrument}-{processing_level}-{data_product}"
+    data_product = f"{instrument}-{processing_level}-{data_product}{domain}"
     logger.info(f"Data Product: {data_product}")
     _check_data_product_name(data_product=data_product)
 
@@ -145,59 +158,99 @@ def goes_download(
 
     # create progress bars for dates and bands
     pbar_time = tqdm.tqdm(list_of_dates)
-    pbar_bands = tqdm.tqdm(list_of_bands)
 
     for itime in pbar_time:
         
         pbar_time.set_description(f"Time - {itime}")
-        success_flag = True
-        sub_files_list: list[str] = []
-
-        for iband in pbar_bands:
-            
-            pbar_bands.set_description(f"Band - {iband}")
-
-            # download file
-            try:
-                ifile: pd.DataFrame = goes_nearesttime(
-                    attime=itime,
-                    within=pd.to_timedelta(15, 'm'),
-                    satellite=satellite_number, 
-                    product=data_product, 
-                    domain=domain, 
-                    bands=iband, 
-                    return_as="filelist", 
-                    save_dir=save_dir,
+        
+        if processing_level == 'L1b':
+            sub_files_list = _goes_level1_download(
+                time=itime, 
+                list_of_bands=list_of_bands,
+                satellite_number=satellite_number,
+                data_product=data_product,
+                domain=domain,
+                save_dir=save_dir,
+                check_bands_downloaded=check_bands_downloaded,
                 )
-                # extract filepath from GOES download pandas dataframe
-                filepath: str = os.path.join(save_dir, ifile.file[0])
-                sub_files_list += [filepath]
-            
-            except IndexError:
-                logger.info(f"Band {iband} could not be downloaded for time step {itime}.")
-                if check_bands_downloaded:
-                    logger.info(f"Deleting all other bands for time step {itime}.")
-                    delete_list_of_files(sub_files_list) # delete partially downloaded bands
-                    success_flag = False
-                    break # skip to next time step
+        elif processing_level == 'L2':
+            sub_files_list = _goes_level2_download(
+                time=itime, 
+                satellite_number=satellite_number,
+                data_product=data_product,
+                domain=domain,
+                save_dir=save_dir)
+        else:
+            raise ValueError(f"Unrecognized processing level: {processing_level}")
 
-            # MANUALLY TESTING - TBD (TO BE DELETED)
-            
-            # 2018 274 17 # no channel 6
-            # python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/
-            # python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/ --check-bands-downloaded
-
-            # TODO: Add functions to process data
-            
-            # - open file
-            # - change coordinate systems
-            # - resample  (Change Period)
-            # - rregrid
-
-        if success_flag:
-            files += sub_files_list
+        files += sub_files_list
 
     return files
+
+
+def _goes_level2_download(time,
+                      satellite_number,
+                      data_product,
+                      domain,
+                      save_dir):                  
+                           
+    try:
+        ifile: pd.DataFrame = goes_nearesttime(
+            attime=time,
+            within=pd.to_timedelta(15, 'm'),
+            satellite=satellite_number, 
+            product=data_product, 
+            domain=domain, 
+            return_as="filelist", 
+            save_dir=save_dir,
+        )
+        # extract filepath from GOES download pandas dataframe
+        filepath: str = os.path.join(save_dir, ifile.file[0])
+        return [filepath]
+    except IndexError:
+        logger.info(f"Data could not be downloaded for time step {time}.")
+        return []
+    
+def _goes_level1_download(time, 
+                      list_of_bands,
+                      satellite_number, 
+                      data_product, 
+                      domain, 
+                      save_dir,
+                      check_bands_downloaded
+                      ):
+
+    sub_files_list: list[str] = []
+    pbar_bands = tqdm.tqdm(list_of_bands)
+
+
+    for iband in pbar_bands:
+        
+        pbar_bands.set_description(f"Band - {iband}")
+        # download file
+        try:
+            ifile: pd.DataFrame = goes_nearesttime(
+                attime=time,
+                within=pd.to_timedelta(15, 'm'),
+                satellite=satellite_number, 
+                product=data_product, 
+                domain=domain, 
+                bands=iband, 
+                return_as="filelist", 
+                save_dir=save_dir,
+            )
+            # extract filepath from GOES download pandas dataframe
+            filepath: str = os.path.join(save_dir, ifile.file[0])
+            sub_files_list += [filepath]
+        
+        except IndexError:
+            logger.info(f"Band {iband} could not be downloaded for time step {time}.")
+            if check_bands_downloaded:
+                logger.info(f"Deleting all other bands for time step {time}.")
+                delete_list_of_files(sub_files_list) # delete partially downloaded bands
+                return []
+
+    return sub_files_list
 
 
 def _check_datetime_format(start_datetime_str: str, end_datetime_str: str) -> bool:
@@ -234,7 +287,6 @@ def _check_timedelta_format(time_delta: str) -> bool:
         msg += "\nExpected time format: %H:%M:%S"
         raise SyntaxError(msg)
 
-
 def _check_timedelta(time_delta: datetime, domain: str) -> bool:
     if time_delta.days > 0: return True
     
@@ -256,24 +308,25 @@ def _check_domain(domain: str) -> bool:
         raise ValueError(msg)
     
 
-def _check_satellite_number(satellite_number: str) -> bool:
+def _check_satellite_number(satellite_number: int) -> bool:
     """checks satellite number for GOES data"""
-    if str(satellite_number) in ["16", "17", "18"]:
+    if satellite_number in [16, 17, 18]:
         return True
     else:
         msg = "Unrecognized satellite number level"
-        msg += f"\nNeeds to be '16', '17', or '18'."
+        msg += f"\nNeeds to be 16, 17, or 18."
         msg += "\nOthers are not yet implemented"
+        msg += f"\nInput: {satellite_number}"
         raise ValueError(msg)
     
 
 def _check_input_processing_level(processing_level: str) -> bool:
     """checks processing level for GOES data"""
-    if processing_level in ["L1b"]:
+    if processing_level in ["L1b", "L2"]:
         return True
     else:
         msg = "Unrecognized processing level"
-        msg += f"\nNeeds to be 'L1b'. Others are not yet implemented"
+        msg += f"\nNeeds to be 'L1b' or 'L2'. Others are not yet test"
         raise ValueError(msg)
 
 
@@ -283,15 +336,15 @@ def _check_instrument(instrument: str) -> bool:
         return True
     else:
         msg = "Unrecognized instrument"
-        msg += f"\nNeeds to be 'ABI'. Others are not yet implemented"
+        msg += f"\nNeeds to be 'ABI'. Others are not yet tested"
         raise ValueError(msg)
     
 def _check_data_product_name(data_product: str) -> bool:
-    if data_product in ['ABI-L1b-Rad']:
+    if data_product in ['ABI-L1b-RadF', 'ABI-L1b-RadM', 'ABI-L1b-RadC', 'ABI-L1b-Rad',
+                        'ABI-L2-ACMF', 'ABI-L2-ACMM', 'ABI-L2-ACMC']:
         return True
     else:
-        msg = "Unrecognized data product"
-        msg += f"\nNeeds to be 'ABI-L1b-Rad'. Others are not yet implemented"
+        msg = f"Unrecognized data product {data_product}"
         raise ValueError(msg)
         
 def _check_bands(bands: str) -> List[int]:

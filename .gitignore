@@ -147,3 +147,7 @@ datasets/*
 \jbook/_build/
 \_build/
 \.idea/
+*.hdf
+*.xml
+*.txt
+*.nc

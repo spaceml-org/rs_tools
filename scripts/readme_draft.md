@@ -123,3 +123,12 @@ for itime in timestamps:
         ds.to_netcdf(...)
 
 """
+
+
+
+```bash
+https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/
+modis_download.py -s MOST -u https://n5eil01.nsidc.org -p MOD10A1F.061 -f 2012-01-01 -t h18v03,h18v04 ./temp/
+modis_download.py -I -s MOST -u https://n5eil01u.ecs.nsidc.org/ -p MOD10A1F.061 -f 2012-01-01 -e 2012-01-02 -t h18v03,h18v04 .
+modis_download.py -I -s MOST -u https://ladsweb.modaps.eosdis.nasa.gov/ -p MOD10A1F.061 -f 2012-01-01 -e 2012-01-02 .
+```
