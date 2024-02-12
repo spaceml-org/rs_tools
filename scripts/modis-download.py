@@ -66,6 +66,9 @@ def modis_download(
     # MODIS LEVEL 2 CLOUD MASK Test Cases
     # =========================
 
+    # one day - successfully downloaded 4 granules (all nighttime)
+    python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 8:10:00 --save-dir ./notebooks/modisdata/ --processing-level L2 --identifier 35
+
     # ====================
     # FAILURE TEST CASES
     # ====================
