@@ -99,7 +99,7 @@ def modis_download(
     if processing_level == 'L1b':
         data_product = f"{satellite_code}{identifier}{resolution_code}"
     elif processing_level == 'L2':
-        # TODO: Implement other level-2 products
+        # TODO: Implement other level-2 products or allow passing in data_product?
         # NOTE: Resolution argument not needed for cloud mask download
         data_product = f"{satellite_code}{identifier}_{processing_level}"
     else:
