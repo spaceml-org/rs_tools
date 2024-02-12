@@ -33,7 +33,7 @@ def goes_download(
     time_step: Optional[str]=None,
     satellite_number: int=16,
     save_dir: Optional[str]=".",
-    instrument: str = 'ABI',
+    instrument: str = "ABI",
     processing_level: str = 'L1b',
     data_product: str = 'Rad',
     domain: str = 'F',
@@ -80,6 +80,7 @@ def goes_download(
     """
 
     # run checks
+    # check satellite details
     _check_input_processing_level(processing_level=processing_level)
     _check_instrument(instrument=instrument)
     _check_satellite_number(satellite_number=satellite_number)
@@ -96,20 +97,22 @@ def goes_download(
     if end_date is None:
         end_date = start_date
 
+    # combine date and time information
     start_datetime_str = start_date + ' ' + start_time
     end_datetime_str = end_date + ' ' + end_time
     _check_datetime_format(start_datetime_str, end_datetime_str)
     # datetime conversion 
     start_datetime = datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M:%S")
     end_datetime = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
-
     _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
-                           
+
+    # define time step for data query                       
     if time_step is None: 
         time_step = '1:00:00'
         logger.info("No timedelta specified. Default is 1 hour.")
     _check_timedelta_format(time_delta=time_step)
     
+    # convert str to datetime object
     hours, minutes, seconds = convert_str2time(time=time_step)
     time_delta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
     
@@ -119,7 +122,7 @@ def goes_download(
     list_of_dates = np.arange(start_datetime, end_datetime + time_delta, time_delta).astype(datetime)
     print('Times to check: ',list_of_dates[0], list_of_dates[-1])
 
-    window_date = '1991-10-19' # Add any date to convert into proper datetime object
+    window_date = '1991-10-19' # Add arbitrary date to convert into proper datetime object
     start_datetime_window_str = window_date + ' ' + daily_window_t0
     end_datetime_window_str = window_date + ' ' + daily_window_t1
     _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
@@ -128,12 +131,15 @@ def goes_download(
     daily_window_t1_datetime = datetime.strptime(end_datetime_window_str, "%Y-%m-%d %H:%M:%S")
     _check_start_end_times(start_datetime=daily_window_t0_datetime, end_datetime=daily_window_t1_datetime)
 
-    # filter function - check between
+    # filter function - check that query times fall within desired time window
     def is_in_between(date):
        return daily_window_t0_datetime.time() <= date.time() <= daily_window_t1_datetime.time()
 
-    # new list of dates
+    # compile new list of dates within desired time window
     list_of_dates = list(filter(is_in_between, list_of_dates))
+
+    # check if save_dir is valid before attempting to download
+    _check_save_dir(save_dir=save_dir)
 
     files = []
 
@@ -152,7 +158,6 @@ def goes_download(
             pbar_bands.set_description(f"Band - {iband}")
 
             # download file
-
             try:
                 ifile: pd.DataFrame = goes_nearesttime(
                     attime=itime,
@@ -188,7 +193,6 @@ def goes_download(
             # - change coordinate systems
             # - resample  (Change Period)
             # - rregrid
-            
 
         if success_flag:
             files += sub_files_list
@@ -243,7 +247,6 @@ def _check_timedelta(time_delta: datetime, domain: str) -> bool:
 
 def _check_domain(domain: str) -> bool:
     """checks domain GOES data"""
-    # TODO: Check mesoscale
     if str(domain) in ["F", "C", "M"]:
         return True
     else:
@@ -265,7 +268,7 @@ def _check_satellite_number(satellite_number: str) -> bool:
     
 
 def _check_input_processing_level(processing_level: str) -> bool:
-    """checks processing level for GOES datas"""
+    """checks processing level for GOES data"""
     if processing_level in ["L1b"]:
         return True
     else:
@@ -326,6 +329,20 @@ def delete_list_of_files(file_list: List[str]) -> None:
             os.remove(file_path)
         except OSError as e:
             print(f"Error: {file_path} : {e.strerror}")
+
+def _check_save_dir(save_dir: str) -> bool:
+    """ check if save_dir exists """
+    if os.path.isdir(save_dir):
+        return True
+    else:
+        try:
+            os.mkdir(save_dir)
+            return True
+        except:
+            msg = "Save directory does not exist"
+            msg += f"\nReceived: {save_dir}"
+            msg += "\nCould not create directory"
+            raise ValueError(msg)
 
 def main(input: str):
 
