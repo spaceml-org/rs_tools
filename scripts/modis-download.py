@@ -270,7 +270,7 @@ def _check_resolution(resolution: str) -> str:
     
 def _check_data_product_name(data_product: str) -> bool:
     if data_product in ['MOD021KM', 'MOD02HKM', 'MOD02QKM', 'MYD021KM', 'MYD02HKM', 'MYD02QKM',
-                        'MOD35_L2', 'MOD35_L2']:
+                        'MOD35_L2', 'MYD35_L2']:
         return True
     else:
         msg = "Unrecognized data product"
