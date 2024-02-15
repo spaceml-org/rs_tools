@@ -135,7 +135,7 @@ def csv_read_to_list(file_name, delim=",", do_float=False):
 def twodgaussian(params, shape):
     """
     Build a 2D Gaussian ellipse as parameterised by 'params' for a region with
-    'shape'
+    'shape'.
         params - [amp, xo, yo, cx, cy, pa] where:
                 amp - amplitude
                 xo  - centre of Gaussian in X
@@ -144,6 +144,7 @@ def twodgaussian(params, shape):
                 cy  - width of Gaussian in Y (sigma or c, not FWHM)
                 pa  - position angle of Gaussian, aka theta (radians)
         shape - (y, x) dimensions of region
+
     Returns a 2D numpy array with shape="shape"
     """
 
@@ -168,9 +169,9 @@ def twodgaussian(params, shape):
 #-----------------------------------------------------------------------------#
 if __name__ == '__main__':
 
-    descStr = """
+    desc_str = """
     Create a new fidelity testing image from catalogues. This initial
-    version understands catalogues containing Gaussian sources on a
+    version understands catalogues containing Gaussian features on a
     background of uniform noise.
     """
 
@@ -180,7 +181,7 @@ if __name__ == '__main__':
     """
 
     # Parse the command line options
-    ap = argparse.ArgumentParser(description=descStr, epilog=epilog_str,
+    ap = argparse.ArgumentParser(description=desc_str, epilog=epilog_str,
                                  formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument(
         "--cat",
@@ -199,20 +200,14 @@ if __name__ == '__main__':
         help="Level of noise in the image [%(default)s]."
     )
     ap.add_argument(
-        "--x-size",
-        default="10000",
+        "--size",
+        default=10000,
         type=int,
-        help="Number of Y-axis pixels [%(default)s]."
-    )
-    ap.add_argument(
-        "--y-size",
-        default="7000",
-        type=int,
-        help="Number of Y-axis pixels [%(default)s]."
+        help="Number of pixels on X and Y axes (equal) [%(default)s]."
     )
     ap.add_argument(
         "--pixscale",
-        default="10.0",
+        default=10.0,
         type=float,
         help="Scale of square pixels in projection units [%(default)s]."
     )
@@ -223,6 +218,6 @@ if __name__ == '__main__':
         cat_file=args.cat,
         out_root=args.out,
         noise_level=args.noise_level,
-        x_size=args.x_size,
-        y_size=args.y_size,
+        x_size=args.size,
+        y_size=args.size,
         pixscale=args.pixscale)
