@@ -24,6 +24,7 @@ def modis_download(
     earthdata_username: Optional[str]="",
     earthdata_password: Optional[str]="",
     day_night_flag: Optional[str]=None, 
+    identifier: Optional[str] = "02"
 ):
     """
     Downloads MODIS satellite data for a specified time period and location.
@@ -46,6 +47,9 @@ def modis_download(
         list: A list of file paths for the downloaded files.
         
     Examples:
+    # =========================
+    # MODIS LEVEL 1B Test Cases
+    # =========================
     # one day - successfully downloaded 4 granules (all nighttime)
     python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 8:10:00 --save-dir ./notebooks/modisdata/test_script/
 
@@ -58,6 +62,12 @@ def modis_download(
     # test day/night flag - successfully downloaded 1 file (daytime only)
     python scripts/modis-download.py 2018-10-15 --save-dir ./notebooks/modisdata/test_script/ --bounding-box -10 10 -5 15 --day-night-flag day
 
+    # =========================
+    # MODIS LEVEL 2 CLOUD MASK Test Cases
+    # =========================
+
+    # one day - successfully downloaded 4 granules (all nighttime)
+    python scripts/modis-download.py 2018-10-01 --start-time 08:00:00 --end-time 8:10:00 --save-dir ./notebooks/modisdata/ --processing-level L2 --identifier 35
 
     # ====================
     # FAILURE TEST CASES
@@ -81,11 +91,20 @@ def modis_download(
     # run checks
     # translate str inputs to modis specific names
     _check_input_processing_level(processing_level=processing_level)
+    _check_identifier(identifier=identifier)
     satellite_code = _check_satellite(satellite=satellite)
     resolution_code = _check_resolution(resolution=resolution)
     logger.info(f"Satellite: {satellite}")
     # check data product
-    data_product = f"{satellite_code}02{resolution_code}"
+    if processing_level == 'L1b':
+        data_product = f"{satellite_code}{identifier}{resolution_code}"
+    elif processing_level == 'L2':
+        # TODO: Implement other level-2 products or allow passing in data_product?
+        # NOTE: Resolution argument not needed for cloud mask download
+        data_product = f"{satellite_code}{identifier}_{processing_level}"
+    else:
+        raise ValueError("Incorrect processing level, downloader only implemented for 'L1b' and 'L2'")
+    
     logger.info(f"Data Product: {data_product}")
     _check_data_product_name(data_product=data_product)
 
@@ -212,11 +231,19 @@ def _check_netcdf4_backend() -> bool:
 
 def _check_input_processing_level(processing_level: str) -> bool:
     """checks processing level for MODIS data"""
-    if processing_level in ["L1b"]:
+    if processing_level in ["L1b", "L2"]:
         return True
     else:
         msg = "Unrecognized processing level"
-        msg += f"\nNeeds to be 'L1b'. Others are not yet implemented"
+        msg += f"\nNeeds to be 'L1b' or 'L2'. Others are not yet implemented"
+        raise ValueError(msg)
+    
+def _check_identifier(identifier: str) -> bool:
+    if identifier in ["02", "35"]:
+        return True
+    else:
+        msg = "Unrecognized data identifier"
+        msg += f"\nNeeds to be '02' or '35'. Others are not yet tested"
         raise ValueError(msg)
 
 def _check_satellite(satellite: str) -> str:
@@ -242,11 +269,12 @@ def _check_resolution(resolution: str) -> str:
         raise ValueError(msg)
     
 def _check_data_product_name(data_product: str) -> bool:
-    if data_product in ['MOD021KM', 'MOD02HKM', 'MOD02QKM', 'MYD021KM', 'MYD02HKM', 'MYD02QKM']:
+    if data_product in ['MOD021KM', 'MOD02HKM', 'MOD02QKM', 'MYD021KM', 'MYD02HKM', 'MYD02QKM',
+                        'MOD35_L2', 'MYD35_L2']:
         return True
     else:
         msg = "Unrecognized data product"
-        msg += f"\nOnly implemented for TERRA/AQUA MODIS and 1KM, 500M, 250M resolution."
+        msg += f"\nOnly implemented for TERRA/AQUA MODIS and 1KM, 500M, 250M resolution (Level 1B), and cloud mask (Level 2)."
         raise ValueError(msg)
 
 def _check_datetime_format(start_datetime_str: str, end_datetime_str: str) -> bool:
