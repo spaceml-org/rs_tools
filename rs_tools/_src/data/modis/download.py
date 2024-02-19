@@ -23,7 +23,7 @@ def modis_download(
     bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90), # TODO: Add polygon option
     earthdata_username: Optional[str]="",
     earthdata_password: Optional[str]="",
-    day_night_flag: Optional[str]=None,
+    day_night_flag: Optional[str]=None, 
     identifier: Optional[str] = "02"
 ):
     """
@@ -180,8 +180,8 @@ def modis_download(
         # TODO: check file sizes - if less than X MB (ca 70MB) the download failed
         if success_flag:
             files += files_day
-
-    return files
+    
+    return files    
 
 # start/end times are used as daily window
 def get_daily_window(daily_start, end_time):
@@ -189,7 +189,7 @@ def get_daily_window(daily_start, end_time):
     day = daily_start.strftime("%Y-%m-%d")
     daily_end = day + ' ' + end_time
     return (daily_start.strftime("%Y-%m-%d %H:%M:%S"), daily_end)
-
+    
 
 def _check_earthdata_login(earthdata_username: str, earthdata_password: str) -> bool:
     """check if earthdata login is available in environment variables / as input arguments"""
