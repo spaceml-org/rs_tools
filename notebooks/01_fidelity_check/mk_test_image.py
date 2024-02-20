@@ -25,13 +25,15 @@ import rasterio
 from rasterio.transform import Affine
 from tqdm import tqdm
 
+from utils_fidelity import csv_read_to_list, twodgaussian
+
 
 #-----------------------------------------------------------------------------#
 def gen_testing_data(cat_file, out_root, noise_level, x_size, y_size, pixscale,
-                     x_cent=334925.0, y_cent=6174486.0, crs="EPSG:32756"):
+                     x_cent=284925.0, y_cent=6174486.0, crs="EPSG:32756"):
     """
     Generate a GeoTIFF file containing test structures from a catalogue file.
-    Default to projection UTM zone 56S (EPSG:32756) centred over the city of
+    Default to projection UTM zone 56S (EPSG:32756) near the city of
     Sydney, Australia.
     """
 
@@ -56,7 +58,7 @@ def gen_testing_data(cat_file, out_root, noise_level, x_size, y_size, pixscale,
             yo = e[2] * y_size
             cx = e[3]
             cy = e[4]
-            pa = math.radians(e[5])
+            pa = e[5]
             amp = e[6]
             params = [amp, xo, yo, cx, cy, pa]
             shape2D = (y_size, x_size)
@@ -90,80 +92,6 @@ def gen_testing_data(cat_file, out_root, noise_level, x_size, y_size, pixscale,
     ) as dst:
         dst.write(data_arr, 1)
     print("done.\n")
-
-
-# -----------------------------------------------------------------------------#
-def csv_read_to_list(file_name, delim=",", do_float=False):
-    """
-    Read rows from an ASCII file into a list of lists.
-    """
-
-    # Compile a few useful regular expressions
-    spaces = re.compile("\s+")
-    comma_and_spaces = re.compile(",\s+")
-    comma_or_space = re.compile("[\s|,]")
-    brackets = re.compile("[\[|\]\(|\)|\{|\}]")
-    comment = re.compile("#.*")
-    quotes = re.compile("'[^']*'")
-    keyVal = re.compile("^.+=.+")
-    words = re.compile("\S+")
-
-    # Parse the input file into a list
-    out_lst = []
-    FH = open(file_name, "r")
-    for line in FH:
-        line = line.rstrip("\n\r")
-        if comment.match(line):
-            continue
-        line = comment.sub("", line)  # remove internal comments
-        line = line.strip()           # kill external whitespace
-        line = spaces.sub(" ", line)  # shrink internal whitespace
-        if line == "":
-            continue
-        line = line.split(delim)
-        if len(line) < 1:
-            continue
-        if do_float:
-            line = [float(x) for x in line]
-
-        out_lst.append(line)
-
-    return out_lst
-
-
-# -----------------------------------------------------------------------------#
-def twodgaussian(params, shape):
-    """
-    Build a 2D Gaussian ellipse as parameterised by 'params' for a region with
-    'shape'.
-        params - [amp, xo, yo, cx, cy, pa] where:
-                amp - amplitude
-                xo  - centre of Gaussian in X
-                yo  - centre of Gaussian in Y
-                cx  - width of Gaussian in X (sigma or c, not FWHM)
-                cy  - width of Gaussian in Y (sigma or c, not FWHM)
-                pa  - position angle of Gaussian, aka theta (radians)
-        shape - (y, x) dimensions of region
-
-    Returns a 2D numpy array with shape="shape"
-    """
-
-    assert len(shape) == 2
-    amp, xo, yo, cx, cy, pa = params
-    y, x = np.indices(shape)
-    st = math.sin(pa) ** 2
-    ct = math.cos(pa) ** 2
-    s2t = math.sin(2 * pa)
-    a = (ct / cx**2 + st / cy**2) / 2
-    b = s2t / 4 * (1 / cy**2 - 1 / cx**2)
-    c = (st / cx**2 + ct / cy**2) / 2
-    v = amp * np.exp(
-        -1 * (a * (x - xo) ** 2
-              + 2 * b * (x - xo) * (y - yo)
-              + c * (y - yo) ** 2)
-    )
-
-    return v
 
 
 #-----------------------------------------------------------------------------#

@@ -7,9 +7,9 @@
 # Type 1 = Gaussian Features
 # type, x_frac, y_frac, maj_pix, min_pix, pa_deg, amp
 
-1, 0.25, 0.25, 50.0, 10.0, 45.0, 1500.0
-1, 0.5, 0.5, 50.0, 10.0, 90.0, 1500.0
-1, 0.75, 0.75, 50.0, 50.0, 0.0, 1500.0
+1, 0.25, 0.25, 10.0, 5.0, 45.0, 1500.0
+1, 0.5, 0.5, 10.0, 5.0, 90.0, 1500.0
+1, 0.75, 0.75, 20.0, 20.0, 0.0, 1500.0
 
 # Type 2 = Rectangular Features
 # type, x_frac, y_frac, x_side, y_side, pa_deg, amp
