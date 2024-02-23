@@ -18,7 +18,7 @@ regular grid on the square image, perturbed by ```jitter``` pixels.
 # Create a catalogue of Gaussian features
 python mk_test_cat.py \
     --out testcat \
-    --num-features 9 \
+    --num-features 25 \
     --amp-range-gauss 20 50 \
     --size 2000 \
     --debug
@@ -27,7 +27,8 @@ python mk_test_cat.py \
 python mk_test_image.py \
     --cat testcat.csv \
     --out testimg \
-    --size 2000
+    --size 2000 \
+    --noise-level 40
 ```
 
 Once the image has been generated, we run an ITI model on it and
@@ -39,6 +40,5 @@ highlight systemic changes.
 python analyse_test_image.py \
     --cat testcat.csv \
     --image testimg.tif \
-    --debug
+    --jitter 0.1
 ```
-

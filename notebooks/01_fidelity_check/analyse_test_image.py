@@ -76,7 +76,7 @@ def do_gaussian2D_fit(p, data_arr, quiet=True):
     fit_dict["n_iter"] = mp.niter
     fit_dict["p_err"] = mp.perror
     fit_dict["inparms"] = inparms
-    
+
     return mp, fit_dict
 
 
@@ -89,7 +89,7 @@ def plot_gaussian_fit(fig, p, data_arr):
     # Plot the data and fit ellipse
     ax1 = fig.add_subplot(1,3,1)
     cax1 = ax1.imshow(data_arr, origin='lower', cmap=mpl.cm.jet)
-    cbar1=fig.colorbar(cax1, pad=0.0)
+    cbar1 = fig.colorbar(cax1, pad=0.0)
     sigma2fwhm = math.sqrt(8*math.log(2))
     ellipse = Ellipse(
         xy=(p[1], p[2]),
@@ -144,10 +144,10 @@ def run_sequential_fits(image_file, cat_file, jitter=0.01, sigma_extract=3.0,
 
     # Input and output parameters are stored in lists -> DataFrames
     gauss_cat_lst = []
-    
+
     # Setup the figure for plotting individual Gaussian fits
     if debug:
-        fig1 = plt.figure(facecolor="w", figsize=(18,4.3))
+        fig1 = plt.figure(facecolor="w", figsize=(18, 4.3))
         ax1 = fig1.add_axes([0.1, 0.08, 0.9, 0.87])
 
     # Loop through the catalogue and fit individually
@@ -197,8 +197,9 @@ def run_sequential_fits(image_file, cat_file, jitter=0.01, sigma_extract=3.0,
                 print(f"[WARN] Fit failed on feature {idx+1}! Skipping.\n")
                 continue
             p = mp.params
+            p[5] %= 180.0
             inparms = fit_dict["inparms"]
-            
+
             # Feedback to user
             tq.write(f"[INFO] Final fit values for feature {idx+1}:\n")
             for i_ in range(len(p)):
@@ -215,7 +216,7 @@ def run_sequential_fits(image_file, cat_file, jitter=0.01, sigma_extract=3.0,
             gauss_fit_row[1] +=x1   # Shift to the image reference frame
             gauss_fit_row[2] +=y1   #
             gauss_cat_lst.append(gauss_cat_row + gauss_fit_row.tolist())
-            
+
             # DEBUG: Plot the individual fits
             if debug:
                 fig1.clf()
@@ -224,24 +225,63 @@ def run_sequential_fits(image_file, cat_file, jitter=0.01, sigma_extract=3.0,
                 fig1.show()
                 input("Press <RETURN> to continue ...")
 
-        # Save final values to dataframes for later comparison
-        root, ext = os.path.splitext(cat_file)
-        out_df_filename = root + "_fit.pickle"
-        gauss_df = pd.DataFrame(gauss_cat_lst,
-                                columns=["amp_cat",
-                                         "x0_cat",
-                                         "y0_cat",
-                                         "sig_x_cat",
-                                         "sig_y_cat",
-                                         "pa_cat",
-                                         "amp_fit",
-                                         "x0_fit",
-                                         "y0_fit",
-                                         "sig_x_fit",
-                                         "sig_y_fit",
-                                         "pa_fit"])
-        gauss_df.to_pickle(out_df_filename)
-        
+    # Save final values to dataframes for later comparison
+    root, ext = os.path.splitext(cat_file)
+    out_df_filename = root + "_fit.pkl"
+    gauss_df = pd.DataFrame(gauss_cat_lst,
+                            columns=["amp_cat",
+                                     "x0_cat",
+                                     "y0_cat",
+                                     "sig_x_cat",
+                                     "sig_y_cat",
+                                     "pa_cat",
+                                     "amp_fit",
+                                     "x0_fit",
+                                     "y0_fit",
+                                     "sig_x_fit",
+                                     "sig_y_fit",
+                                     "pa_fit"])
+    print(f"[INFO] Saving results to '{out_df_filename}'.")
+    gauss_df.to_pickle(out_df_filename)
+
+    # Plot the catalogue and fits as ellipses over the image
+    fig2 = plt.figure(facecolor="w", figsize=(8, 7))
+    ax2 = fig2.add_axes([0.1, 0.08, 0.9, 0.87])
+    cax2 = ax2.imshow(data_arr, origin='lower', cmap=mpl.cm.gray)
+    cbar2 = fig2.colorbar(cax2, pad=0.0)
+    sigma2fwhm = math.sqrt(8*math.log(2))
+    for idx, row in gauss_df.iterrows():
+        ell_cat = Ellipse(
+            xy=(row.x0_cat, row.y0_cat),
+            width=row.sig_x_cat * sigma2fwhm,
+            height=row.sig_y_cat * sigma2fwhm,
+            angle=-1*row.pa_cat,
+            edgecolor="lightgreen",
+            fc="None",
+            lw=3)
+        ax2.add_patch(ell_cat)
+        ell_fit = Ellipse(
+            xy=(row.x0_fit, row.y0_fit),
+            width=row.sig_x_fit * sigma2fwhm,
+            height=row.sig_y_fit * sigma2fwhm,
+            angle=-1*row.pa_fit,
+            edgecolor="magenta",
+            fc="None",
+            lw=1)
+        ax2.add_patch(ell_fit)
+    ax2.set_aspect("equal")
+    ax2.set_xlabel("X (frac)")
+    ax2.set_ylabel("Y (frac)")
+    cbar2.set_label("Amplitude")
+
+    # Save the plot to disk as a png
+    root, ext = os.path.splitext(image_file)
+    fig_filename = root + "_fit.png"
+    print(f"[INFO] Saving plot to '{fig_filename}'.")
+    fig2.savefig(fig_filename, dpi=300)
+    fig2.show()
+    input("Press <RETURN> to continue ...")
+
 
 #-----------------------------------------------------------------------------#
 if __name__ == '__main__':

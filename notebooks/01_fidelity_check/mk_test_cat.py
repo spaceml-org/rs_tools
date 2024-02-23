@@ -111,7 +111,6 @@ def gen_catalogue_file(out_root, num_features, jitter=0.0,
         plot_gaussian_cat(fig, size, amp_arr, x_arr, y_arr,
                           sig_x_arr, sig_y_arr, pa_arr)
         fig.canvas.draw()
-
         fig_filename = out_root + ".png"
         fig.savefig(fig_filename, dpi=300)
         fig.show()
