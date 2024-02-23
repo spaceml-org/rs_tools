@@ -270,8 +270,8 @@ def run_sequential_fits(image_file, cat_file, jitter=0.01, sigma_extract=3.0,
             lw=1)
         ax2.add_patch(ell_fit)
     ax2.set_aspect("equal")
-    ax2.set_xlabel("X (frac)")
-    ax2.set_ylabel("Y (frac)")
+    ax2.set_xlabel("X (pixels)")
+    ax2.set_ylabel("Y (pixels)")
     cbar2.set_label("Amplitude")
 
     # Save the plot to disk as a png
