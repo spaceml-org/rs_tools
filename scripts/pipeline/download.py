@@ -5,6 +5,7 @@ A General Pipeline for create ML-Ready Data
 - Normalizing
 - Patching
 """
+import autoroot
 import numpy as np
 
 from pathlib import Path
@@ -14,13 +15,16 @@ from typing import Optional, List, Union, Tuple
 from rs_tools import goes_download, modis_download, MODIS_VARIABLES
 
 from rs_tools._src.geoprocessing.grid import create_latlon_grid
+import typer
+from loguru import logger
 
 
 @dataclass
 class DownloadParameters:
-    period: List[str] = ["2020-10-01", "2020-10-31"]
+    start_date: str = "2020-10-01"
+    end_date: str = "2020-10-02"
     region: Tuple[float, float, float, float] = (-180, -90, 180, 90)
-    save_path: str = "path/to/file"
+    save_path: str = "./"
 
 
 @dataclass
@@ -88,62 +92,12 @@ class GOES16Download:
     
     def download_cloud_mask(self, params: DownloadParameters) -> List[str]:
         return None
-
-@dataclass
-class GeoProcessingParams:
-    # region of interest
-    # target grid
-    # unit conversion
-    # crs transformation
-    # resampling Transform
-    region: Tuple[float, float, float, float] = ...
-    save_path: str = 'path/to/bucket' # analysis ready bucket
-
-
-
-@dataclass
-class MODISGeoProcessing:
-    resolution: float = ... # in degrees?
-    save_path: str = ...
-
-    def geoprocess(self, params: GeoProcessingParams, files: List[str]):
-        save_path: str = params.save_path.join(self.save_path)
-        target_grid: np.ndarray = create_latlon_grid(params.region, self.resolution) # create using np.linspace?
-
-        # loop through files
-        # open dataset
-        # stack variables to channels
-        # resample
-        # convert units (before or after resampling???)
-        # save as netcdf
-
-
-
-
-
-@dataclass
-class GOESGeoProcessing:
-    resolution: float = ... # in degrees?
-
-    def geoprocess(self, params: GeoProcessingParams, files: List[str]):
-        return None
-        
-    def parse_filenames(self, files: List[str]):
-        # chunk the files
-        # time, bands
-        return None
-
-@dataclass
-class MLProcessingParams:
-    # patching
-    # normalization
-    # gap-filling
-    pass
-
+    
 
 def download(
-        period: List[str]=["2020-10-01", "2020-10-31"],
-        region: Tuple[str] = (-180, -90, 180, 90),
+        start_date: str = "2020-10-01",
+        end_date: str = "2020-10-31",
+        region: str = "-180 -90 180 90",
         save_path: str = "./"
 ):
     """
@@ -157,8 +111,10 @@ def download(
     Returns:
         None
     """
+    region = tuple(map(lambda x: int(x), region.split(" ")))
     # initialize params
-    params = DownloadParameters(period=period, region=region, save_path=save_path)
+    logger.info("Initializing MODIS parameters...")
+    params = DownloadParameters(start_date=start_date, end_date=end_date, region=region, save_path=save_path)
     # initialize MODIS TERRA Files downloader
     dc_modis_download = MODISTerraDownload(
         start_date=params.start_date,
@@ -166,39 +122,27 @@ def download(
         region=params.region,
         save_path=str(Path(params.save_path).joinpath("modis"))
     )
-    modis_filenames = dc_modis_download.download(params=params)
+    logger.info("Downloading MODIS...")
+    modis_filenames = dc_modis_download.download()
+    logger.info("Done!")
     
 
     # initialize GOES 16 Files
+    logger.info("Initializing GOES16 parameters...")
     dc_goes16_download = GOES16Download(
         start_date=params.start_date,
         end_date=params.start_date,
-        region=params.region,
         save_path=str(Path(params.save_path).joinpath("goes16"))
     )
-    goes16_filenames = dc_goes16_download.download(params=params)
+    logger.info("Downloading GOES 16...")
+    goes16_filenames = dc_goes16_download.download()
+    logger.info("Done!")
 
     # TODO: Create DataFrame
     # TODO: save MODIS-TERRA filenames to CSV?
     # TODO: save GOES-16 filenames to CSV?
+    logger.info("Finished Script...")
 
-
-
-
-def main(stage: str="download"):
-
-    # part 1
-    if stage == "download":
-        # download MODIS & GOES
-        raise NotImplementedError()
-    elif stage == "harmonize":
-        # harmonize MODIS & GOES
-        raise NotImplementedError()
-    elif stage == "ml_processing":
-        # normalize, Gap-fill, patch
-        raise NotImplementedError()
-    else:
-        raise ValueError(f"Unrecognized stage - {stage}")
 
 if __name__ == '__main__':
-    main()
+    typer.run(download)
