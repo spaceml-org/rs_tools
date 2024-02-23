@@ -1,0 +1,19 @@
+#-----------------------------------------------------------------------------#
+#                                                                             #
+# Input catalogue file for use with the ITI validation workflow.              #
+#                                                                             #
+#-----------------------------------------------------------------------------#
+
+# Type 1 = Gaussian Features
+# type, amp, x_frac, y_frac, maj_pix, min_pix, pa_deg
+
+1, 1500.0, 0.25, 0.25, 10.0, 5.0, 45.0
+1, 1500.0, 0.5, 0.5, 10.0, 5.0, 90.0
+1, 1500.0, 0.75, 0.75, 20.0, 20.0, 0.0
+
+# Type 2 = Rectangular Features
+# type, amp, x_frac, y_frac, x_side, y_side, pa_deg
+
+
+# Type 3 = Noise Features
+

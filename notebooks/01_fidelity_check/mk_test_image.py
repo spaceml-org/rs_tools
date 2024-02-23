@@ -54,13 +54,13 @@ def gen_testing_data(cat_file, out_root, noise_level, x_size, y_size, pixscale,
         # Feature Type 1: Gaussian features.
         # twodgaussian() expects [amp, xo, yo, cx, cy, pa]
         if src_type == 1:
-            xo = e[1] * x_size
-            yo = e[2] * y_size
-            cx = e[3]
-            cy = e[4]
-            pa = e[5]
-            amp = e[6]
-            params = [amp, xo, yo, cx, cy, pa]
+            amp = e[1]
+            x0 = e[2] * x_size
+            y0 = e[3] * y_size
+            sig_x = e[4]
+            sig_y = e[5]
+            pa = e[6]
+            params = [amp, x0, y0, sig_x, sig_y, pa]
             shape2D = (y_size, x_size)
             gauss = twodgaussian(params, shape2D).reshape((y_size, x_size))
             data_arr[:, :] += gauss
@@ -98,9 +98,24 @@ def gen_testing_data(cat_file, out_root, noise_level, x_size, y_size, pixscale,
 if __name__ == '__main__':
 
     desc_str = """
-    Create a new fidelity testing image from catalogues. This initial
+    Create a new fidelity testing image from a catalogue. This initial
     version understands catalogues containing Gaussian features on a
     background of uniform noise.
+
+    Usage:
+        python mk_test_image.py \
+            --cat testcat.csv \
+            --out testimg \
+            --size 2000
+
+    This example generates a GeoTIFF file called 'testimg.tif'
+    containing the Gaussians specified in the catalogue. The idea is
+    to use this image as a probe of the changes wrought by the ITI
+    model by measuring the inputs and outputs, and comparing
+    properties. The script 'analyse_test_image.py' fits the Gaussian
+    components in the image for later comparison to the input
+    catalogue.
+
     """
 
     epilog_str = """
@@ -129,7 +144,7 @@ if __name__ == '__main__':
     )
     ap.add_argument(
         "--size",
-        default=10000,
+        default=2000,
         type=int,
         help="Number of pixels on X and Y axes (equal) [%(default)s]."
     )
@@ -137,7 +152,7 @@ if __name__ == '__main__':
         "--pixscale",
         default=10.0,
         type=float,
-        help="Scale of square pixels in projection units [%(default)s]."
+        help="Scale of square pixels in meters [%(default)s]."
     )
     args = ap.parse_args()
 
