@@ -136,8 +136,8 @@ def goes_download(
     print('Times to check: ',list_of_dates[0], list_of_dates[-1])
 
     window_date = '1991-10-19' # Add arbitrary date to convert into proper datetime object
-    start_datetime_window_str = window_date + ' ' + daily_window_t0
-    end_datetime_window_str = window_date + ' ' + daily_window_t1
+    start_datetime_window_str = window_date + ' ' + str(daily_window_t0)
+    end_datetime_window_str = window_date + ' ' + str(daily_window_t1)
     _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
     # datetime conversion 
     daily_window_t0_datetime = datetime.strptime(start_datetime_window_str, "%Y-%m-%d %H:%M:%S")

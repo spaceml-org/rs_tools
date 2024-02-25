@@ -27,35 +27,6 @@ class DownloadParameters:
     save_path: str = "./"
 
 
-@dataclass
-class MODISTerraDownload:
-    """MODIS will save to 1 subdirectory"""
-    start_date: str = "2020-10-01"
-    end_date: str = "2020-10-31"
-    start_time: str = '00:00:00'
-    end_time: str = '23:59:00'
-    region: Tuple[float, float, float, float] = (-180, -90, 180, 90)
-    save_path: str = "./modis"
-    
-    def download(self) -> List[str]:
-        modis_files = modis_download(
-            start_date=self.start_date,
-            end_date=self.end_date,
-            start_time=self.start_time, # used for daily window
-            end_time=self.end_time, # used for daily window
-            day_step=1,
-            satellite="Terra",
-            save_dir=self.save_path,
-            processing_level='L1b',
-            resolution="1KM",
-            bounding_box=self.region,
-            day_night_flag="day",
-            identifier= "02"
-        )
-        return modis_files
-
-    def download_cloud_mask(self, params: DownloadParameters) -> List[str]:
-        return None
 
 @dataclass
 class GOES16Download:
@@ -66,8 +37,9 @@ class GOES16Download:
     end_date: str = "2020-10-31"
     start_time: str = '00:00:00'
     end_time: str = '23:59:00'
-    daily_window_t0: str = '14:00:00', # Times in UTC, 9 AM local time
-    daily_window_t1: str = '20:00:00', # Times in UTC, 3 PM local time
+    daily_window_t0: str = '14:00:00' # Times in UTC, 9 AM local time
+    daily_window_t1: str = '20:00:00' # Times in UTC, 3 PM local time
+    time_step: str = "12:00:00"
     save_path: str = "./goes"
 
     def download(self) -> List[str]:
@@ -78,7 +50,7 @@ class GOES16Download:
             end_time=self.end_time,
             daily_window_t0=self.daily_window_t0, # Times in UTC, 9 AM local time
             daily_window_t1=self.daily_window_t1, # Times in UTC, 3 PM local time
-            time_step=None,
+            time_step=self.time_step,
             satellite_number=self.satellite,
             save_dir=self.save_path,
             instrument="ABI",
@@ -112,26 +84,12 @@ def download(
         None
     """
     region = tuple(map(lambda x: int(x), region.split(" ")))
-    # initialize params
-    logger.info("Initializing MODIS parameters...")
-    params = DownloadParameters(start_date=start_date, end_date=end_date, region=region, save_path=save_path)
-    # initialize MODIS TERRA Files downloader
-    dc_modis_download = MODISTerraDownload(
-        start_date=params.start_date,
-        end_date=params.start_date,
-        region=params.region,
-        save_path=str(Path(params.save_path).joinpath("modis"))
-    )
-    logger.info("Downloading MODIS...")
-    modis_filenames = dc_modis_download.download()
-    logger.info("Done!")
-    
 
     # initialize GOES 16 Files
     logger.info("Initializing GOES16 parameters...")
     dc_goes16_download = GOES16Download(
         start_date=params.start_date,
-        end_date=params.start_date,
+        end_date=params.end_date,
         save_path=str(Path(params.save_path).joinpath("goes16"))
     )
     logger.info("Downloading GOES 16...")
