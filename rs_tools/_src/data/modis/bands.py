@@ -9,3 +9,4 @@ MODIS_VARIABLES = {
 MODIS_CHANNEL_NUMBERS = [
     str(i) for i in range(1, 39)
 ] + ['13lo', '14lo', '13hi', '14hi']
+}

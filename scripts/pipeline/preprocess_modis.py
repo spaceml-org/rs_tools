@@ -34,16 +34,20 @@ class MODISGeoProcessing:
     save_path: str = "./"
     channels: list[str] = MODIS_CHANNEL_NUMBERS
 
-    def geoprocess_files(self, params: GeoProcessingParams, files: List[str]):
-        save_path: str = params.save_path.join(self.save_path)
-        target_grid: np.ndarray = create_latlon_grid(params.region, self.resolution) # create using np.linspace?
+    # def geoprocess_files(self, params: GeoProcessingParams, files: List[str]):
+    # resolution: float = 0.25 # in degrees?
+    # save_path: str = "./"
 
-        # loop through files
-        # open dataset
-        # stack variables to channels
-        # resample
-        # convert units (before or after resampling???)
-        # save as netcdf
+    # def geoprocess(self, params: GeoProcessingParams, files: List[str]):
+    #     save_path: str = params.save_path.join(self.save_path)
+    #     target_grid: np.ndarray = create_latlon_grid(params.region, self.resolution) # create using np.linspace?
+
+    #     # loop through files
+    #     # open dataset
+    #     # stack variables to channels
+    #     # resample
+    #     # convert units (before or after resampling???)
+    #     # save as netcdf
 
     def geoprocess_file(self, file: str, save_name: str="test") -> None:
 
@@ -51,6 +55,7 @@ class MODISGeoProcessing:
         ds, time_stamp = self.load_modis_scene(file)
         # convert units
         ds = self.convert_units(file)
+        # TODO: resample
         # save to raster
         time_stamp = time_stamp.strftime("%Y%m%d%H%M")
         save_name =f"modis_{time_stamp}.tif"

@@ -389,7 +389,7 @@ def _check_save_dir(save_dir: str) -> bool:
         return True
     else:
         try:
-            os.mkdir(save_dir)
+            os.makedirs(save_dir)
             return True
         except:
             msg = "Save directory does not exist"
