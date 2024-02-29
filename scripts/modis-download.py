@@ -35,10 +35,10 @@ def modis_download(
         start_time (str, optional): The start time of the data download in the format 'HH:MM:SS'. Default is '00:00:00'.
         end_time (str, optional): The end time of the data download in the format 'HH:MM:SS'. Default is '23:59:00'.
         day_step (int, optional): The time step (in days) between downloads. This is to allow the user to download data every e.g. 2 days. If not provided, the default is daily downloads.
-        satellite (str, optional): The satellite. Options are "Terra" and "Aqua", with "Terra" as default.
+        satellite (str): The satellite. Options are "Terra" and "Aqua", with "Terra" as default.
         save_dir (str, optional): The directory where the downloaded files will be saved. Default is the current directory.
-        processing_level (str, optional): The processing level of the data. Default is 'L1b'.
-        resolution (str, optional): The resolution of the data. Options are "QKM" (250m), "HKM (500m), "1KM" (1000m), with "1KM" as default. Not all bands are measured at all resolutions.
+        processing_level (str): The processing level of the data. Default is 'L1b'.
+        resolution (str): The resolution of the data. Options are "QKM" (250m), "HKM (500m), "1KM" (1000m), with "1KM" as default. Not all bands are measured at all resolutions.
         bounding_box (tuple, optional): The region to be downloaded.
         earthdata_username (str): Username associated with the NASA Earth Data login. Required for download.
         earthdata_password (str): Password associated with the NASA Earth Data login. Required for download.
@@ -327,7 +327,7 @@ def _check_save_dir(save_dir: str) -> bool:
         return True
     else:
         try:
-            os.mkdir(save_dir)
+            os.mkdirs(save_dir)
             return True
         except:
             msg = "Save directory does not exist"
