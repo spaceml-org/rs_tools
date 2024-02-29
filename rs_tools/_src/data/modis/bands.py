@@ -6,7 +6,11 @@ MODIS_VARIABLES = {
 }
 
 
-MODIS_CHANNEL_NUMBERS = [
-    str(i) for i in range(1, 39)
-] + ['13lo', '14lo', '13hi', '14hi']
-}
+
+def get_modis_channel_numbers():
+    channels = [str(i) for i in range(1, 39)]
+    channels[12] = '13lo'
+    channels[13] = '14lo'
+    channels[36] = '13hi'
+    channels[37] = '14hi'
+    return channels
