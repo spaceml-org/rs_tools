@@ -33,13 +33,13 @@ class GOES16Download:
     """GOES will save to separate subdirectories"""
     channels: str = "all"
     satellite: int = 16
-    start_date: str = "2020-10-01"
-    end_date: str = "2020-10-31"
-    start_time: str = '00:00:00'
-    end_time: str = '23:59:00'
+    start_date: str = "2018-10-01"
+    end_date: str = "2018-10-31"
+    start_time: str = '14:00:00'
+    end_time: str = '20:00:00'
     daily_window_t0: str = '14:00:00' # Times in UTC, 9 AM local time
     daily_window_t1: str = '20:00:00' # Times in UTC, 3 PM local time
-    time_step: str = "12:00:00"
+    time_step: str = "4:00:00" # download one image at 14:00 and one at 18:00 every day
     save_path: str = "./goes"
 
     def download(self) -> List[str]:
@@ -84,6 +84,13 @@ def download(
         None
     """
     region = tuple(map(lambda x: int(x), region.split(" ")))
+
+    params = DownloadParameters(
+        start_date=start_date,
+        end_date=end_date,
+        region=region,
+        save_path=save_path
+    )
 
     # initialize GOES 16 Files
     logger.info("Initializing GOES16 parameters...")
