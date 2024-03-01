@@ -3,40 +3,21 @@ import rioxarray
 from pyproj import CRS
 
 
-def reproject_goes16(ds: xr.Dataset, crs_projection: str="EPSG:4326") -> xr.Dataset:
+def add_goes16_crs(ds: xr.Dataset) -> xr.Dataset:
     """
-    Reprojects a GOES-16 dataset to a desired coordinate system.
+    Adds the Coordinate Reference System (CRS) to the given GOES16 dataset.
 
     Parameters:
-        ds (xr.Dataset): The input dataset to be reprojected.
-        crs_projection (str): The desired coordinate system for reprojection. Default is "EPSG:4326".
+    - ds (xarray.Dataset): The dataset to which the CRS will be added.
 
     Returns:
-        xr.Dataset: The reprojected dataset.
+    - xarray.Dataset: The dataset with the CRS added.
     """
-
-    # transpose data
-    try:
-        ds = ds.transpose("band", "y", "x")
-    except ValueError:
-        pass
-        # ds = ds.transpose("y", "x")
-        
-
-    # get perspective height
-    sat_height = ds.goes_imager_projection.attrs["perspective_point_height"]
-
-    # reassign coordinates to correct height
-    ds = ds.assign_coords({"x": ds.x.values * sat_height})
-    ds = ds.assign_coords({"y": ds.y.values * sat_height})
 
     # load CRS
     cc = CRS.from_cf(ds.goes_imager_projection.attrs)
-
+    
     # assign CRS to dataarray
     ds.rio.write_crs(cc.to_string(), inplace=True)
 
-    # reproject to desired coordinate system
-    ds = ds.rio.reproject(crs_projection)
-    
     return ds

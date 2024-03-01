@@ -101,46 +101,6 @@ class MODISGeoProcessing:
             ds_modis.to_netcdf(Path(self.save_path).joinpath(f"{itime}_{satellite}.nc"), engine="netcdf4")
 
 
-    # def save_patches(self, ds):
-    #     patches = dict(x=self.patch_size, y=self.patch_size)
-    #     strides = dict(x=self.stride_size, y=self.stride_size)
-    #     patcher = XRDAPatcher(da=ds, patches=patches, strides=strides)
-    #     for i, ipatch in tqdm(enumerate(patcher), total=len(patcher)):
-    #         # save as numpy files
-    #         np.savez(
-    #             Path(self.save_path).joinpath(f"{ipatch.time.values}_patch{i}.npz"),
-    #             data=ipatch.values, 
-    #             lat=ipatch.latitude.values,
-    #             lon=ipatch.longitude.values,
-    #             cloud_mask=ipatch.latitude.values
-    #         )
-
-    # def load_modis_scene(self, file: str) -> Tuple[xr.Dataset, datetime.datetime]:
-
-    #     # load modis scene
-    #     scn = Scene(reader="modis_l1b", filenames=[file])
-
-    #     # load channels
-    #     channels = get_modis_channel_numbers()
-    #     scn.load(channels, resolution = self.resolution)
-
-    #     time_stamp = scn.start_time + (scn.end_time - scn.start_time) / 2
-
-    #     # convert to xarray
-    #     ds = scn.to_xarray_dataset()
-
-    #     ds = ds.assign_coord({"time": time_stamp})
-
-    #     return ds, time_stamp
-
-    # def convert_units(self, ds: xr.Dataset) -> xr.Dataset:
-
-    #     ds.rio.write_crs("epsg:4326", inplace=True)
-    #     ds = ds.set_coords(["latitude", "longitude"])
-    #     ds = ds.assign_coords({"latitude": ds.latitude, "longitude": ds.longitude})
-    #     return ds
-
-
 
 def preprocess_modis(
         modis_save_dir: str = "./",
