@@ -34,7 +34,7 @@ def reproject_goes16(ds: xr.Dataset, crs_projection: str="EPSG:4326") -> xr.Data
     cc = CRS.from_cf(ds.goes_imager_projection.attrs)
 
     # assign CRS to dataarray
-    ds =  ds.rio.write_crs(cc.to_string(), inplace=False)
+    ds.rio.write_crs(cc.to_string(), inplace=True)
 
     # reproject to desired coordinate system
     ds = ds.rio.reproject(crs_projection)

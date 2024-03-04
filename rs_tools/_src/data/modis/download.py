@@ -23,7 +23,7 @@ def modis_download(
     bounding_box: Optional[tuple[float, float, float, float]]=(-180, -90, 180, 90), # TODO: Add polygon option
     earthdata_username: Optional[str]="",
     earthdata_password: Optional[str]="",
-    day_night_flag: Optional[str]=None,
+    day_night_flag: Optional[str]=None, 
     identifier: Optional[str] = "02"
 ):
     """
@@ -35,10 +35,10 @@ def modis_download(
         start_time (str, optional): The start time of the data download in the format 'HH:MM:SS'. Default is '00:00:00'.
         end_time (str, optional): The end time of the data download in the format 'HH:MM:SS'. Default is '23:59:00'.
         day_step (int, optional): The time step (in days) between downloads. This is to allow the user to download data every e.g. 2 days. If not provided, the default is daily downloads.
-        satellite (str): The satellite. Options are "Terra" and "Aqua", with "Terra" as default.
+        satellite (str, optional): The satellite. Options are "Terra" and "Aqua", with "Terra" as default.
         save_dir (str, optional): The directory where the downloaded files will be saved. Default is the current directory.
-        processing_level (str): The processing level of the data. Default is 'L1b'.
-        resolution (str): The resolution of the data. Options are "QKM" (250m), "HKM (500m), "1KM" (1000m), with "1KM" as default. Not all bands are measured at all resolutions.
+        processing_level (str, optional): The processing level of the data. Default is 'L1b'.
+        resolution (str, optional): The resolution of the data. Options are "QKM" (250m), "HKM (500m), "1KM" (1000m), with "1KM" as default. Not all bands are measured at all resolutions.
         bounding_box (tuple, optional): The region to be downloaded.
         earthdata_username (str): Username associated with the NASA Earth Data login. Required for download.
         earthdata_password (str): Password associated with the NASA Earth Data login. Required for download.
@@ -180,8 +180,8 @@ def modis_download(
         # TODO: check file sizes - if less than X MB (ca 70MB) the download failed
         if success_flag:
             files += files_day
-
-    return files
+    
+    return files    
 
 # start/end times are used as daily window
 def get_daily_window(daily_start, end_time):
@@ -189,7 +189,7 @@ def get_daily_window(daily_start, end_time):
     day = daily_start.strftime("%Y-%m-%d")
     daily_end = day + ' ' + end_time
     return (daily_start.strftime("%Y-%m-%d %H:%M:%S"), daily_end)
-
+    
 
 def _check_earthdata_login(earthdata_username: str, earthdata_password: str) -> bool:
     """check if earthdata login is available in environment variables / as input arguments"""
@@ -327,7 +327,7 @@ def _check_save_dir(save_dir: str) -> bool:
         return True
     else:
         try:
-            os.makedirs(save_dir)
+            os.mkdir(save_dir)
             return True
         except:
             msg = "Save directory does not exist"

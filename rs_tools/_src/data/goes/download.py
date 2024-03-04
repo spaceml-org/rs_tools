@@ -51,12 +51,12 @@ def goes_download(
         daily_window_t0 (str, optional): The start time of the daily window in the format 'HH:MM:SS'. Default is '00:00:00'. Used if e.g., only day/night measurements are required.
         daily_window_t1 (str, optional): The end time of the daily window in the format 'HH:MM:SS'. Default is '23:59:00'. Used if e.g., only day/night measurements are required.
         time_step (str, optional): The time step between each data download in the format 'HH:MM:SS'. If not provided, the default is 1 hour.
-        satellite_number (int): The satellite number. Default is 16.
+        satellite_number (int, optional): The satellite number. Default is 16.
         save_dir (str, optional): The directory where the downloaded files will be saved. Default is the current directory.
-        instrument (str): The instrument name. Default is 'ABI'.
-        processing_level (str): The processing level of the data. Default is 'L1b'.
-        data_product (str): The data product to download. Default is 'Rad'.
-        domain (str): The domain of the data. Default is 'F' - Full Disk.
+        instrument (str, optional): The instrument name. Default is 'ABI'.
+        processing_level (str, optional): The processing level of the data. Default is 'L1b'.
+        data_product (str, optional): The data product to download. Default is 'Rad'.
+        domain (str, optional): The domain of the data. Default is 'F' - Full Disk.
         bands (str, optional): The bands to download. Default is 'all'.
         check_bands_downloaded (bool, optional): Whether to check if all bands were successfully downloaded for each time step. Default is False.
 
@@ -136,8 +136,8 @@ def goes_download(
     print('Times to check: ',list_of_dates[0], list_of_dates[-1])
 
     window_date = '1991-10-19' # Add arbitrary date to convert into proper datetime object
-    start_datetime_window_str = window_date + ' ' + daily_window_t0
-    end_datetime_window_str = window_date + ' ' + daily_window_t1
+    start_datetime_window_str = window_date + ' ' + str(daily_window_t0)
+    end_datetime_window_str = window_date + ' ' + str(daily_window_t1)
     _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
     # datetime conversion 
     daily_window_t0_datetime = datetime.strptime(start_datetime_window_str, "%Y-%m-%d %H:%M:%S")
@@ -326,7 +326,7 @@ def _check_input_processing_level(processing_level: str) -> bool:
         return True
     else:
         msg = "Unrecognized processing level"
-        msg += f"\nNeeds to be 'L1b' or 'L2'. Others are not yet tested"
+        msg += f"\nNeeds to be 'L1b' or 'L2'. Others are not yet test"
         raise ValueError(msg)
 
 
@@ -389,7 +389,7 @@ def _check_save_dir(save_dir: str) -> bool:
         return True
     else:
         try:
-            os.makedirs(save_dir)
+            os.mkdir(save_dir)
             return True
         except:
             msg = "Save directory does not exist"
