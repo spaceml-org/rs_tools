@@ -14,8 +14,8 @@ from datetime import datetime, timedelta
 def msg_download(
     start_date: str,
     end_date: Optional[str]=None,
-    start_time: Optional[str]='00:00:00',
-    end_time: Optional[str]='23:59:00',
+    start_time: Optional[str]='00:00:00', # EUMDAC did not find any data for 00:00:00
+    end_time: Optional[str]='23:59:00', # EUMDAC did not find any data for 23:59:00
     daily_window_t0: Optional[str]='00:00:00',
     daily_window_t1: Optional[str]='23:59:00',
     time_step: Optional[str]=None,
@@ -52,13 +52,28 @@ def msg_download(
         # MSG LEVEL 1 Test Cases
         # =========================
         # custom day
+        python scripts/msg-download.py 2018-10-01
+        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01
         # custom day + end points
+        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05
+        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 09:00:00 --end-time 12:00:00
+        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:05:00 --end-time 12:05:00
         # custom day + end points + time window
+        scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 
         # custom day + end points + time window + timestep
+        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 --time-step 00:15:00
+        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 --time-step 00:25:00
         # ===================================
         # MSG CLOUD MASK Test Cases
         # ===================================
-        
+        # custom day
+        python scripts/msg-download.py 2018-10-01 --instrument=CLM
+        # custom day + end points
+        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --instrument=CLM 
+        # custom day + end points + time window
+        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:00:00 --end-time 12:00:00 --instrument=CLM 
+        # custom day + end points + time window + timestep
+        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:00:00 --end-time 12:00:00 --time-step 00:25:00 --instrument=CLM
         # ====================
         # FAILURE TEST CASES
         # ====================
@@ -106,7 +121,7 @@ def msg_download(
     _check_timedelta(time_delta=time_delta)
     
     # Compile list of dates/times
-    list_of_dates = np.arange(start_datetime, end_datetime + time_delta, time_delta).astype(datetime)
+    list_of_dates = np.arange(start_datetime, end_datetime, time_delta).astype(datetime)
     print('Times to check: ',list_of_dates[0], list_of_dates[-1])
 
     window_date = '1991-10-19' # Add arbitrary date to convert into proper datetime object
@@ -137,11 +152,32 @@ def msg_download(
         
         pbar_time.set_description(f"Time - {itime}")
 
-        products = _compile_msg_products()
-        sub_files_list = _msg_data_download(products=products, save_dir=save_dir)
-        files += sub_files_list
+        sub_files_list = _download(time=itime, data_product=data_product, save_dir=save_dir, datastore=datastore)
+        if sub_files_list is None:
+            if itime != list_of_dates[-1]:
+                logger.info(f"Could not find data for time {itime}. Trying to add 5 mins to timestamp.")
+                time_delta = timedelta(hours=0, minutes=5, seconds=0)
+                itime_5 = itime+ time_delta
+                sub_files_list = _download(time=itime_5, data_product=data_product, save_dir=save_dir, datastore=datastore)
+        if sub_files_list is None:
+            if itime != list_of_dates[-1]:
+                logger.info(f"Could not find data for time {itime}. Trying to add 10 mins to timestamp.")
+                time_delta = timedelta(hours=0, minutes=10, seconds=0)
+                itime_10 = itime+ time_delta
+                sub_files_list = _download(time=itime_10, data_product=data_product, save_dir=save_dir, datastore=datastore)
+
+        if sub_files_list is None:
+            logger.info(f"Could not find data for time {itime}. Skipping to next time.")
+        else:
+            files += sub_files_list
 
     return files
+
+def _download(time: datetime, data_product: str, save_dir: str, datastore):
+    products = _compile_msg_products(data_product=data_product, time=time, datastore=datastore)
+    sub_files_list = _msg_data_download(products=products, save_dir=save_dir)
+    print(sub_files_list)
+    return sub_files_list
 
 def _compile_msg_products(data_product: str, time: datetime, datastore):
     selected_collection = datastore.get_collection(data_product)
@@ -153,13 +189,14 @@ def _compile_msg_products(data_product: str, time: datetime, datastore):
 def _msg_data_download(products, save_dir: str):
     for product in products:
         for entry in product.entries:
-            if entry.endswith(".nat"):
+            if entry.endswith(".nat") or entry.endswith(".grb"): 
                 try:
                     with product.open(entry=entry) as fsrc:
                         # Create a full file path for saving the file
                         save_path = os.path.join(save_dir, os.path.basename(fsrc.name))
                         with open(save_path, mode='wb') as fdst:
                             shutil.copyfileobj(fsrc, fdst)
+                        print(f"Successfully downloaded {entry}.")
                         return [save_path]
                 except eumdac.product.ProductError as error:
                     print(f"Could not download entry {entry} from product '{product}': '{error.msg}'")
@@ -182,7 +219,7 @@ def _check_eumdac_login(eumdac_key: str, eumdac_secret: str) -> bool:
     credentials = (eumdac_key, eumdac_secret)
     try:
         token = eumdac.AccessToken(credentials)
-        logger.info("EUMDAC login successful. Token '{token}' expires {token.expiration}")
+        logger.info(f"EUMDAC login successful. Token '{token}' expires {token.expiration}")
         return token
     except:
         msg = "EUMDAC login failed."
@@ -240,7 +277,6 @@ def _check_timedelta_format(time_delta: str) -> bool:
 
 def _check_timedelta(time_delta: datetime) -> bool:
     if time_delta.days > 0: return True
-    
     if time_delta.seconds >= 15 * 60: return True
 
     msg = "Time delta must not be smaller than the time resolution of the data\n"
@@ -310,11 +346,30 @@ if __name__ == '__main__':
     typer.run(msg_download)
 
     """
+    # =========================
+    # MSG LEVEL 1 Test Cases
+    # =========================
     # custom day
+    python scripts/msg-download.py 2018-10-01
+    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01
     # custom day + end points
+    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05
+    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 09:00:00 --end-time 12:00:00
+    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:05:00 --end-time 12:05:00
     # custom day + end points + time window
-    # custom day + end points + time window + time step
-    # ====================
-    # FAILURE TEST CASES
-    # ====================
+    scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 
+    # custom day + end points + time window + timestep
+    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 --time-step 00:15:00
+    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 --time-step 00:25:00
+    # ===================================
+    # MSG CLOUD MASK Test Cases
+    # ===================================
+    # custom day
+    python scripts/msg-download.py 2018-10-01 --instrument=CLM
+    # custom day + end points
+    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --instrument=CLM 
+    # custom day + end points + time window
+    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:00:00 --end-time 12:00:00 --instrument=CLM 
+    # custom day + end points + time window + timestep
+    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:00:00 --end-time 12:00:00 --time-step 00:25:00 --instrument=CLM
     """
