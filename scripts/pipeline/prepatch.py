@@ -60,7 +60,7 @@ class PrePatcher:
             patcher = XRDAPatcher(da=ds, patches=patches, strides=strides)
             for i, ipatch in tqdm(enumerate(patcher), total=len(patcher)):
                 # save as numpy files
-                np.save(Path(save_path).joinpath(f"{itime}_reflectance_patch_{i}"), ipatch.values)
+                np.save(Path(save_path).joinpath(f"{itime}_radiance_patch_{i}"), ipatch.values)
                 np.save(Path(save_path).joinpath(f"{itime}_latitude_patch_{i}"), ipatch.latitude.values)
                 np.save(Path(save_path).joinpath(f"{itime}_longitude_patch_{i}"), ipatch.longitude.values)
                 np.save(Path(save_path).joinpath(f"{itime}_cloudmask_patch_{i}"), ipatch.cloud_mask.values)

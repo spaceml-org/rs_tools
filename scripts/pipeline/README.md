@@ -20,19 +20,27 @@ python scripts/pipeline/preprocess_modis.py --read-path "/home/juanjohn/data/rs/
 python scripts/pipeline/prepatch.py --read-path "/home/juanjohn/data/rs/modis/analysis"  --save-path "/home/juanjohn/data/rs/modis/mlready"
 ```
 
+**Inference**
+
+* Download New Data
+* Preprocess Data (same way)
+* Make predictions
+* Do Analysis
+
+
 
 ### GOES PIPELINE
 
 **Downloading**
 
 ```bash
-python scripts/pipeline/download_goes.py --save-path /home/juanjohn/data/rs/goes
+python scripts/pipeline/download_goes.py --save-path /home/juanjohn/data/rs/goes/raw
 ```
 
 **Preprocessing**
 
 ```bash
-python scripts/pipeline/preprocess_goes.py --read-path "/home/juanjohn/data/rs/goes16/raw/noaa-goes16/" --save-path "/home/juanjohn/data/rs/goes16/analysis"
+python scripts/pipeline/preprocess_goes.py --read-path "/home/juanjohn/data/rs/goes/raw/" --save-path "/home/juanjohn/data/rs/goes/analysis"
 ```
 
 
