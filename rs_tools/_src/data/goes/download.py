@@ -150,6 +150,10 @@ def goes_download(
 
     # compile new list of dates within desired time window
     list_of_dates = list(filter(is_in_between, list_of_dates))
+    if list_of_dates == []:
+        msg = f"No times within the specified time window {daily_window_t0_datetime.time()} - {daily_window_t1_datetime.time()} for time step {time_step}"
+        msg += f"\n adjust daily window times or time step"
+        raise ValueError(msg)
 
     # check if save_dir is valid before attempting to download
     _check_save_dir(save_dir=save_dir)

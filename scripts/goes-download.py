@@ -51,12 +51,12 @@ def goes_download(
         daily_window_t0 (str, optional): The start time of the daily window in the format 'HH:MM:SS'. Default is '00:00:00'. Used if e.g., only day/night measurements are required.
         daily_window_t1 (str, optional): The end time of the daily window in the format 'HH:MM:SS'. Default is '23:59:00'. Used if e.g., only day/night measurements are required.
         time_step (str, optional): The time step between each data download in the format 'HH:MM:SS'. If not provided, the default is 1 hour.
-        satellite_number (int, optional): The satellite number. Default is 16.
+        satellite_number (int): The satellite number. Default is 16.
         save_dir (str, optional): The directory where the downloaded files will be saved. Default is the current directory.
-        instrument (str, optional): The instrument name. Default is 'ABI'.
-        processing_level (str, optional): The processing level of the data. Default is 'L1b'.
-        data_product (str, optional): The data product to download. Default is 'Rad'.
-        domain (str, optional): The domain of the data. Default is 'F' - Full Disk.
+        instrument (str): The instrument name. Default is 'ABI'.
+        processing_level (str): The processing level of the data. Default is 'L1b'.
+        data_product (str): The data product to download. Default is 'Rad'.
+        domain (str): The domain of the data. Default is 'F' - Full Disk.
         bands (str, optional): The bands to download. Default is 'all'.
         check_bands_downloaded (bool, optional): Whether to check if all bands were successfully downloaded for each time step. Default is False.
 
@@ -326,7 +326,7 @@ def _check_input_processing_level(processing_level: str) -> bool:
         return True
     else:
         msg = "Unrecognized processing level"
-        msg += f"\nNeeds to be 'L1b' or 'L2'. Others are not yet test"
+        msg += f"\nNeeds to be 'L1b' or 'L2'. Others are not yet tested"
         raise ValueError(msg)
 
 
