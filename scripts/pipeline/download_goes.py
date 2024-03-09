@@ -19,13 +19,6 @@ import typer
 from loguru import logger
 
 
-@dataclass
-class DownloadParameters:
-    start_date: str = "2020-10-01"
-    end_date: str = "2020-10-02"
-    region: Tuple[float, float, float, float] = (-180, -90, 180, 90)
-    save_path: str = "./"
-
 
 
 @dataclass
@@ -62,14 +55,30 @@ class GOES16Download:
         )
         return goes_files
     
-    def download_cloud_mask(self, params: DownloadParameters) -> List[str]:
-        return None
+    def download_cloud_mask(self) -> List[str]:
+        goes_files = goes_download(
+            start_date=self.start_date,
+            end_date=self.end_date,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            daily_window_t0=self.daily_window_t0, # Times in UTC, 9 AM local time
+            daily_window_t1=self.daily_window_t1, # Times in UTC, 3 PM local time
+            time_step=self.time_step,
+            satellite_number=self.satellite,
+            save_dir=self.save_path,
+            instrument="ABI",
+            processing_level='L2',
+            data_product='ACM',
+            domain='F',
+            bands=self.channels,
+            check_bands_downloaded=True,
+        )
+        return goes_files
     
 
 def download(
         start_date: str = "2020-10-01",
-        end_date: str = "2020-10-31",
-        region: str = "-180 -90 180 90",
+        end_date: str = "2020-10-02",
         save_path: str = "./"
 ):
     """
@@ -83,7 +92,6 @@ def download(
     Returns:
         None
     """
-    region = tuple(map(lambda x: int(x), region.split(" ")))
 
     params = DownloadParameters(
         start_date=start_date,
@@ -95,12 +103,15 @@ def download(
     # initialize GOES 16 Files
     logger.info("Initializing GOES16 parameters...")
     dc_goes16_download = GOES16Download(
-        start_date=params.start_date,
-        end_date=params.end_date,
-        save_path=str(Path(params.save_path).joinpath("goes16"))
+        start_date=start_date,
+        end_date=end_date,
+        save_path=str(Path(save_path).joinpath("goes16"))
     )
     logger.info("Downloading GOES 16...")
     goes16_filenames = dc_goes16_download.download()
+    logger.info("Done!")
+    logger.info("Downloading GOES 16 Cloud Mask...")
+    goes16_filenames = dc_goes16_download.download_cloud_mask()
     logger.info("Done!")
 
     # TODO: Create DataFrame

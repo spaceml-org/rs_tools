@@ -19,6 +19,7 @@ dependencies:
   # PLOTTING LIBRARY
   - matplotlib # standard plotting library
   - seaborn # Stats viz library
+  - conda-forge::hvplot
   # Storage
   - conda-forge::netCDF4
   - conda-forge::zarr

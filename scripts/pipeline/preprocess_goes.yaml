@@ -1,0 +1,12 @@
+
+
+__call__: "pipe"
+  input: "path/to/data"
+  fn1: correct_goes16_satheight
+  fn2: correct_goes16_bands
+  fn3: add_goes16_crs
+  fn4: resample
+      resolution: 5000
+      method: "bilinear"
+  fn5: calc_latlon
+
