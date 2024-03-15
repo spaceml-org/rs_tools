@@ -54,6 +54,8 @@ class MODISTerraDownload:
         #     day_night_flag="day",
         #     identifier= "02"
         # )
+
+        # TODO: Use our download function instead of earthaccess
         pbar = tqdm(pd.date_range(start=self.start_date, end=self.end_date, freq="D"))
         for idate in pbar:
             pbar.set_description(f"Downloading Terra - Date: {idate}")

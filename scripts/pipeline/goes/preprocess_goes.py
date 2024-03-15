@@ -35,7 +35,7 @@ class GOES16GeoProcessing:
     @property
     def goes_files(self) -> List[str]:
         # get a list of all filenames within the path
-        # get all modis files
+        # get all GOES files
         files = get_list_filenames(self.read_path, ".nc")
         return files
     
@@ -202,11 +202,11 @@ def preprocess_goes16(
     logger.info(f"Starting Script...")
 
     logger.info(f"Initializing GeoProcessor...")
-    modis_geoprocessor = GOES16GeoProcessing(
+    goes_geoprocessor = GOES16GeoProcessing(
         resolution=resolution, read_path=read_path, save_path=save_path
         )
     logger.info(f"Saving Files...")
-    modis_geoprocessor.preprocess_files()
+    goes_geoprocessor.preprocess_files()
 
     logger.info(f"Finished Script...!")
 

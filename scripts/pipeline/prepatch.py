@@ -32,6 +32,20 @@ class GeoProcessingParams:
 
 @dataclass(frozen=True)
 class PrePatcher:
+    """
+    A class for preprocessing and saving patches from NetCDF files.
+
+    Attributes:
+        read_path (str): The path to the directory containing the NetCDF files.
+        patch_size (int): The size of each patch.
+        stride_size (int): The stride size for generating patches.
+        save_path (str): The path to save the patches.
+
+    Methods:
+        nc_files(self) -> List[str]: Returns a list of all NetCDF filenames in the read_path directory.
+        save_patches(self): Preprocesses and saves patches from the NetCDF files.
+    """
+
     read_path: str = "./"
     patch_size: int = 256
     stride_size: int = 256
@@ -39,17 +53,24 @@ class PrePatcher:
 
     @property
     def nc_files(self) -> List[str]:
+        """
+        Returns a list of all NetCDF filenames in the read_path directory.
+
+        Returns:
+            List[str]: A list of NetCDF filenames.
+        """
         # get a list of all filenames within the path
         # get all modis files
         modis_files = get_list_filenames(self.read_path, ".nc")
         return modis_files
 
     def save_patches(self):
-
+        """
+        Preprocesses and saves patches from the NetCDF files.
+        """
         pbar = tqdm(self.nc_files)
 
         save_path = str(Path(self.save_path))
-
 
         for ifile in pbar:
             # open dataset
@@ -65,29 +86,26 @@ class PrePatcher:
                 np.save(Path(save_path).joinpath(f"{itime}_longitude_patch_{i}"), ipatch.longitude.values)
                 np.save(Path(save_path).joinpath(f"{itime}_cloudmask_patch_{i}"), ipatch.cloud_mask.values)
 
-
-
-
-def preprocess_modis(
+def prepatch(
         read_path: str = "./",
         patch_size: int = 256,
         stride_size: int = 256,
         save_path: str = "./"
 ):
     """
-    Downloads MODIS TERRA and GOES 16 files for the specified period, region, and save path.
-
+    Patches satellite data into smaller patches for training.
     Args:
-        period (List[str], optional): The period of time to download files for. Defaults to ["2020-10-01", "2020-10-31"].
-        region (Tuple[str], optional): The geographic region to download files for. Defaults to (-180, -90, 180, 90).
-        save_path (str, optional): The path to save the downloaded files. Defaults to "./".
+        read_path (str, optional): The path to read the input files from. Defaults to "./".
+        patch_size (int, optional): The size of each patch. Defaults to 256.
+        stride_size (int, optional): The stride size for patch extraction. Defaults to 256.
+        save_path (str, optional): The path to save the extracted patches. Defaults to "./".
 
     Returns:
         None
     """
     logger.info(f"Starting Script...")
 
-    logger.info(f"Initializing GeoProcessor...")
+    logger.info(f"Initializing Prepatcher...")
     prepatcher = PrePatcher(
         read_path=read_path, save_path=save_path
         )
@@ -103,10 +121,8 @@ def preprocess_modis(
     logger.info(f"Finished Script...!")
 
 
-
-
 if __name__ == '__main__':
     """
-    python scripts/pipeline/preprocess_modis.py --read-path "/home/juanjohn/data/rs/modis/raw" --save-path /home/juanjohn/data/rs/modis/analysis
+    python scripts/pipeline/prepatch.py --read-path "/path/to/netcdf/file" --save-path /path/to/save/patches
     """
-    typer.run(preprocess_modis)
+    typer.run(prepatch)
