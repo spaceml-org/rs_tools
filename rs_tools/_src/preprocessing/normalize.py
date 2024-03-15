@@ -7,11 +7,11 @@ from functools import partial
 def spatial_mean(ds: xr.Dataset, spatial_variables: List[str]) -> xr.Dataset:
     return ds.mean(spatial_variables)
 
-
+# TODO: Check this function
 def normalize(
-        files: List[str], 
+        files: List[str],
+        temporal_variables: List[str], 
         spatial_variables: List[str]=["x","y"], 
-        temporal_variables: List[str],
 ) -> xr.Dataset:
     
     preprocess = partial(spatial_mean, spatial_variables=spatial_variables)
