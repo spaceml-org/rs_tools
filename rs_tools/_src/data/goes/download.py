@@ -330,7 +330,7 @@ def _check_input_processing_level(processing_level: str) -> bool:
         return True
     else:
         msg = "Unrecognized processing level"
-        msg += f"\nNeeds to be 'L1b' or 'L2'. Others are not yet test"
+        msg += f"\nNeeds to be 'L1b' or 'L2'. Others are not yet tested"
         raise ValueError(msg)
 
 
@@ -393,7 +393,7 @@ def _check_save_dir(save_dir: str) -> bool:
         return True
     else:
         try:
-            os.mkdir(save_dir)
+            os.makedirs(save_dir)
             return True
         except:
             msg = "Save directory does not exist"
