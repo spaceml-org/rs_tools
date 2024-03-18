@@ -115,7 +115,6 @@ def download(
     logger.info("Done!")
 
     # TODO: Create DataFrame
-    # TODO: save MODIS-TERRA filenames to CSV?
     # TODO: save GOES-16 filenames to CSV?
     logger.info("Finished Script...")
 

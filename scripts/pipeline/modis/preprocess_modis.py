@@ -34,8 +34,6 @@ class GeoProcessingParams:
 class MODISGeoProcessing:
     resolution: float = 1_000 # km
     read_path: str = "./"
-    patch_size: int = 256
-    stride_size: int = 256
     save_path: str = "./"
 
     @property
@@ -103,11 +101,8 @@ class MODISGeoProcessing:
 
 
 def preprocess_modis(
-        modis_save_dir: str = "./",
         resolution: float = 1000,
         read_path: str = "./",
-        patch_size: int = 256,
-        stride_size: int = 256,
         save_path: str = "./"
 ):
     """

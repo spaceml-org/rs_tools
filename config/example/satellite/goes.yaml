@@ -1,0 +1,15 @@
+__target__: rs_tools.OTHER_WRAPPER_SCRIPT
+start_date: ${download.start_date}
+end_date: ${download.end_date}
+save_dir: ${download.save_dir}
+cloud_mask: ${download.cloud_mask}
+daily_window_t0: '14:00:00'
+daily_window_t1: '20:00:00'
+time_step: '4:00:00'
+satellite_number: 16
+instrument: 'ABI'
+processing_level: 'L1b'
+data_product: 'Rad'
+domain: 'F'
+bands: 'all'
+check_bands_downloaded: False
