@@ -2,6 +2,7 @@ import xarray as xr
 import numpy as np
 from scipy.interpolate import griddata
 
+# TODO: Satpy can interpolate grid, so function not necessarily needed
 def interp_coords_modis(ds: xr.Dataset, desired_size: tuple[int], method: str="cubic") -> np.array:
 
     lat = ds.Latitude

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import xarray as xr
 import numpy as np
 
+# TODO: Satpy can rescale data, so function not necessarily needed
 def convert_integers2radiances(
         da: xr.DataArray, 
     ) -> xr.DataArray:

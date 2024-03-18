@@ -1,5 +1,6 @@
 from math import floor, ceil
 
+# TODO: Eman to refactor code
 def bounds_and_points_to_step(xmin: float, xmax: float, Nx: float) -> float:
     """Calculates the dx from the minmax
     Eq:

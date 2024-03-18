@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime
 
-
+# TODO: Expand mapping to other resolutions (250m, 500m)
 MODIS_NAME_TO_ID= dict(
     terra="MOD021KM",
     terra_geo="MOD03",
@@ -13,6 +13,7 @@ MODIS_NAME_TO_ID= dict(
     aqua_cloud="MYD35_L2",
 )
 
+# TODO: Expand mapping to other resolutions (250m, 500m)
 MODIS_ID_TO_NAME = dict(
     MYD021KM="aqua",
     MYDO3="aqua_geo",

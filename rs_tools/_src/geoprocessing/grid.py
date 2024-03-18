@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Tuple
 
-
+# TODO: To be moved to Earth System Datacube Tools
 def create_latlon_grid(region: Tuple[float, float, float, float],
                        resolution: float):
     """
