@@ -64,14 +64,14 @@ class GOES16Download:
     
 
 def download(
-        start_date: str,
-        end_date: str, 
-        start_time: str, 
-        end_time: str, 
-        daily_window_t0: str,  
-        daily_window_t1: str,  
-        time_step: str,
-        save_dir: str, 
+        start_date: str="2020-10-02",
+        end_date: str="2020-10-02", 
+        start_time: str="14:00:00", 
+        end_time: str="20:00:00", 
+        daily_window_t0: str="14:00:00",  
+        daily_window_t1: str="14:30:00",  
+        time_step: str="00:15:00",
+        save_dir: str='./data/', 
         cloud_mask: bool = True
 ):
     """

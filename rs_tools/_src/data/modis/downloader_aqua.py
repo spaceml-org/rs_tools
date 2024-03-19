@@ -63,8 +63,8 @@ class MODISAquaDownload:
 
 
 def download(
-        start_date: str = "2018-10-01", 
-        end_date: str = "2018-10-01",
+        start_date: str = "2020-10-01", 
+        end_date: str = "2020-10-01",
         start_time: str = "14:00:00",
         end_time: str = "21:00:00",
         save_dir: str = "./data/",
