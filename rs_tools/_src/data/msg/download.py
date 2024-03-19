@@ -214,6 +214,9 @@ def _check_eumdac_login(eumdac_key: str, eumdac_secret: str) -> bool:
         msg += "\nOr provide them as command line arguments using:"
         msg += "\n--eumdac-key <your user key> --eumdac-secret <your user secret>"
         raise ValueError(msg)
+    else:
+        eumdac_key = os.environ.get("EUMDAC_KEY")
+        eumdac_secret = os.environ.get("EUMDAC_SECRET")
     
     # check if credentials are valid
     credentials = (eumdac_key, eumdac_secret)
@@ -330,7 +333,7 @@ def _check_save_dir(save_dir: str) -> bool:
         return True
     else:
         try:
-            os.mkdirs(save_dir)
+            os.makedirs(save_dir)
             return True
         except:
             msg = "Save directory does not exist"
