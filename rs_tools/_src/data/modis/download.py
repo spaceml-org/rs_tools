@@ -42,7 +42,8 @@ def modis_download(
         bounding_box (tuple, optional): The region to be downloaded.
         earthdata_username (str): Username associated with the NASA Earth Data login. Required for download.
         earthdata_password (str): Password associated with the NASA Earth Data login. Required for download.
-        
+        day_night_flag (str, optional): The time of day for the data. Options are "day" and "night". If not provided, both day and night data will be downloaded.
+        identifier (str, optional): The MODIS data product identifier. Options are "02" and "35". Default is "02".
     Returns:
         list: A list of file paths for the downloaded files.
         

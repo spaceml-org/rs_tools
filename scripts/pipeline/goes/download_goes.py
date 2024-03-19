@@ -18,8 +18,7 @@ from rs_tools._src.geoprocessing.grid import create_latlon_grid
 import typer
 from loguru import logger
 
-
-
+# NOTE: This has now been moved to rs_tools/_src/data/goes/downloader_goes16.py
 
 @dataclass
 class GOES16Download:

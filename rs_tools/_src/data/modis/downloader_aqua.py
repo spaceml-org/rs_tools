@@ -18,8 +18,8 @@ from loguru import logger
 
 
 @dataclass
-class MODISTerraDownload:
-    """Downloading class for TERRA/MODIS data and cloud mask"""
+class MODISAquaDownload:
+    """Downloading class for AQUA/MODIS data and cloud mask"""
     start_date: str
     end_date: str
     start_time: str
@@ -28,13 +28,13 @@ class MODISTerraDownload:
     bounding_box: tuple[float, float, float, float]
     
     def download(self) -> List[str]:
-        terra_files = modis_download(
+        aqua_files = modis_download(
             start_date=self.start_date,
             end_date=self.end_date,
             start_time=self.start_time, 
             end_time=self.end_time,
             day_step=1,
-            satellite="Terra",
+            satellite="Aqua",
             save_dir=Path(self.save_dir).joinpath("L1b"),
             processing_level='L1b',
             resolution="1KM",
@@ -42,16 +42,16 @@ class MODISTerraDownload:
             day_night_flag="day",
             identifier= "02"
             )
-        return terra_files
+        return aqua_files
     
     def download_cloud_mask(self) -> List[str]:
-        terra_files = modis_download(
+        aqua_files = modis_download(
             start_date=self.start_date,
             end_date=self.end_date,
             start_time=self.start_time, 
             end_time=self.end_time,
             day_step=1,
-            satellite="Terra",
+            satellite="Aqua",
             save_dir=Path(self.save_dir).joinpath("CM"),
             processing_level='L2',
             resolution="1KM",
@@ -59,7 +59,7 @@ class MODISTerraDownload:
             day_night_flag="day",
             identifier= "35"
             )
-        return terra_files
+        return aqua_files
 
 
 def download(
@@ -72,7 +72,7 @@ def download(
         cloud_mask: bool = True
 ):
     """
-    Downloads TERRA MODIS data including cloud mask
+    Downloads AQUA MODIS data including cloud mask
 
     Args:
         start_date (str): The start date of the period to download files for in the format "YYYY-MM-DD".
@@ -87,25 +87,25 @@ def download(
         None
     """
     bounding_box = tuple(map(lambda x: int(x), region.split(" ")))
-    # Initialize TERRA Downloader
-    logger.info("Initializing TERRA Downloader...")
-    dc_terra_download = MODISTerraDownload(
+    # Initialize AQUA Downloader
+    logger.info("Initializing AQUA Downloader...")
+    dc_aqua_download = MODISAquaDownload(
         start_date=start_date,
         end_date=end_date,
         start_time=start_time,
         end_time=end_time,
-        save_dir=Path(save_dir).joinpath("terra"),
+        save_dir=Path(save_dir).joinpath("aqua"),
         bounding_box=bounding_box,
     )
-    logger.info("Downloading TERRA Data...")
-    modis_filenames = dc_terra_download.download()
+    logger.info("Downloading AQUA Data...")
+    modis_filenames = dc_aqua_download.download()
     logger.info("Done!")
     if cloud_mask:
-        logger.info("Downloading TERRA Cloud Mask...")
-        modis_filenames = dc_terra_download.download_cloud_mask()
+        logger.info("Downloading AQUA Cloud Mask...")
+        modis_filenames = dc_aqua_download.download_cloud_mask()
         logger.info("Done!")
 
-    logger.info("Finished TERRA Downloading Script...")
+    logger.info("Finished AQUA Downloading Script...")
 
 if __name__ == '__main__':
     typer.run(download)
