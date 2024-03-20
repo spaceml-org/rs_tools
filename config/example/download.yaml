@@ -1,0 +1,26 @@
+# input
+
+# REGION
+region:
+  lat_min: -130
+  lat_max: -90
+  lon_min: -15
+  lon_max: 5
+
+# PERIOD
+period:
+  start_date: '2018-10-01'
+  start_time: ...
+  end_date: '2018-10-31'
+  end_time: ...
+
+# EXTRAS
+cloud_mask: True
+  
+# PATH
+save_dir: ./goes
+
+defaults:
+  - _self_
+  - satellite: goes.yaml
+

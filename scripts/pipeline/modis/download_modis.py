@@ -127,5 +127,27 @@ def download(
     logger.info("Finished Script...")
 
 
+# ALOT OF HYDRA META INFORMATION
+# Create a configuration associated with the above function (cf next cell)
+import hydra_zen
+import hydra
+
+main_config = hydra_zen.builds(download, populate_full_signature=True)
+
+# Wrap the function to accept the configuration as input
+zen_endpoint = hydra_zen.zen(download)
+
+#Store the config
+store = hydra_zen.ZenStore()
+store(main_config, name='download_modis')
+store.add_to_hydra_store(overwrite_ok=True)
+
+# Create CLI endpoint
+api_endpoint = hydra.main(
+    config_name='download_modis', version_base="1.3", config_path=None
+)(zen_endpoint)
+
 if __name__ == '__main__':
-    typer.run(download)
+    # HYDRA ENDPOINT
+    # typer.run(download)
+    api_endpoint()
