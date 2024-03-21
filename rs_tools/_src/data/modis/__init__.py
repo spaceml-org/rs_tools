@@ -38,6 +38,16 @@ class MODISFileName:
 
     @classmethod
     def from_filename(cls, file_name: str):
+        """
+        Creates a MODISFileName object from a given file name.
+
+        Args:
+            cls (type): The class object that the method is bound to.
+            file_name (str): The file name to parse.
+
+        Returns:
+            MODISFileName: The parsed MODISFileName object.
+        """
 
         file_name = Path(file_name)
         components = file_name.name.split('.')
@@ -48,16 +58,16 @@ class MODISFileName:
         # time and date
         time = components[2]
         year = components[1][1:5]
-        doy = components[1][-3:]
-        datetime_acquisition = datetime.strptime(f"{year}{doy}{time}", "%Y%j%H%M")
+        day = components[1][-3:]
+        datetime_acquisition = datetime.strptime(f"{year}{day}{time}", "%Y%j%H%M")
 
         # processing time
         year = components[-2][:4]
-        doy = components[-2][4:7]
+        day = components[-2][4:7]
         hour = components[-2][-6:-4]
         minute = components[-2][-4:-2]
         second = components[-2][-2:]
-        datetime_processing = datetime.strptime(f"{year}{doy}{hour}{minute}{second}", "%Y%j%H%M%S")
+        datetime_processing = datetime.strptime(f"{year}{day}{hour}{minute}{second}", "%Y%j%H%M%S")
        
         # extension
         ext = components[-1]
@@ -71,14 +81,22 @@ class MODISFileName:
 
     @property
     def satellite_name(self):
+        """
+        Gets the name of the satellite based on the satellite ID.
+
+        Returns:
+            str: The name of the satellite.
+        """
         return MODIS_ID_TO_NAME[self.satellite_id]
     
     @property
     def modis_filename(self):
         """
-        M[O/Y]D02[1/H/Q]KM.A[date].[time].[collection].[processing_time].hdf
-        """
+        Generates the MODIS file name based on the object's properties.
 
+        Returns:
+            str: The generated MODIS file name.
+        """
         # satellite ID
         filename = f"{self.satellite_id}"
         # Date
@@ -98,9 +116,11 @@ class MODISFileName:
     @property
     def full_path(self):
         """
-        M[O/Y]D02[1/H/Q]KM.A[date].[time].[collection].[processing_time].hdf
-        """
+        Gets the full path of the MODIS file.
 
+        Returns:
+            Path: The full path of the MODIS file.
+        """
         return Path(self.save_path).joinpath(self.modis_filename)
     
 
