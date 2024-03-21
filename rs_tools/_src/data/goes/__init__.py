@@ -94,8 +94,6 @@ class GOESFileName:
 
         Returns:
             str: The generated GOES file name.
-        OR_[instrument]-[level]-[product][domain]-M4C[channel]_G[sat-no]_s[YYYYDDDHHMMSSS]_e[YYYYDDDHHMMSSS]_c[YYYYDDDHHMMSSS].nc
-
         """
         # data product
         filename = f"OR_{self.instrument}-{self.processing_level}-{self.product}{self.domain}-{self.identifier}"
