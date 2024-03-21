@@ -176,7 +176,6 @@ def msg_download(
 def _download(time: datetime, data_product: str, save_dir: str, datastore):
     products = _compile_msg_products(data_product=data_product, time=time, datastore=datastore)
     sub_files_list = _msg_data_download(products=products, save_dir=save_dir)
-    print(sub_files_list)
     return sub_files_list
 
 def _compile_msg_products(data_product: str, time: datetime, datastore):
