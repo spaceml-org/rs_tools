@@ -34,6 +34,9 @@ if __name__ == "__main__":
 
 """"
 EXAMPLES:
-python rs_tools satellite=goes
+    python rs_tools satellite=goes stage=download
+    python rs_tools satellite=goes stage=geoprocess
+    python rs_tools satellite=goes stage=preprocess
+    python rs_tools satellite=goes stage=patch
 """
 
