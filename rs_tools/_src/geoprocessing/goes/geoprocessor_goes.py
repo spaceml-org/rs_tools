@@ -1,4 +1,5 @@
 import autoroot
+import os
 import numpy as np
 import rioxarray
 from pathlib import Path
@@ -17,7 +18,11 @@ from rs_tools._src.geoprocessing.reproject import convert_lat_lon_to_x_y, calc_l
 import pandas as pd
 from datetime import datetime
 from functools import partial
+import dask
+import warnings
 
+dask.config.set(**{'array.slicing.split_large_chunks': False})
+warnings.filterwarnings('ignore', category=FutureWarning)
 
 def parse_goes16_dates_from_file(file: str):
     timestamp = Path(file).name.replace("-","_").split("_")
@@ -48,7 +53,7 @@ class GOES16GeoProcessing:
     resolution: float
     read_path: str
     save_path: str
-    region: Tuple[str]
+    region: Tuple[int, int, int, int]
     resample_method: str
 
     @property
@@ -99,6 +104,8 @@ class GOES16GeoProcessing:
         if self.resolution is not None:
             # resampling
             ds_subset = resample_rioxarray(ds, resolution=self.resolution, method=self.resample_method)
+        else:
+            ds_subset = ds
 
         # assign coordinates
         ds_subset = calc_latlon(ds_subset)
@@ -183,17 +190,24 @@ class GOES16GeoProcessing:
             try:
                 # load radiances
                 ds = self.preprocess_radiances(files)
-            except:
-                logger.error(f"Error loading radiances for {itime}")
+            except AssertionError:
+                logger.error(f"Skipping {itime} due to missing bands")
+                continue
+            try:
+                # load cloud mask
+                ds_clouds = self.preprocess_cloud_mask(files)["cloud_mask"]
+            except AssertionError:
+                logger.error(f"Skipping {itime} due to missing cloud mask")
                 continue
 
-            # load cloud mask
-            ds_clouds = self.preprocess_cloud_mask(files)["cloud_mask"]
             # interpolate cloud mask to data
             ds_clouds = ds_clouds.interp(x=ds.x, y=ds.y)
             # save cloud mask as data coordinate
             ds = ds.assign_coords({"cloud_mask": (("y", "x"), ds_clouds.values.squeeze())})
             ds["cloud_mask"].attrs = ds_clouds.attrs
+
+            if not os.path.exists(self.save_path):
+                os.makedirs(self.save_path)
 
             ds.to_netcdf(Path(self.save_path).joinpath(f"{itime}_goes16.nc"), engine="netcdf4")
 
@@ -211,6 +225,7 @@ class GOES16GeoProcessing:
         files = list(filter(lambda x: "Rad" in x, files))
 
         # Check that all 16 bands are present
+        logger.info(f"Number of radiance files: {len(files)}")
         assert len(files) == 16
 
         # open multiple files as a single dataset
@@ -248,6 +263,7 @@ class GOES16GeoProcessing:
         files = list(filter(lambda x: "ACMF" in x, files))
         
         # Check that only one file is present
+        logger.info(f"Number of cloud mask files: {len(files)}")
         assert len(files) == 1
 
         # open multiple files as a single dataset
@@ -266,11 +282,11 @@ class GOES16GeoProcessing:
 
         return ds
 
-def preprocess(
-        resolution: float = 1_000, # defined in meters
-        read_path: str = "./",
-        save_path: str = "./",
-        region: Tuple[str] = (-130, -15, -90, 5),
+def geoprocess_goes16(
+        resolution: float = None, # defined in meters
+        read_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/goes16",
+        save_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/goes16/geoprocessed",
+        region: Tuple[int, int, int, int] = (-130, -15, -90, 5),
         resample_method: str = "bilinear",
 ):
     """
@@ -280,7 +296,7 @@ def preprocess(
         resolution (float, optional): The resolution of the downloaded files in meters. Defaults to 1_000.
         read_path (str, optional): The path to read the files from. Defaults to "./".
         save_path (str, optional): The path to save the downloaded files. Defaults to "./".
-        region (Tuple[str], optional): The geographic region to download files for. Defaults to (-130, -15, -90, 5).
+        region (Tuple[int, int, int, int], optional): The geographic region to download files for. Defaults to (-130, -15, -90, 5).
         resample_method (str, optional): The resampling method to use. Defaults to "bilinear".
 
     Returns:
@@ -288,15 +304,15 @@ def preprocess(
     """
     # Initialize GOES 16 GeoProcessor
     logger.info(f"Initializing GOES16 GeoProcessor...")
-    goes_geoprocessor = GOES16GeoProcessing(
+    goes16_geoprocessor = GOES16GeoProcessing(
         resolution=resolution, 
         read_path=read_path, 
         save_path=save_path,
         region=region,
         resample_method=resample_method
         )
-    logger.info(f"Saving Processed Files...")
-    goes_geoprocessor.preprocess_files()
+    logger.info(f"GeoProcessing Files...")
+    goes16_geoprocessor.preprocess_files()
 
     logger.info(f"Finished GOES 16 GeoProcessing Script...!")
 
@@ -305,4 +321,4 @@ if __name__ == '__main__':
     """
     python scripts/pipeline/preprocess_modis.py --read-path "/home/juanjohn/data/rs/modis/raw" --save-path /home/juanjohn/data/rs/modis/analysis
     """
-    typer.run(preprocess)
+    typer.run(geoprocess_goes16)
