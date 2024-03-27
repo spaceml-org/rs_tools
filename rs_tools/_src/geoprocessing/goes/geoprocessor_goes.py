@@ -15,6 +15,7 @@ from rs_tools._src.geoprocessing.goes.interp import resample_rioxarray
 from rs_tools._src.geoprocessing.goes.validation import correct_goes16_bands, correct_goes16_satheight
 from rs_tools._src.geoprocessing.goes.reproject import add_goes16_crs
 from rs_tools._src.geoprocessing.reproject import convert_lat_lon_to_x_y, calc_latlon
+from rs_tools._src.geoprocessing.utils import check_sat_FOV
 import pandas as pd
 from datetime import datetime
 from functools import partial
@@ -53,7 +54,7 @@ class GOES16GeoProcessing:
     resolution: float
     read_path: str
     save_path: str
-    region: Tuple[int, int, int, int]
+    region: Optional[Tuple[int, int, int, int]]
     resample_method: str
 
     @property
@@ -91,17 +92,27 @@ class GOES16GeoProcessing:
         # assign coordinate reference system
         ds = add_goes16_crs(ds)
 
-        if self.region is not None:
+        if self.region != (None, None, None, None):
+            logger.info(f"Subsetting data to region: {self.region}")
             # subset data
             lon_bnds = (self.region[0], self.region[2])
             lat_bnds = (self.region[1], self.region[3])
             # convert lat lon bounds to x y (in meters)
             x_bnds, y_bnds = convert_lat_lon_to_x_y(ds.FOV.crs, lon=lon_bnds, lat=lat_bnds, )
+            # check that region is within the satellite field of view
+            # compile satellite FOV
+            satellite_FOV = (min(ds.x.values), min(ds.y.values), max(ds.x.values), max(ds.y.values))
+            # compile region bounds in x y
+            region_xy = (x_bnds[0], y_bnds[0], x_bnds[1], y_bnds[1])
+            if not check_sat_FOV(region_xy, FOV=satellite_FOV):
+                raise ValueError("Region is not within the satellite field of view")
+
             ds = ds.sortby("x").sortby("y")
             # slice based on x y bounds
             ds = ds.sel(y=slice(y_bnds[0], y_bnds[1]), x=slice(x_bnds[0], x_bnds[1]))
 
         if self.resolution is not None:
+            logger.info(f"Resampling data to resolution: {self.resolution} m")
             # resampling
             ds_subset = resample_rioxarray(ds, resolution=self.resolution, method=self.resample_method)
         else:
@@ -170,46 +181,6 @@ class GOES16GeoProcessing:
         ds_subset = ds_subset.drop_vars(["t", "y_image", "x_image", "goes_imager_projection"])
 
         return ds_subset
-
-    def preprocess_files(self):
-        """
-        Preprocesses multiple files in the read path and saves processed files to the save path.
-        """
-        # get unique times from read path
-        unique_times = list(set(map(parse_goes16_dates_from_file, self.goes_files)))
-
-        pbar_time = tqdm(unique_times)
-
-        for itime in pbar_time:
-
-            pbar_time.set_description(f"Processing: {itime}")
-
-            # get files from unique times
-            files = list(filter(lambda x: itime in x, self.goes_files))
-
-            try:
-                # load radiances
-                ds = self.preprocess_radiances(files)
-            except AssertionError:
-                logger.error(f"Skipping {itime} due to missing bands")
-                continue
-            try:
-                # load cloud mask
-                ds_clouds = self.preprocess_cloud_mask(files)["cloud_mask"]
-            except AssertionError:
-                logger.error(f"Skipping {itime} due to missing cloud mask")
-                continue
-
-            # interpolate cloud mask to data
-            ds_clouds = ds_clouds.interp(x=ds.x, y=ds.y)
-            # save cloud mask as data coordinate
-            ds = ds.assign_coords({"cloud_mask": (("y", "x"), ds_clouds.values.squeeze())})
-            ds["cloud_mask"].attrs = ds_clouds.attrs
-
-            if not os.path.exists(self.save_path):
-                os.makedirs(self.save_path)
-
-            ds.to_netcdf(Path(self.save_path).joinpath(f"{itime}_goes16.nc"), engine="netcdf4")
 
     def preprocess_radiances(self, files: List[str]) -> xr.Dataset:
         """
@@ -282,21 +253,69 @@ class GOES16GeoProcessing:
 
         return ds
 
+    def preprocess_files(self):
+        """
+        Preprocesses multiple files in the read path and saves processed files to the save path.
+        """
+        # get unique times from read path
+        unique_times = list(set(map(parse_goes16_dates_from_file, self.goes_files)))
+
+        pbar_time = tqdm(unique_times)
+
+        for itime in pbar_time:
+
+            pbar_time.set_description(f"Processing: {itime}")
+
+            # get files from unique times
+            files = list(filter(lambda x: itime in x, self.goes_files))
+
+            try:
+                # load radiances
+                ds = self.preprocess_radiances(files)
+            except AssertionError:
+                logger.error(f"Skipping {itime} due to missing bands")
+                continue
+            try:
+                # load cloud mask
+                ds_clouds = self.preprocess_cloud_mask(files)["cloud_mask"]
+            except AssertionError:
+                logger.error(f"Skipping {itime} due to missing cloud mask")
+                continue
+
+            # interpolate cloud mask to data
+            ds_clouds = ds_clouds.interp(x=ds.x, y=ds.y)
+            # save cloud mask as data coordinate
+            ds = ds.assign_coords({"cloud_mask": (("y", "x"), ds_clouds.values.squeeze())})
+            ds["cloud_mask"].attrs = ds_clouds.attrs
+
+            # check if save path exists, and create if not
+            if not os.path.exists(self.save_path):
+                os.makedirs(self.save_path)
+        
+            # remove file if it already exists
+            save_filename = Path(self.save_path).joinpath(f"{itime}_goes16.nc")
+            if os.path.exists(save_filename):
+                logger.info(f"File already exists. Overwriting file: {save_filename}")
+                os.remove(save_filename)
+            # save to netcdf
+            ds.to_netcdf(save_filename, engine="netcdf4")
+
+
 def geoprocess_goes16(
         resolution: float = None, # defined in meters
         read_path: str = "./",
         save_path: str = "./",
-        region: Tuple[int, int, int, int] = (-130, -15, -90, 5),
+        region: Tuple[int, int, int, int] = (None, None, None, None),
         resample_method: str = "bilinear",
 ):
     """
     Downloads MODIS TERRA and GOES 16 files for the specified period, region, and save path.
 
     Args:
-        resolution (float, optional): The resolution of the downloaded files in meters. Defaults to 1_000.
+        resolution (float, optional): The resolution of the downloaded files in meters. Defaults to None.
         read_path (str, optional): The path to read the files from. Defaults to "./".
         save_path (str, optional): The path to save the downloaded files. Defaults to "./".
-        region (Tuple[int, int, int, int], optional): The geographic region to download files for. Defaults to (-130, -15, -90, 5).
+        region (Tuple[int, int, int, int], optional): The geographic region to download files for. Defaults to None.
         resample_method (str, optional): The resampling method to use. Defaults to "bilinear".
 
     Returns:
@@ -319,6 +338,17 @@ def geoprocess_goes16(
 
 if __name__ == '__main__':
     """
+    # =========================
+    # Test Cases
+    # =========================
     python geoprocessor_goes.py --read-path "/home/data" --save-path /home/data/goes/geoprocessed
+    python geoprocessor_goes.py --read-path "/home/data" --save-path /home/data/goes/geoprocessed --resolution 1000
+    python geoprocessor_goes.py --read-path "/home/data" --save-path /home/data/goes/geoprocessed --resolution 5000
+    python geoprocessor_goes.py --read-path "/home/data" --save-path /home/data/goes/geoprocessed --resolution 5000 --region -130 -15 -90 5
+
+    # ====================
+    # FAILURE TEST CASES
+    # ====================
+    python geoprocessor_goes.py --read-path "/home/data" --save-path /home/data/goes/geoprocessed --resolution 5000 --region -200 -15 90 5
     """
     typer.run(geoprocess_goes16)
