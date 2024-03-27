@@ -284,8 +284,8 @@ class GOES16GeoProcessing:
 
 def geoprocess_goes16(
         resolution: float = None, # defined in meters
-        read_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/goes16",
-        save_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/goes16/geoprocessed",
+        read_path: str = "./",
+        save_path: str = "./",
         region: Tuple[int, int, int, int] = (-130, -15, -90, 5),
         resample_method: str = "bilinear",
 ):
@@ -319,6 +319,6 @@ def geoprocess_goes16(
 
 if __name__ == '__main__':
     """
-    python scripts/pipeline/preprocess_modis.py --read-path "/home/juanjohn/data/rs/modis/raw" --save-path /home/juanjohn/data/rs/modis/analysis
+    python geoprocessor_goes.py --read-path "/home/data" --save-path /home/data/goes/geoprocessed
     """
     typer.run(geoprocess_goes16)
