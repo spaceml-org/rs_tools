@@ -3,6 +3,15 @@ import xarray as xr
 
 
 def correct_goes16_satheight(ds: xr.Dataset) -> xr.Dataset:
+    """
+    Convert measurement angle of GOES-16 satellite data to horizontal distance (in meters).
+
+    Parameters:
+    - ds (xr.Dataset): The input dataset containing the GOES-16 satellite data.
+
+    Returns:
+    - xr.Dataset: The dataset with corrected perspective height.
+    """
 
     # get perspective height
     sat_height = ds.goes_imager_projection.attrs["perspective_point_height"]
@@ -22,7 +31,16 @@ def correct_goes16_satheight(ds: xr.Dataset) -> xr.Dataset:
 
 
 def correct_goes16_bands(ds: xr.Dataset) -> xr.Dataset:
+    """
+    Corrects the band coordinates in a GOES-16 dataset.
 
+    Parameters:
+        ds (xr.Dataset): The input dataset containing GOES-16 bands.
+
+    Returns:
+        xr.Dataset: The corrected dataset with updated band coordinates.
+
+    """
     # reassign coordinate
     band_id_attrs = ds.band_id.attrs
     ds = ds.assign_coords(band=ds.band_id.values)

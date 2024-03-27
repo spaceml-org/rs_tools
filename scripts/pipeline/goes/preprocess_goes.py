@@ -23,7 +23,7 @@ def parse_goes16_dates_from_file(file: str):
     timestamp = Path(file).name.replace("-","_").split("_")
     return datetime.strptime(timestamp[-2][1:], "%Y%j%H%M%S%f").strftime("%Y%j%H%M")
 
-
+# NOTE: This has now been moved to rs_tools/_src/geoprocessing/goes/geoprocessor_goes16.py 
 @dataclass
 class GOES16GeoProcessing:
     resolution: float = 1_000 # [m]

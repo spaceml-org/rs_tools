@@ -12,7 +12,23 @@ from loguru import logger
 
 @dataclass
 class GOES16Download:
-    """Downloading class for GOES 16 data and cloud mask"""
+    """A class for downloading GOES 16 data and cloud mask
+    
+    Attributes:
+        start_date (str): The start date of the data to download.
+        end_date (str): The end date of the data to download.
+        start_time (str): The start time of the data to download.
+        end_time (str): The end time of the data to download.
+        daily_window_t0 (str): The start time of the daily window for data download.
+        daily_window_t1 (str): The end time of the daily window for data download.
+        time_step (str): The time step for data download.
+        save_dir (str): The directory to save the downloaded data.
+
+    Methods:
+        download: Downloads GOES 16 data.
+        download_cloud_mask: Downloads GOES 16 cloud mask.  
+    """
+
     start_date: str
     end_date: str 
     start_time: str 
@@ -23,6 +39,7 @@ class GOES16Download:
     save_dir: str 
 
     def download(self) -> List[str]:
+        """Downloads GOES 16 data"""
         goes_files = goes_download(
             start_date=self.start_date,
             end_date=self.end_date,
@@ -43,6 +60,7 @@ class GOES16Download:
         return goes_files
     
     def download_cloud_mask(self) -> List[str]:
+        """Downloads GOES 16 cloud mask"""
         goes_files = goes_download(
             start_date=self.start_date,
             end_date=self.end_date,
