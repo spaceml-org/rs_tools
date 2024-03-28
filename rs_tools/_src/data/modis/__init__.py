@@ -123,7 +123,7 @@ class MODISFileName:
         """
         return Path(self.save_path).joinpath(self.modis_filename)
     
-
+# NOTE: we no longer download geo data
 def get_modis_paired_files(files: List[MODISFileName], satellite="aqua"):
     # get satellite filenames
     modis_satellite = list(filter(lambda x: x.satellite_name == satellite, files))
