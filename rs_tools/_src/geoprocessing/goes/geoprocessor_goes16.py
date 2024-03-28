@@ -25,15 +25,27 @@ import warnings
 dask.config.set(**{'array.slicing.split_large_chunks': False})
 warnings.filterwarnings('ignore', category=FutureWarning)
 
+from datetime import datetime
+from pathlib import Path
+
 def parse_goes16_dates_from_file(file: str):
-    timestamp = Path(file).name.replace("-","_").split("_")
+    """
+    Parses the date and time information from a GOES-16 file name.
+
+    Args:
+        file (str): The file name to parse.
+
+    Returns:
+        str: The parsed date and time in the format 'YYYYJJJHHMM'.
+    """
+    timestamp = Path(file).name.replace("-", "_").split("_")
     return datetime.strptime(timestamp[-2][1:], "%Y%j%H%M%S%f").strftime("%Y%j%H%M")
 
 
 @dataclass
 class GOES16GeoProcessing:
     """
-    A class for performing geoprocessing on GOES-16 satellite data.
+    A class for geoprocessing GOES-16 data.
 
     Attributes:
         resolution (float): The resolution in meters.
@@ -71,7 +83,7 @@ class GOES16GeoProcessing:
 
     def preprocess_fn(self, ds: xr.Dataset) -> Tuple[xr.Dataset, xr.Dataset]:
         """
-        Preprocesses the input dataset by applying corrections, subsetting, and resampling.
+        Preprocesses the input dataset by applying corrections, subsetting, and resampling etc.
 
         Args:
             ds (xr.Dataset): The input dataset.
@@ -125,7 +137,7 @@ class GOES16GeoProcessing:
 
     def preprocess_fn_radiances(self, ds: xr.Dataset) -> xr.Dataset:
         """
-        Preprocesses the input dataset for GOES16 radiances.
+        Preprocesses the GOES16 radiance dataset.
 
         Args:
             ds (xr.Dataset): The input dataset.
@@ -256,7 +268,7 @@ class GOES16GeoProcessing:
 
     def preprocess_files(self):
         """
-        Preprocesses multiple files in the read path and saves processed files to the save path.
+        Preprocesses multiple files in read path and saves processed files to save path.
         """
         # get unique times from read path
         unique_times = list(set(map(parse_goes16_dates_from_file, self.goes_files)))
@@ -310,7 +322,7 @@ def geoprocess_goes16(
         resample_method: str = "bilinear",
 ):
     """
-    Downloads MODIS TERRA and GOES 16 files for the specified period, region, and save path.
+    Geoprocesses GOES 16 files
 
     Args:
         resolution (float, optional): The resolution of the downloaded files in meters. Defaults to None.
