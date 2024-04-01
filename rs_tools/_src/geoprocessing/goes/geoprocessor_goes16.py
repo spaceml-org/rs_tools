@@ -10,38 +10,20 @@ from rs_tools._src.utils.io import get_list_filenames
 import typer
 from loguru import logger
 import xarray as xr
-import datetime
 from rs_tools._src.geoprocessing.interp import resample_rioxarray
+from rs_tools._src.geoprocessing.goes import parse_goes16_dates_from_file, format_goes_dates
 from rs_tools._src.geoprocessing.goes.validation import correct_goes16_bands, correct_goes16_satheight
 from rs_tools._src.geoprocessing.goes.reproject import add_goes16_crs
 from rs_tools._src.geoprocessing.reproject import convert_lat_lon_to_x_y, calc_latlon
 from rs_tools._src.geoprocessing.utils import check_sat_FOV
 import pandas as pd
-from datetime import datetime
-from functools import partial
 import dask
 import warnings
 
 dask.config.set(**{'array.slicing.split_large_chunks': False})
 warnings.filterwarnings('ignore', category=FutureWarning)
 
-from datetime import datetime
-from pathlib import Path
-
-def parse_goes16_dates_from_file(file: str):
-    """
-    Parses the date and time information from a GOES-16 file name.
-
-    Args:
-        file (str): The file name to parse.
-
-    Returns:
-        str: The parsed date and time in the format 'YYYYJJJHHMM'.
-    """
-    timestamp = Path(file).name.replace("-", "_").split("_")
-    return datetime.strptime(timestamp[-2][1:], "%Y%j%H%M%S%f").strftime("%Y%j%H%M")
-
-
+# TODO: Add unit conversion
 @dataclass
 class GOES16GeoProcessing:
     """
@@ -304,9 +286,10 @@ class GOES16GeoProcessing:
             # check if save path exists, and create if not
             if not os.path.exists(self.save_path):
                 os.makedirs(self.save_path)
-        
+
             # remove file if it already exists
-            save_filename = Path(self.save_path).joinpath(f"{itime}_goes16.nc")
+            itime_name = format_goes_dates(itime)
+            save_filename = Path(self.save_path).joinpath(f"{itime_name}_goes16.nc")
             if os.path.exists(save_filename):
                 logger.info(f"File already exists. Overwriting file: {save_filename}")
                 os.remove(save_filename)

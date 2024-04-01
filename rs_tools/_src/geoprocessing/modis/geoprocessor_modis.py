@@ -18,33 +18,15 @@ from satpy import Scene
 import datetime
 from rs_tools._src.data.modis import MODISFileName, MODIS_ID_TO_NAME, MODIS_NAME_TO_ID, get_modis_paired_files
 from rs_tools._src.geoprocessing.modis.reproject import add_modis_crs
-from rs_tools._src.geoprocessing.modis import MODIS_WAVELENGTHS
+from rs_tools._src.geoprocessing.modis import MODIS_WAVELENGTHS, parse_modis_dates_from_file, format_modis_dates
 import pandas as pd
 from datetime import datetime
+from pathlib import Path
 import dask
 import warnings
 
 dask.config.set(**{'array.slicing.split_large_chunks': False})
 warnings.filterwarnings('ignore', category=FutureWarning)
-
-from pathlib import Path
-
-def parse_modis_dates_from_file(file: str):
-    """
-    Parses the date and time information from a MODIS file name.
-
-    Args:
-        file (str): The file name to parse.
-
-    Returns:
-        str: The parsed date and time in the format 'YYYYJJJHHMM'.
-    """
-    # get the date from the file
-    date = Path(file).name.split(".")[1][1:]
-    # get the time from the file
-    time = Path(file).name.split(".")[2]
-    datetime_str = f"{date}.{time}"
-    return datetime_str
 
 @dataclass
 class MODISGeoProcessing:
@@ -125,13 +107,12 @@ class MODISGeoProcessing:
         # do core preprocess function (e.g. resample, add crs etc.)
         ds = self.preprocess_fn(ds) 
 
-        channels = get_modis_channel_numbers()
         # Store the attributes in a dict before concatenation
         attrs_dict = {x: ds[x].attrs for x in channels}
             
         # concatinate in new band dimension
         # NOTE: Concatination overwrites attrs of bands.
-        ds = xr.concat(list(map(lambda x: ds[x], channels)), dim="band")
+        ds = ds.assign(Rad=xr.concat(list(map(lambda x: ds[x], channels)), dim="band"))
         # rename band dimensions
         ds = ds.assign_coords(band=list(map(lambda x: x, channels)))
 
@@ -144,11 +125,11 @@ class MODISGeoProcessing:
         # NOTE: Keep only certain relevant attributes
         ds.attrs = {}
         ds.attrs = dict(
-            calibration=attrs_dict['1']["calibration"],
-            standard_name=attrs_dict['1']["standard_name"],
-            platform_name=attrs_dict['1']["platform_name"],
-            sensor=attrs_dict['1']["sensor"],
-            units=attrs_dict['1']["units"],
+            calibration=attrs_dict[list(attrs_dict.keys())[0]]["calibration"],
+            standard_name=attrs_dict[list(attrs_dict.keys())[0]]["standard_name"],
+            platform_name=attrs_dict[list(attrs_dict.keys())[0]]["platform_name"],
+            sensor=attrs_dict[list(attrs_dict.keys())[0]]["sensor"],
+            units=attrs_dict[list(attrs_dict.keys())[0]]["units"],
         )
         
         # TODO: Correct wavelength assignment. This attaches 36++ wavelengths to each band.
@@ -226,6 +207,7 @@ class MODISGeoProcessing:
         logger.info(f"Number of cloud mask files: {len(file)}")
         assert len(file) == 1
 
+        # load file using satpy, convert to xarray dataset, and preprocess
         ds = self.preprocess_fn_cloudmask(file)
 
         return ds
@@ -251,7 +233,7 @@ class MODISGeoProcessing:
                 # load radiances
                 ds = self.preprocess_radiances(files)
             except AssertionError:
-                logger.error(f"Skipping {itime} due to missing bands")
+                logger.error(f"Skipping {itime} due to error loading")
                 continue
             try:
                 # load cloud mask
@@ -264,9 +246,16 @@ class MODISGeoProcessing:
             ds = ds.assign_coords({"cloud_mask": (("y", "x"), ds_clouds.values)})
             # add cloud mask attrs to dataset
             ds["cloud_mask"].attrs = ds_clouds.attrs
+
             # remove attrs that cause netcdf error
             for attr in ["start_time", "end_time", "area", "_satpy_id"]:
                 ds["cloud_mask"].attrs.pop(attr)
+
+            for var in ds.data_vars:
+                ds[var].attrs.pop('start_time', None)
+                ds[var].attrs.pop('end_time', None)
+                ds[var].attrs.pop('area', None)
+                ds[var].attrs.pop('_satpy_id', None)
 
             # remove crs from dataset
             ds = ds.drop_vars("crs")
@@ -276,10 +265,12 @@ class MODISGeoProcessing:
                 os.makedirs(self.save_path)
         
             # remove file if it already exists
-            save_filename = Path(self.save_path).joinpath(f"{itime}_{self.satellite}.nc")
+            itime_name = format_modis_dates(itime)
+            save_filename = Path(self.save_path).joinpath(f"{itime_name}_{self.satellite}.nc")
             if os.path.exists(save_filename):
                 logger.info(f"File already exists. Overwriting file: {save_filename}")
                 os.remove(save_filename)
+
             # save to netcdf
             ds.to_netcdf(save_filename, engine="netcdf4")
 
