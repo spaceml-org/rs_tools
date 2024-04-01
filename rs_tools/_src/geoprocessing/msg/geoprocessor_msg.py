@@ -176,9 +176,9 @@ class MSGGeoProcessing:
         ds_subset = ds_subset.assign(Rad=xr.concat(list(map(lambda x: ds_subset[x], channels)), dim="band"))
         # rename band dimensions
         ds_subset = ds_subset.assign_coords(band=list(map(lambda x: x, channels)))
-        ds_subset = ds_subset.drop(list(map(lambda x: x, channels)))
 
         # drop variables that will no longer be needed
+        ds_subset = ds_subset.drop(list(map(lambda x: x, channels)))
         ds_subset = ds_subset.drop(list(map(lambda x: f'{x}_acq_time', channels)))
 
         # extract measurement time

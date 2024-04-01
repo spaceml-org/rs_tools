@@ -79,7 +79,6 @@ def format_modis_dates(time: str) -> str:
     Returns:
         str: The formatted time string.
     """
-    print(time)
     # Split the string into date and time parts
     date_str, time_str = time.split(".")
     # Convert the date part to a datetime object

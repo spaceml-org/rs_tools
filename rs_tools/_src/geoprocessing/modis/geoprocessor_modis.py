@@ -112,7 +112,7 @@ class MODISGeoProcessing:
             
         # concatinate in new band dimension
         # NOTE: Concatination overwrites attrs of bands.
-        ds = ds.assign(Rad=xr.concat(list(map(lambda x: ds[x], channels)), dim="band"))
+        ds = xr.concat(list(map(lambda x: ds[x], channels)), dim="band")
         # rename band dimensions
         ds = ds.assign_coords(band=list(map(lambda x: x, channels)))
 
@@ -247,18 +247,13 @@ class MODISGeoProcessing:
             # add cloud mask attrs to dataset
             ds["cloud_mask"].attrs = ds_clouds.attrs
 
+            # remove crs from dataset
+            ds = ds.drop_vars("crs")
+            ds = ds.drop_vars("spatial_ref")
+
             # remove attrs that cause netcdf error
             for attr in ["start_time", "end_time", "area", "_satpy_id"]:
                 ds["cloud_mask"].attrs.pop(attr)
-
-            for var in ds.data_vars:
-                ds[var].attrs.pop('start_time', None)
-                ds[var].attrs.pop('end_time', None)
-                ds[var].attrs.pop('area', None)
-                ds[var].attrs.pop('_satpy_id', None)
-
-            # remove crs from dataset
-            ds = ds.drop_vars("crs")
 
             # check if save path exists, and create if not
             if not os.path.exists(self.save_path):
