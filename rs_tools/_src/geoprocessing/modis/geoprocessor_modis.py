@@ -275,17 +275,17 @@ class MODISGeoProcessing:
             ds.to_netcdf(save_filename, engine="netcdf4")
 
 def geoprocess_modis(
-        satellite: str = "terra",
-        read_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/terra",
-        save_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/terra/geoprocessed"
+        satellite: str,
+        read_path: str = "./",
+        save_path: str = "./"
 ):
     """
     Geoprocesses MODIS files
 
     Args:
-        satellite (str, optional): The satellite to download files for.
+        satellite (str, optional): The satellite of the data to geoprocess.
         read_path (str, optional): The path to read the files from. Defaults to "./".
-        save_path (str, optional): The path to save the downloaded files. Defaults to "./".
+        save_path (str, optional): The path to save the geoprocessed files to. Defaults to "./".
 
     Returns:
         None
@@ -312,8 +312,8 @@ if __name__ == '__main__':
     python geoprocessor_modis.py --satellite aqua --read-path "/home/data" --save-path /home/data/modis/geoprocessed
     python geoprocessor_modis.py --satellite terra --read-path "/home/data" --save-path /home/data/modis/geoprocessed
     
-    # ====================
+    # =========================
     # FAILURE TEST CASES
-    # ====================
+    # =========================
     """
     typer.run(geoprocess_modis)

@@ -23,7 +23,7 @@ import warnings
 dask.config.set(**{'array.slicing.split_large_chunks': False})
 warnings.filterwarnings('ignore', category=FutureWarning)
 
-# TODO: Add unit conversion
+# TODO: Add unit conversion?
 @dataclass
 class GOES16GeoProcessing:
     """
@@ -103,15 +103,15 @@ class GOES16GeoProcessing:
 
             ds = ds.sortby("x").sortby("y")
             # slice based on x y bounds
-            ds = ds.sel(y=slice(y_bnds[0], y_bnds[1]), x=slice(x_bnds[0], x_bnds[1]))
+            ds_subset = ds.sel(y=slice(y_bnds[0], y_bnds[1]), x=slice(x_bnds[0], x_bnds[1]))
+        else:
+            ds_subset = ds
 
         if self.resolution is not None:
             logger.info(f"Resampling data to resolution: {self.resolution} m")
             # resampling
-            ds_subset = resample_rioxarray(ds, resolution=self.resolution, method=self.resample_method)
-        else:
-            ds_subset = ds
-
+            ds_subset = resample_rioxarray(ds_subset, resolution=(self.resolution, self.resolution), method=self.resample_method)
+            
         # assign coordinates
         ds_subset = calc_latlon(ds_subset)
 
@@ -308,10 +308,10 @@ def geoprocess_goes16(
     Geoprocesses GOES 16 files
 
     Args:
-        resolution (float, optional): The resolution of the downloaded files in meters. Defaults to None.
+        resolution (float, optional): The resolution in meters to resample data to. Defaults to None.
         read_path (str, optional): The path to read the files from. Defaults to "./".
-        save_path (str, optional): The path to save the downloaded files. Defaults to "./".
-        region (Tuple[int, int, int, int], optional): The geographic region to download files for. Defaults to None.
+        save_path (str, optional): The path to save the geoprocessed files to. Defaults to "./".
+        region (Tuple[int, int, int, int], optional): The geographic region to extract (lon_min, lat_min, lon_max, lat_max). Defaults to None.
         resample_method (str, optional): The resampling method to use. Defaults to "bilinear".
 
     Returns:
@@ -342,9 +342,9 @@ if __name__ == '__main__':
     python geoprocessor_goes16.py --read-path "/home/data" --save-path /home/data/goes/geoprocessed --resolution 5000
     python geoprocessor_goes16.py --read-path "/home/data" --save-path /home/data/goes/geoprocessed --resolution 5000 --region -130 -15 -90 5
 
-    # ====================
+    # =========================
     # FAILURE TEST CASES
-    # ====================
+    # =========================
     python geoprocessor_goes16.py --read-path "/home/data" --save-path /home/data/goes/geoprocessed --resolution 5000 --region -200 -15 90 5
     """
     typer.run(geoprocess_goes16)

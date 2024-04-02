@@ -32,7 +32,7 @@ warnings.filterwarnings('ignore', category=UserWarning)
 from datetime import datetime
 from pathlib import Path
 
-# TODO: Add unit conversion
+# TODO: Add unit conversion?
 
 def parse_msg_dates_from_file(file: str):
     """
@@ -112,7 +112,7 @@ class MSGGeoProcessing:
             lon_bnds = (self.region[0], self.region[2])
             lat_bnds = (self.region[1], self.region[3])
             # convert lat lon bounds to x y (in meters)
-            x_bnds, y_bnds = convert_lat_lon_to_x_y(ds.FOV.crs, lon=lon_bnds, lat=lat_bnds, )
+            x_bnds, y_bnds = convert_lat_lon_to_x_y(ds.rio.crs, lon=lon_bnds, lat=lat_bnds, )
             # check that region is within the satellite field of view
             # compile satellite FOV
             satellite_FOV = (min(ds.x.values), min(ds.y.values), max(ds.x.values), max(ds.y.values))
@@ -123,14 +123,14 @@ class MSGGeoProcessing:
 
             ds = ds.sortby("x").sortby("y")
             # slice based on x y bounds
-            ds = ds.sel(y=slice(y_bnds[0], y_bnds[1]), x=slice(x_bnds[0], x_bnds[1]))
+            ds_subset = ds.sel(y=slice(y_bnds[0], y_bnds[1]), x=slice(x_bnds[0], x_bnds[1]))
+        else:
+            ds_subset = ds
 
         if self.resolution is not None:
             logger.info(f"Resampling data to resolution: {self.resolution} m")
             # resampling
-            ds_subset = resample_rioxarray(ds, resolution=self.resolution, method=self.resample_method)
-        else:
-            ds_subset = ds
+            ds_subset = resample_rioxarray(ds_subset, resolution=(self.resolution, self.resolution), method=self.resample_method)
 
         # assign coordinates
         ds_subset = calc_latlon(ds_subset)
@@ -163,7 +163,11 @@ class MSGGeoProcessing:
         ds = scn.to_xarray()
 
         # attach cloud mask as data variable before preprocessing
-        ds = ds.assign_coords({"cloud_mask": (("y", "x"), cloud_mask)})
+        ds = ds.assign(cloud_mask=(("y", "x"), cloud_mask))
+
+        # reset coordinates for resampling/reprojecting
+        # this drops all {channel}_acq_time coordinates
+        ds = ds.reset_coords(drop=True)
 
         # do core preprocess function (e.g. resample, add crs etc.)
         ds_subset, ds = self.preprocess_fn(ds) 
@@ -177,9 +181,11 @@ class MSGGeoProcessing:
         # rename band dimensions
         ds_subset = ds_subset.assign_coords(band=list(map(lambda x: x, channels)))
 
+        # re-index coordinates
+        ds_subset = ds_subset.set_coords(['latitude', 'longitude', 'cloud_mask'])
+
         # drop variables that will no longer be needed
         ds_subset = ds_subset.drop(list(map(lambda x: x, channels)))
-        ds_subset = ds_subset.drop(list(map(lambda x: f'{x}_acq_time', channels)))
 
         # extract measurement time
         time_stamp = attrs_dict[list(attrs_dict.keys())[0]]['start_time']
@@ -201,9 +207,6 @@ class MSGGeoProcessing:
         # assign band wavelengths 
         ds_subset = ds_subset.expand_dims({"band_wavelength": list(MSG_WAVELENGTHS.values())}) 
 
-        # rename coord for coordinate reference system  
-        ds_subset = ds_subset.rename({'msg_seviri_fes_3km': 'CRS'}) 
-
         return ds_subset
 
     def preprocess_fn_cloudmask(self, file: List[str]) -> np.array:
@@ -214,7 +217,7 @@ class MSGGeoProcessing:
             file (List[str]): The input file.
 
         Returns:
-            np.array: The preprocessed dataset.
+            np.array: The preprocessed cloud mask dataset.
         """
 
         grbs = pygrib.open(file[0])
@@ -307,6 +310,13 @@ class MSGGeoProcessing:
                 logger.error(f"Skipping {itime} due to error loading")
                 continue
 
+             # remove crs from dataset
+            ds = ds.drop_vars('msg_seviri_fes_3km') 
+
+            # remove attrs that cause netcdf error
+            for var in ds.data_vars:
+                ds[var].attrs.pop('grid_mapping', None)
+
             # check if save path exists, and create if not
             if not os.path.exists(self.save_path):
                 os.makedirs(self.save_path)
@@ -317,29 +327,24 @@ class MSGGeoProcessing:
                 logger.info(f"File already exists. Overwriting file: {save_filename}")
                 os.remove(save_filename)
 
-            # remove attrs that cause netcdf error
-            for var in ds.data_vars:
-                ds[var].attrs.pop('grid_mapping', None)
-
             # save to netcdf
             ds.to_netcdf(save_filename, engine="netcdf4")
 
-
 def geoprocess_msg(
-        resolution: float = None, # defined in meters
+        resolution: float = 2000, # defined in meters
         read_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/msg",
         save_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/msg/geoprocessed",
-        region: Tuple[int, int, int, int] = (None, None, None, None),
+        region: Tuple[int, int, int, int] = (-100, -10, -90, 10),
         resample_method: str = "bilinear",
 ):
     """
     Geoprocesses MSG files
 
     Args:
-        resolution (float, optional): The resolution of the downloaded files in meters. Defaults to None.
+        resolution (float, optional): The resolution in meters to resample data to. Defaults to None.
         read_path (str, optional): The path to read the files from. Defaults to "./".
-        save_path (str, optional): The path to save the downloaded files. Defaults to "./".
-        region (Tuple[int, int, int, int], optional): The geographic region to download files for. Defaults to None.
+        save_path (str, optional): The path to save the geoprocessed files to. Defaults to "./".
+        region (Tuple[int, int, int, int], optional): The geographic region to extract (lon_min, lat_min, lon_max, lat_max). Defaults to None.
         resample_method (str, optional): The resampling method to use. Defaults to "bilinear".
 
     Returns:
@@ -365,9 +370,15 @@ if __name__ == '__main__':
     # =========================
     # Test Cases
     # =========================
-
-    # ====================
+    python geoprocessor_msg.py --read-path "/home/data" --save-path /home/data/msg/geoprocessed
+    python geoprocessor_msg.py --read-path "/home/data" --save-path /home/data/msg/geoprocessed --resolution 5000
+    python geoprocessor_msg.py --read-path "/home/data" --save-path /home/data/msg/geoprocessed --resolution 10000
+    python geoprocessor_msg.py --read-path "/home/data" --save-path /home/data/msg/geoprocessed --region (-10, -10, 10, 10)
+    python geoprocessor_msg.py --read-path "/home/data" --save-path /home/data/msg/geoprocessed --resolution 2000 --region (-10, -10, 10, 10)
+            
+    # =========================
     # FAILURE TEST CASES
-    # ====================
+    # =========================
+    python geoprocessor_msg.py --read-path "/home/data" --save-path /home/data/msg/geoprocessed --resolution 2000 --region (-100, -10, -90, 10)
     """
     typer.run(geoprocess_msg)
