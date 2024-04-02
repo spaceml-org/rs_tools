@@ -331,10 +331,10 @@ class MSGGeoProcessing:
             ds.to_netcdf(save_filename, engine="netcdf4")
 
 def geoprocess_msg(
-        resolution: float = 2000, # defined in meters
-        read_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/msg",
-        save_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/msg/geoprocessed",
-        region: Tuple[int, int, int, int] = (-100, -10, -90, 10),
+        resolution: float = None, # defined in meters
+        read_path: str = "./",
+        save_path: str = "./",
+        region: Tuple[int, int, int, int] = (None, None, None, None),
         resample_method: str = "bilinear",
 ):
     """
