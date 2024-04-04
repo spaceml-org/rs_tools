@@ -9,14 +9,16 @@ def main(cfg):
     # instantiate the config 
     logger.debug(f"Choosing Stage...")
     if cfg.stage == "download":
-        logger.info(f"Instantiating Datamodule: {cfg.satellite.download['_target_']}")
+        logger.info(f"Instantiating Downloader: {cfg.satellite.download['_target_']}")
         download = hydra.utils.instantiate(cfg.satellite.download)
-        logger.info(f"Starting Download")
+        logger.info(f"Starting Download...")
         hydra.utils.call(download)
 
     elif cfg.stage == "geoprocess":
-        logger.debug(f"starting geoprocessing script...")
-        raise NotImplementedError()
+        logger.info(f"Instantiating Geoprocessor: {cfg.satellite.geoprocess['_target_']}")
+        geoprocess = hydra.utils.instantiate(cfg.satellite.geoprocess)
+        logger.debug(f"Starting Geoprocessing...")
+        hydra.utils.call(geoprocess)
     
     elif cfg.stage == "preprocess":
         logger.debug(f"starting preprocessing script...")
@@ -36,7 +38,7 @@ if __name__ == "__main__":
 EXAMPLES:
     python rs_tools satellite=goes stage=download
     python rs_tools satellite=goes stage=geoprocess
-    python rs_tools satellite=goes stage=preprocess
-    python rs_tools satellite=goes stage=patch
+    python rs_tools satellite=msg stage=geoprocess
+    python rs_tools satellite=terra stage=geoprocess
 """
 

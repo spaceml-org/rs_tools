@@ -106,7 +106,7 @@ class MSGGeoProcessing:
         # assign coordinate reference system
         ds = add_msg_crs(ds)
 
-        if self.region != (None, None, None, None):
+        if self.region is not None:
             logger.info(f"Subsetting data to region: {self.region}")
             # subset data
             lon_bnds = (self.region[0], self.region[2])
@@ -330,11 +330,11 @@ class MSGGeoProcessing:
             # save to netcdf
             ds.to_netcdf(save_filename, engine="netcdf4")
 
-def geoprocess_msg(
+def geoprocess(
         resolution: float = None, # defined in meters
         read_path: str = "./",
         save_path: str = "./",
-        region: Tuple[int, int, int, int] = (None, None, None, None),
+        region: str = None,
         resample_method: str = "bilinear",
 ):
     """
@@ -344,7 +344,7 @@ def geoprocess_msg(
         resolution (float, optional): The resolution in meters to resample data to. Defaults to None.
         read_path (str, optional): The path to read the files from. Defaults to "./".
         save_path (str, optional): The path to save the geoprocessed files to. Defaults to "./".
-        region (Tuple[int, int, int, int], optional): The geographic region to extract (lon_min, lat_min, lon_max, lat_max). Defaults to None.
+        region (str, optional): The geographic region to extract ("lon_min, lat_min, lon_max, lat_max"). Defaults to None.
         resample_method (str, optional): The resampling method to use. Defaults to "bilinear".
 
     Returns:
@@ -352,6 +352,10 @@ def geoprocess_msg(
     """
     # Initialize MSG GeoProcessor
     logger.info(f"Initializing MSG GeoProcessor...")
+    # Extracting region from str
+    if region is not None:
+        region = tuple(map(lambda x: int(x), region.split(" ")))
+
     msg_geoprocessor = MSGGeoProcessing(
         resolution=resolution, 
         read_path=read_path, 
@@ -381,4 +385,4 @@ if __name__ == '__main__':
     # =========================
     python geoprocessor_msg.py --read-path "/home/data" --save-path /home/data/msg/geoprocessed --resolution 2000 --region (-100, -10, -90, 10)
     """
-    typer.run(geoprocess_msg)
+    typer.run(geoprocess)

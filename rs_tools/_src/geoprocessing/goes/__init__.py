@@ -50,6 +50,7 @@ def format_goes_dates(time: str) -> str:
     date_str, time_str = time[:7], time[7:]
     # Convert the date part to a datetime object
     date = datetime.strptime(date_str, "%Y%j")
+
     # Convert the time part to a timedelta object
     time = timedelta(hours=int(time_str[:2]), minutes=int(time_str[2:4]), seconds=int(time_str[4:6]))
     # Add the date and time parts to get a datetime object

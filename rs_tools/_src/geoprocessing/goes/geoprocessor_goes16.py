@@ -86,7 +86,7 @@ class GOES16GeoProcessing:
         # assign coordinate reference system
         ds = add_goes16_crs(ds)
 
-        if self.region != (None, None, None, None):
+        if self.region is not None:
             logger.info(f"Subsetting data to region: {self.region}")
             # subset data
             lon_bnds = (self.region[0], self.region[2])
@@ -297,11 +297,11 @@ class GOES16GeoProcessing:
             ds.to_netcdf(save_filename, engine="netcdf4")
 
 
-def geoprocess_goes16(
+def geoprocess(
         resolution: float = None, # defined in meters
         read_path: str = "./",
         save_path: str = "./",
-        region: Tuple[int, int, int, int] = (None, None, None, None),
+        region: str = None,
         resample_method: str = "bilinear",
 ):
     """
@@ -311,7 +311,7 @@ def geoprocess_goes16(
         resolution (float, optional): The resolution in meters to resample data to. Defaults to None.
         read_path (str, optional): The path to read the files from. Defaults to "./".
         save_path (str, optional): The path to save the geoprocessed files to. Defaults to "./".
-        region (Tuple[int, int, int, int], optional): The geographic region to extract (lon_min, lat_min, lon_max, lat_max). Defaults to None.
+        region (str, optional): The geographic region to extract ("lon_min, lat_min, lon_max, lat_max"). Defaults to None.
         resample_method (str, optional): The resampling method to use. Defaults to "bilinear".
 
     Returns:
@@ -319,6 +319,10 @@ def geoprocess_goes16(
     """
     # Initialize GOES 16 GeoProcessor
     logger.info(f"Initializing GOES16 GeoProcessor...")
+    # Extracting region from str
+    if region is not None:
+        region = tuple(map(lambda x: int(x), region.split(" ")))
+
     goes16_geoprocessor = GOES16GeoProcessing(
         resolution=resolution, 
         read_path=read_path, 
@@ -347,4 +351,4 @@ if __name__ == '__main__':
     # =========================
     python geoprocessor_goes16.py --read-path "/home/data" --save-path /home/data/goes/geoprocessed --resolution 5000 --region -200 -15 90 5
     """
-    typer.run(geoprocess_goes16)
+    typer.run(geoprocess)

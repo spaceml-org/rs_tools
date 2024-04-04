@@ -274,7 +274,7 @@ class MODISGeoProcessing:
             # save to netcdf
             ds.to_netcdf(save_filename, engine="netcdf4")
 
-def geoprocess_modis(
+def geoprocess(
         satellite: str,
         read_path: str = "./",
         save_path: str = "./"
@@ -316,4 +316,4 @@ if __name__ == '__main__':
     # FAILURE TEST CASES
     # =========================
     """
-    typer.run(geoprocess_modis)
+    typer.run(geoprocess)

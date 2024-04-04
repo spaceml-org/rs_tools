@@ -1,4 +1,6 @@
 defaults:
   - download
+  - geoprocess
+  - satellite: msg
 
-stage: "download"
+stage: download

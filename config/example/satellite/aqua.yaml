@@ -7,6 +7,11 @@ download:
   end_time: ${period.end_time}
   region: "-130 -15 -90 5" # "lon_min lat_min lon_max lat_max"
 
-# geoprocess:
+geoprocess:
+  _target_: rs_tools._src.geoprocessing.modis.geoprocessor_modis.geoprocess
+  read_path: ${read_path}/aqua/raw
+  save_path: ${save_path}/aqua/geoprocessed
+  satellite: aqua
+
 # preprocess:
 # patch:

@@ -9,6 +9,13 @@ download:
   daily_window_t1: "20:00:00"
   time_step: "1:00:00"
 
-# geoprocess:
+geoprocess:
+  _target_: rs_tools._src.geoprocessing.goes.geoprocessor_goes16.geoprocess
+  read_path: ${read_path}/goes16/raw
+  save_path: ${save_path}/goes16/geoprocessed
+  resolution: null
+  region: null
+  resample_method: bilinear
+
 # preprocess:
 # patch:
