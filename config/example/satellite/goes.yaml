@@ -18,4 +18,12 @@ geoprocess:
   resample_method: bilinear
 
 # preprocess:
-# patch:
+
+patch:
+  _target_: rs_tools._src.preprocessing.prepatcher.prepatch
+  read_path: ${read_path}/goes16/geoprocessed
+  save_path: ${save_path}/goes16/analysis
+  patch_size: ${patch_size}
+  stride_size: ${stride_size}
+  nan_cutoff: ${nan_cutoff}
+  save_filetype: ${save_filetype}

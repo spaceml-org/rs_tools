@@ -23,9 +23,9 @@ def main(cfg):
         raise NotImplementedError()
     
     elif cfg.stage == "patch":
-        logger.debug(f"starting patching script...")
-        raise NotImplementedError()
-    
+        logger.debug(f"Instantiating Prepatcher: {cfg.satellite.patch['_target_']}")
+        patch = hydra.utils.instantiate(cfg.satellite.patch)
+        hydra.utils.call(patch)
     else:
         raise ValueError(f"Unrecognized stage: {cfg.stage}")
 

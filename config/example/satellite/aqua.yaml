@@ -14,4 +14,12 @@ geoprocess:
   satellite: aqua
 
 # preprocess:
-# patch:
+
+patch:
+  _target_: rs_tools._src.preprocessing.prepatcher.prepatch
+  read_path: ${read_path}/aqua/geoprocessed
+  save_path: ${save_path}/aqua/analysis
+  patch_size: ${patch_size}
+  stride_size: ${stride_size}
+  nan_cutoff: ${nan_cutoff}
+  save_filetype: ${save_filetype}

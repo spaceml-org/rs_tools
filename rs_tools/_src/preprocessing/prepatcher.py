@@ -128,8 +128,8 @@ class PrePatcher:
                     logger.info(f'NaN count exceeded for patch {i} of timestamp {itime}.')
 
 def prepatch(
-        read_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/msg/geoprocessed",
-        save_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/msg/analysis",
+        read_path: str = "./",
+        save_path: str = "./",
         patch_size: int = 256,
         stride_size: int = 256,
         nan_cutoff: float = 0.5, 
