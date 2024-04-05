@@ -137,15 +137,17 @@ class GOES16GeoProcessing:
         # convert measurement time (in seconds) to datetime
         time_stamp = pd.to_datetime(ds.t.values) 
         time_stamp = time_stamp.strftime("%Y-%m-%d %H:%M") 
-        # assign bands and time data to each variable
-        ds_subset[variables] = ds_subset[variables].expand_dims({"band": ds.band.values, "time": [time_stamp]})
+        # assign bands data to each variable
+        ds_subset[variables] = ds_subset[variables].expand_dims({"band": ds.band.values})
+        # attach time coordinate
+        ds_subset = ds_subset.assign_coords({"time": [time_stamp]})
         # drop variables that will no longer be needed
         ds_subset = ds_subset.drop_vars(["t", "y_image", "x_image", "goes_imager_projection"])
         # assign band attributes to dataset
         ds_subset.band.attrs = ds.band.attrs
         # TODO: Correct wavelength assignment. This attaches 16 wavelengths to each band.
         # assign band wavelength to each variable
-        ds_subset = ds_subset[variables].expand_dims({"band_wavelength": ds.band_wavelength.values})
+        ds_subset = ds_subset[variables].assign_coords({"band_wavelength": ds.band_wavelength.values})
         ds_subset.band_wavelength.attrs = ds.band_wavelength.attrs
 
         return ds_subset
@@ -171,7 +173,7 @@ class GOES16GeoProcessing:
         time_stamp = pd.to_datetime(ds.t.values)
         time_stamp = time_stamp.strftime("%Y-%m-%d %H:%M")
         # assign time data to variable
-        ds_subset = ds_subset.expand_dims({"time": [time_stamp]})
+        ds_subset = ds_subset.assign_coords({"time": [time_stamp]})
         # drop variables that will no longer be needed
         ds_subset = ds_subset.drop_vars(["t", "y_image", "x_image", "goes_imager_projection"])
 

@@ -190,7 +190,7 @@ class MSGGeoProcessing:
         # extract measurement time
         time_stamp = attrs_dict[list(attrs_dict.keys())[0]]['start_time']
         # assign bands and time data to each variable
-        ds_subset = ds_subset.expand_dims({"time": [time_stamp]})
+        ds_subset = ds_subset.assign_coords({"time": [time_stamp]})
 
         # NOTE: Keep only certain relevant attributes
         ds_subset.attrs = {}
@@ -205,7 +205,7 @@ class MSGGeoProcessing:
         
         # TODO: Correct wavelength assignment. This attaches 36++ wavelengths to each band.
         # assign band wavelengths 
-        ds_subset = ds_subset.expand_dims({"band_wavelength": list(MSG_WAVELENGTHS.values())}) 
+        ds_subset = ds_subset.assign_coords({"band_wavelength": list(MSG_WAVELENGTHS.values())}) 
 
         return ds_subset
 

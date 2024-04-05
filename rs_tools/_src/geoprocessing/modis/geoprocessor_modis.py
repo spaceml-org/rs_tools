@@ -122,7 +122,7 @@ class MODISGeoProcessing:
         time_stamp = pd.to_datetime(ds.attrs['start_time'])
         time_stamp = time_stamp.strftime("%Y-%m-%d %H:%M")  
         # assign bands and time data to each variable
-        ds = ds.expand_dims({"time": [time_stamp]})
+        ds = ds.assign_coords({"time": [time_stamp]})
 
         # NOTE: Keep only certain relevant attributes
         ds.attrs = {}
@@ -136,7 +136,7 @@ class MODISGeoProcessing:
         
         # TODO: Correct wavelength assignment. This attaches 36++ wavelengths to each band.
         # assign band wavelengths 
-        ds = ds.expand_dims({"band_wavelength": list(MODIS_WAVELENGTHS.values())})   
+        ds = ds.assign_coords({"band_wavelength": list(MODIS_WAVELENGTHS.values())})   
 
         return ds
 

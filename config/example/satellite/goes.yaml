@@ -14,7 +14,7 @@ geoprocess:
   read_path: ${read_path}/goes16/raw
   save_path: ${save_path}/goes16/geoprocessed
   resolution: null
-  region: null
+  region: "-130 -15 -90 5"
   resample_method: bilinear
 
 # preprocess:

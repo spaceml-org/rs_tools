@@ -11,13 +11,11 @@ def main(cfg):
     if cfg.stage == "download":
         logger.info(f"Instantiating Downloader: {cfg.satellite.download['_target_']}")
         download = hydra.utils.instantiate(cfg.satellite.download)
-        logger.info(f"Starting Download...")
         hydra.utils.call(download)
 
     elif cfg.stage == "geoprocess":
         logger.info(f"Instantiating Geoprocessor: {cfg.satellite.geoprocess['_target_']}")
         geoprocess = hydra.utils.instantiate(cfg.satellite.geoprocess)
-        logger.debug(f"Starting Geoprocessing...")
         hydra.utils.call(geoprocess)
     
     elif cfg.stage == "preprocess":

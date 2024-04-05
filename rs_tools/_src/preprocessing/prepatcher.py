@@ -49,9 +49,6 @@ def _check_nan_count(arr: np.array, nan_cutoff: float) -> bool:
     else:
         return False
 
-
-
-
 @dataclass(frozen=True)
 class PrePatcher:
     """
@@ -114,6 +111,7 @@ class PrePatcher:
                 os.makedirs(self.save_path)
 
             for i, ipatch in tqdm(enumerate(patcher), total=len(patcher)):
+                # TODO: Fix extraction of data
                 data = ipatch.data[0, :, 0, :, :] # extract data from [band_wavelength, band, time, x, y]
                 if _check_nan_count(data, self.nan_cutoff):
                     if self.save_filetype == "nc":
@@ -124,14 +122,16 @@ class PrePatcher:
                         np.save(Path(self.save_path).joinpath(f"{itime}_latitude_patch_{i}"), ipatch.latitude.values)
                         np.save(Path(self.save_path).joinpath(f"{itime}_longitude_patch_{i}"), ipatch.longitude.values)
                         np.save(Path(self.save_path).joinpath(f"{itime}_cloudmask_patch_{i}"), ipatch.cloud_mask.values)
+                else:
+                    logger.info(f'NaN count exceeded for patch {i} of timestamp {itime}.')
 
 def prepatch(
-        read_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/goes16/geoprocessed/geoprocessed_example",
-        save_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/goes16/analysis",
+        read_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/terra/geoprocessed",
+        save_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/terra/analysis",
         patch_size: int = 256,
         stride_size: int = 256,
         nan_cutoff: float = 0.5, 
-        save_filetype: str = 'np'
+        save_filetype: str = 'nc'
 ):
     """
     Patches satellite data into smaller patches for training.
