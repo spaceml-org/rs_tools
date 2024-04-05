@@ -208,7 +208,6 @@ def _goes_level2_download(time,
             return_as="filelist", 
             save_dir=save_dir,
         )
-        print(ifile)
         # extract filepath from GOES download pandas dataframe
         filepath: str = os.path.join(save_dir, ifile.file[0])
         return [filepath]

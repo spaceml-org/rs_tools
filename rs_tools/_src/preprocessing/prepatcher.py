@@ -7,17 +7,10 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional, List, Union, Tuple
 from tqdm import tqdm
-from rs_tools import goes_download, modis_download, MODIS_VARIABLES, get_modis_channel_numbers
 from rs_tools._src.utils.io import get_list_filenames
-from rs_tools._src.geoprocessing.grid import create_latlon_grid
 import typer
 from loguru import logger
 import xarray as xr
-from satpy import Scene
-import datetime
-from rs_tools._src.data.modis import MODISFileName, MODIS_ID_TO_NAME, MODIS_NAME_TO_ID, get_modis_paired_files
-import pandas as pd
-from datetime import datetime
 
 def _check_filetype(file_type: str) -> bool:
     """checks instrument for GOES data."""
@@ -111,10 +104,19 @@ class PrePatcher:
                 os.makedirs(self.save_path)
 
             for i, ipatch in tqdm(enumerate(patcher), total=len(patcher)):
-                # TODO: Fix extraction of data
-                data = ipatch.data[0, :, 0, :, :] # extract data from [band_wavelength, band, time, x, y]
+                data = ipatch.data # extract data patch
                 if _check_nan_count(data, self.nan_cutoff):
                     if self.save_filetype == "nc":
+                        # reconvert to dataset to attach band_wavelength and time
+                        ipatch = ipatch.to_dataset(name='Rad')
+                        ipatch = ipatch.assign_coords({'time': ds.time.values})
+                        ipatch = ipatch.assign_coords({'band_wavelength': ds.band_wavelength.values})
+                        # compile filename
+                        file_path = Path(self.save_path).joinpath(f"{itime}_patch_{i}.nc")
+                        # remove file if it already exists
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                        # save patch to netcdf                  
                         ipatch.to_netcdf(Path(self.save_path).joinpath(f"{itime}_patch_{i}.nc"), engine="netcdf4")
                     elif self.save_filetype == "np":
                         # save as numpy files
@@ -126,8 +128,8 @@ class PrePatcher:
                     logger.info(f'NaN count exceeded for patch {i} of timestamp {itime}.')
 
 def prepatch(
-        read_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/terra/geoprocessed",
-        save_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/terra/analysis",
+        read_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/msg/geoprocessed",
+        save_path: str = "/Users/anna.jungbluth/Desktop/git/rs_tools/data/msg/analysis",
         patch_size: int = 256,
         stride_size: int = 256,
         nan_cutoff: float = 0.5, 

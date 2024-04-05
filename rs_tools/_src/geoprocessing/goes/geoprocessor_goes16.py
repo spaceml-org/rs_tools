@@ -147,7 +147,7 @@ class GOES16GeoProcessing:
         ds_subset.band.attrs = ds.band.attrs
         # TODO: Correct wavelength assignment. This attaches 16 wavelengths to each band.
         # assign band wavelength to each variable
-        ds_subset = ds_subset[variables].assign_coords({"band_wavelength": ds.band_wavelength.values})
+        ds_subset = ds_subset.assign_coords({"band_wavelength": ds.band_wavelength.values})
         ds_subset.band_wavelength.attrs = ds.band_wavelength.attrs
 
         return ds_subset
@@ -278,7 +278,7 @@ class GOES16GeoProcessing:
             except AssertionError:
                 logger.error(f"Skipping {itime} due to missing cloud mask")
                 continue
-
+            
             # interpolate cloud mask to data
             ds_clouds = ds_clouds.interp(x=ds.x, y=ds.y)
             # save cloud mask as data coordinate
