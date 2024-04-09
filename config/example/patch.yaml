@@ -1,0 +1,18 @@
+# PATH WITH GEOPROCESSED DATA
+read_path: data
+
+# PATH FOR SAVING PATCHES
+save_path: data
+
+# PATCH PARAMETERS
+patch_size: 256
+stride_size: 256
+
+# NAN CUTOFF
+nan_cutoff: 0.5
+
+# FILETYPE TO SAVE [nc = netcdf, np = numpy]
+save_filetype: nc
+
+defaults:
+  - _self_

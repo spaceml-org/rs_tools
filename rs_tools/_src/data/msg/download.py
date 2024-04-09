@@ -176,7 +176,6 @@ def msg_download(
 def _download(time: datetime, data_product: str, save_dir: str, datastore):
     products = _compile_msg_products(data_product=data_product, time=time, datastore=datastore)
     sub_files_list = _msg_data_download(products=products, save_dir=save_dir)
-    print(sub_files_list)
     return sub_files_list
 
 def _compile_msg_products(data_product: str, time: datetime, datastore):
@@ -214,6 +213,9 @@ def _check_eumdac_login(eumdac_key: str, eumdac_secret: str) -> bool:
         msg += "\nOr provide them as command line arguments using:"
         msg += "\n--eumdac-key <your user key> --eumdac-secret <your user secret>"
         raise ValueError(msg)
+    else:
+        eumdac_key = os.environ.get("EUMDAC_KEY")
+        eumdac_secret = os.environ.get("EUMDAC_SECRET")
     
     # check if credentials are valid
     credentials = (eumdac_key, eumdac_secret)
@@ -330,7 +332,7 @@ def _check_save_dir(save_dir: str) -> bool:
         return True
     else:
         try:
-            os.mkdirs(save_dir)
+            os.makedirs(save_dir)
             return True
         except:
             msg = "Save directory does not exist"

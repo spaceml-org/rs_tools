@@ -20,6 +20,8 @@ from loguru import logger
 import earthaccess
 import pandas as pd
 
+# NOTE: This has now been moved to rs_tools/_src/data/modis/downloader_terra.py
+# NOTE: This has now been moved to rs_tools/_src/data/modis/downloader_aqua.py
 
 @dataclass
 class DownloadParameters:
