@@ -2,6 +2,7 @@
 import rioxarray
 import xarray as xr
 from rasterio.enums import Resampling
+from typing import Tuple
 
 
 rioxarray_samplers = {
@@ -12,7 +13,7 @@ rioxarray_samplers = {
 }
 
 # NOTE: This function has been copied outside of the satellite-specific folders
-def resample_rioxarray(ds: xr.Dataset, resolution: int=1_000, method: str="bilinear") -> xr.Dataset:
+def resample_rioxarray(ds: xr.Dataset, resolution: Tuple[int, int]=(1_000, 1_000), method: str="bilinear") -> xr.Dataset:
     """
     Resamples a raster dataset using rasterio-xarray.
 

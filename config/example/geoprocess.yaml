@@ -1,0 +1,8 @@
+# PATH WITH RAW DATA
+read_path: data
+
+# PATH FOR SAVING GEOPROCESSED DATA
+save_path: data
+
+defaults:
+  - _self_
