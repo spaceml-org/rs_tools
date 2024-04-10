@@ -36,3 +36,4 @@ def convert_units(ds: xr.Dataset, wavelengths: Dict) -> xr.Dataset:
         ds[band] = ds[band] * 0.001  # to convert mW to W
         ds[band] = ds[band] * 10000 / wavelengths[band]**2  # to convert cm^-1 to um
     return ds
+
