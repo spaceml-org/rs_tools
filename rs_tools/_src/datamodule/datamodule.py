@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from lightning.pytorch import LightningDataModule
 from torch.utils.data import DataLoader
-from base import BaseDataset
+from rs_tools._src.datamodule.components.base import BaseDataset
 
 class MultiDataModule(LightningDataModule):
     def __init__(
