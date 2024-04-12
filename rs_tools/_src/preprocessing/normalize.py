@@ -16,6 +16,7 @@ def normalize(
     
     preprocess = partial(spatial_mean, spatial_variables=spatial_variables)
 
+    # calculate mean
     ds_mean = xr.open_mfdataset(files, preprocess=preprocess, combine="by_coords",  engine="netcdf4")
 
     ds_mean = ds_mean.mean(temporal_variables)
@@ -31,6 +32,9 @@ def normalize(
 
     ds = xr.combine_by_coords([ds_mean, ds_std])
     return ds
+
+
+
 
 
 

@@ -4,7 +4,7 @@ from lightning.pytorch import LightningDataModule
 from torch.utils.data import DataLoader
 from rs_tools._src.datamodule.components.base import BaseDataset
 
-class MultiDataModule(LightningDataModule):
+class ITIDataModule(LightningDataModule):
     def __init__(
         self,
         datasets_spec,
@@ -21,69 +21,43 @@ class MultiDataModule(LightningDataModule):
         self.prefetch_factor = prefetch_factor
         self.pin_memory = pin_memory
         self.train_shuffle = (
-            train_shuffle  # turn off when performing regional inference
+            train_shuffle
         )
 
-        self.train_dataset = BaseDataset(
-            datasets_spec=datasets_spec,
-            split_file=split_file,
-            split="train",
-            transforms=transforms,
-        )
+        # TODO: Add function to filter train/test/val split
+        # Filter data for months
+        # train_list = [training files]
 
-        self.test_dataset = BaseDataset(
-            datasets_spec=datasets_spec,
-            split_file=split_file,
-            split="test",
-            transforms=transforms,
-        )
+        # TODO: Calculate mean/std for training set
+        # Go through all files and calculate mean/stdev
 
-        self.val_dataset = BaseDataset(
-            datasets_spec=datasets_spec,
-            split_file=split_file,
-            split="val",
-            transforms=transforms,
-        )
+        self.train_A = BaseDataset(...)
+        self.train_B = BaseDataset(...)
+        self.val_A = BaseDataset(...)
+        self.val_B = BaseDataset(...)
 
-    def prepare_data(self):
-        self.train_dataset.prepare_data()
-        self.test_dataset.prepare_data()
-        self.val_dataset.prepare_data()
-
-    def setup(self, stage):
-        self.train_dataset.setup(stage)
-        self.test_dataset.setup(stage)
-        self.val_dataset.setup(stage)
+    # def prepare_data(self):
+    #     self.train_dataset.prepare_data()
+    #     self.test_dataset.prepare_data()
+    #     self.val_dataset.prepare_data()
 
     def train_dataloader(self):
-        return DataLoader(
-            dataset=self.train_dataset,
-            batch_size=self.hparams.batch_size,
-            num_workers=self.hparams.num_workers,
-            pin_memory=self.pin_memory,
-            shuffle=self.train_shuffle,
-            persistent_workers=True,
-            prefetch_factor=self.hparams.prefetch_factor,
-        )
-
+        gen_A = DataLoader(dataset=self.train_A, ...)
+        gen_B = DataLoader(dataset=self.train_B, ...)
+        dis_A = DataLoader(dataset=self.train_A, ...)
+        dis_B = DataLoader(dataset=self.train_B, ...)
+        # return DataLoader(
+        #     dataset=self.train_dataset,
+        #     batch_size=self.hparams.batch_size,
+        #     num_workers=self.hparams.num_workers,
+        #     pin_memory=self.pin_memory,
+        #     shuffle=self.train_shuffle,
+        #     persistent_workers=True,
+        #     prefetch_factor=self.hparams.prefetch_factor,
+        # )
+        return {"gen_A": gen_A, "dis_A": dis_A, "gen_B": gen_B, "dis_B": dis_B}
+    
     def val_dataloader(self):
-        return DataLoader(
-            dataset=self.val_dataset,
-            batch_size=self.hparams.batch_size,
-            num_workers=self.hparams.num_workers,
-            pin_memory=self.pin_memory,
-            shuffle=False,
-            persistent_workers=True,
-            prefetch_factor=self.hparams.prefetch_factor,
-        )
-
-    def test_dataloader(self):
-        return DataLoader(
-            dataset=self.test_dataset,
-            batch_size=self.hparams.batch_size,
-            num_workers=self.hparams.num_workers,
-            pin_memory=self.pin_memory,
-            shuffle=False,
-            persistent_workers=True,
-            prefetch_factor=self.hparams.prefetch_factor,
-        )
+            A = DataLoader(self.A_valid, ...)
+            B = DataLoader(self.B_valid, ...)
+            return [A, B]
