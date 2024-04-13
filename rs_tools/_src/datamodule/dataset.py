@@ -5,6 +5,7 @@ from typing import List
 from loguru import logger
 from omegaconf.dictconfig import DictConfig
 from torch.utils.data import Dataset
+from rs_tools._src.preprocessing.normalize import apply_spectral_normalizer, apply_coordinate_normalizer
 import xarray as xr
 
 class BaseDataset(Dataset):
@@ -13,38 +14,47 @@ class BaseDataset(Dataset):
         file_list,
         transforms=None,
         bands: List[int]=None,
-        coords: bool=False,
-        masks: List[int]=None,
-        include_time: bool=True
+        include_coords: bool=True,
+        include_cloudmask: bool=True, 
+        include_nanmask: bool=True,
+        band_norm: xr.Dataset=None,
+        coord_norm: bool=False,
     ):
-        # TODO: Check that files exist
-        # TODO: Check that files are netcdf
-        # TODO: Make sure it comes out as dict
-
         self.file_list = file_list
         self.transforms = transforms
-
-    def prepare_data(self):
-        pass
-
-    def setup(self, stage):
-        pass
+        self.bands = bands
+        self.include_coords = include_coords
+        self.include_cloudmask = include_cloudmask
+        self.include_nanmask = include_nanmask
+        self.band_norm = band_norm
+        self.coord_norm = coord_norm
 
     def __len__(self):
         return len(self.file_list)
 
     def __getitem__(self, idx):
-        # Loading NetCDF
-        # - Load it from file
-        # - Some checks...?
-        # - Return it!
-        return xr.open_dataset(idx, engine="netcdf4")
+        # Load dataset
+        ds: xr.Dataset = xr.load_dataset(self.file_list[idx], engine="netcdf4")
+
+        # apply normalization per entity
+        if self.band_norm is not None:
+            radiances: np.ndarray = apply_spectral_normalizer(ds.values, self.band_norm)
+        else:
+            radiances: np.ndarray = ds.values
+        
+        if self.coord_norm:
+            # TODO: Check if this is extracting x/y or lat/lon
+            coords_: np.ndarray = apply_coordinate_normalizer(ds.spatial_coords)
+        else:
+            coords_: np.ndarray = ds.spatial_coords
+
+        # TODO: Add band selection
+        # TODO: Add checks & cloudmask selection
+        # TODO: Add checks & nanmask creation
+        # TODO: Apply transforms
+
         
 
-
-        #
-        #
-        #
         #==========================
         # - Load it from file
         # - Reshape Dataset to Array

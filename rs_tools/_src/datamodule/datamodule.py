@@ -2,47 +2,109 @@ from __future__ import annotations
 
 from lightning.pytorch import LightningDataModule
 from torch.utils.data import DataLoader, RandomSampler
-from rs_tools._src.datamodule.components.base import BaseDataset
+from rs_tools._src.datamodule.dataset import BaseDataset
 from rs_tools._src.utils.io import get_files
+from rs_tools._src.datamodule.utils import split_dataset
+from rs_tools._src.preprocessing.normalize import normalize
 
 class ITIDataModule(LightningDataModule):
     def __init__(
         self,
-        datasets_spec,
-        batch_size: int = 4,
-        iterations_per_epoch=1e4,
-        num_workers: int = 1,
-        train_shuffle=True,
+        datasets_spec: dict,
+        include_coords: bool,
+        include_cloudmask: bool,
+        include_nanmask: bool,
+        normalize_coords: bool,
+        datasets_split: dict,
+        batch_size: int=4,
+        iterations_per_epoch: int=1e4,
+        num_workers: int=1,
+        train_shuffle: bool=True,
     ):
         super().__init__()
         self.datasets_spec = datasets_spec
+        self.datasets_split = datasets_split
+
+        self.include_coords = include_coords
+        self.include_cloudmask = include_cloudmask
+        self.include_nanmask = include_nanmask
+        self.normalize_coords = normalize_coords
+
         self.batch_size = batch_size
         self.iterations_per_epoch = iterations_per_epoch
         self.num_workers = num_workers
         self.train_shuffle = train_shuffle
 
-        if not isinstance(datasets_spec, dict):
-            raise ValueError("datasets_spec must be a dictionary")
-        
-        datasets = datasets_spec.keys()
-        if len(datasets) != 2:
+        # extract dataset specifictions from dataloader config
+        self.datasets = self.datasets_spec.keys()
+        if len(self.datasets) != 2:
             raise ValueError("datasets_spec must contain two datasets")
         
+    def setup(self):
         # Get filenames from dataset specs
-        self.A_filenames = get_files(datasets_spec=datasets_spec[datasets[0]])
-        self.B_filenames = get_files(datasets_spec=datasets_spec[datasets[1]])
+        self.A_filenames = get_files(datasets_spec=self.datasets_spec[self.datasets[0]])
+        self.B_filenames = get_files(datasets_spec=self.datasets_spec[self.datasets[1]])
 
-        # TODO: Add function to filter train/test/val split
-        # Filter data for months
-        # train_list = [training files]
+        # split files based on train/test/val criteria
+        self.A_filenames_train, self.A_filenames_valid = split_dataset(
+             filenames=self.A_filenames, 
+             split_spec=self.datasets_split[self.datasets[0]])
+        self.B_filenames_train, self.B_filenames_valid = split_dataset(
+             filenames=self.B_filenames, 
+             split_spec=self.datasets_split[self.datasets[1]])
+        
+        # Prepare data & normalize
+        ds_norm_A, ds_norm_B = self.prepare_data()
+        
+        # Create datasets
+        self.A_train_ds = BaseDataset(
+            file_list=self.A_filenames_train,
+            bands=self.datasets_spec[self.datasets[0]]["bands"],
+            transforms=self.datasets_spec[self.datasets[0]]["transforms"]
+            include_coords=self.include_coords,
+            include_cloudmask=self.include_cloudmask,
+            include_nanmask=self.include_nanmask,
+            band_norm=ds_norm_A,
+            coord_norm=self.normalize_coords,
+        )
+        self.B_train_ds = BaseDataset(
+            file_list=self.B_filenames_train,
+            bands=self.datasets_spec[self.datasets[1]]["bands"],
+            transforms=self.datasets_spec[self.datasets[1]]["transforms"]
+            include_coords=self.include_coords,
+            include_cloudmask=self.include_cloudmask,
+            include_nanmask=self.include_nanmask,
+            band_norm=ds_norm_B,
+            coord_norm=self.normalize_coords,
+        )   
+        self.A_valid_ds = BaseDataset(
+            file_list=self.A_filenames_valid,
+            bands=self.datasets_spec[self.datasets[0]]["bands"],
+            transforms=self.datasets_spec[self.datasets[0]]["transforms"]
+            include_coords=self.include_coords,
+            include_cloudmask=self.include_cloudmask,
+            include_nanmask=self.include_nanmask,
+            band_norm=ds_norm_A,
+            coord_norm=self.normalize_coords,
+        )   
+        self.B_valid_ds = BaseDataset(
+            file_list=self.B_filenames_valid,
+            bands=self.datasets_spec[self.datasets[1]]["bands"],
+            transforms=self.datasets_spec[self.datasets[1]]["transforms"]
+            include_coords=self.include_coords,
+            include_cloudmask=self.include_cloudmask,
+            include_nanmask=self.include_nanmask,
+            band_norm=ds_norm_B,
+            coord_norm=self.normalize_coords,
+        )
 
-        # TODO: Calculate mean/std for training set
-        # Go through all files and calculate mean/stdev
-
-        self.A_train_ds = BaseDataset(...)
-        self.B_train_ds = BaseDataset(...)
-        self.A_valid_ds = BaseDataset(...)
-        self.B_valid_ds = BaseDataset(...)
+    def prepare_data(self):
+        """
+        Calculate normalization based on training files
+        """
+        ds_norm_A = normalize(self.A_filenames_train)
+        ds_norm_B = normalize(self.B_filenames_train)
+        return ds_norm_A, ds_norm_B
 
     def train_dataloader(self):
         gen_A = DataLoader(dataset=self.A_train_ds,

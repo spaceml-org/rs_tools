@@ -1,0 +1,30 @@
+dataloader:
+  _target_: rs_tools._src.datamodule.ITIDataModule
+
+  datasets_spec:
+    msg:
+      data_path: /path/to/your/data
+      bands: all
+      transforms: 
+    goes:
+      data_path: /path/to/your/data
+      bands: all
+      transforms:
+  include_coords: True
+  include_cloudmask: True
+  include_nanmask: True
+  normalize_coords: False
+
+  datasets_split:
+    train:
+      years:
+      months:
+      days:
+    val: 
+      years:
+      months:
+      days:
+
+  batch_size: int=4,
+  iterations_per_epoch: int=1e4,
+  num_workers: int=1,

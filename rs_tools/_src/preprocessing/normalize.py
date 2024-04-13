@@ -10,7 +10,7 @@ def spatial_mean(ds: xr.Dataset, spatial_variables: List[str]) -> xr.Dataset:
 # TODO: Check this function
 def normalize(
         files: List[str],
-        temporal_variables: List[str], 
+        temporal_variables: List[str]=["time"], 
         spatial_variables: List[str]=["x","y"], 
 ) -> xr.Dataset:
     
@@ -32,6 +32,13 @@ def normalize(
 
     ds = xr.combine_by_coords([ds_mean, ds_std])
     return ds
+
+# TODO: Finish normalizers
+def apply_spectral_normalizer(radiances: xr.DataArray, band_norm: xr.Dataset) -> xr.DataArray:
+    pass
+
+def apply_coordinate_normalizer(coords: xr.DataArray) -> xr.DataArray:
+    pass
 
 
 
