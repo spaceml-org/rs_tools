@@ -2,8 +2,9 @@ from typing import Optional, List, Union, Tuple
 from omegaconf import DictConfig
 from datetime import datetime
 import pandas as pd
+from loguru import logger
 
-def split_dataset(filenames: List, split_spec: DictConfig) -> Tuple[List, List]:
+def split_train_val(filenames: List, split_spec: DictConfig) -> Tuple[List, List]:
     """
     Split filenames into training and validation sets based on dataset specification.
 
@@ -17,50 +18,53 @@ def split_dataset(filenames: List, split_spec: DictConfig) -> Tuple[List, List]:
     if "train" not in split_spec.keys() or "val" not in split_spec.keys():
         raise ValueError("split_spec must contain 'train' and 'val' keys")
     
+    train_files = get_split(filenames, split_spec["train"])
+    val_files = get_split(filenames, split_spec["val"])
+
+    return train_files, val_files
+    
+    
+def get_split(filenames: List, 
+              split_dict: DictConfig) -> Tuple[List, List]:
+    """
+    Split filenames into training and validation sets based on dataset specification.
+
+    Args:
+        filenames (List): A list of filenames to be split.
+        split_dict (DictConfig): A dictionary-like object containing the dataset specification.
+
+    Returns:
+        Tuple[List, List]: A tuple containing two lists: the training set and the validation set.
+    """
     # Extract dates from filenames
     dates = get_dates_from_files(filenames)
     # Convert to dataframe for easier manipulation
     df = pd.DataFrame({"filename": filenames, "date": dates})
 
-    train_split = split_spec["train"]
-    val_split = split_spec["val"]
-
     # Check if years, months, and days are specified
-    # If not, use all available years/months/days
-    if train_split["years"] is None:
-        train_split["years"] = df.date.dt.year.unique().tolist()
-    if val_split["years"] is None:
-        val_split["years"] = df.date.dt.year.unique().tolist()
-    if train_split["months"] is None:
-        train_split["months"] = df.date.dt.month.unique().tolist()
-    if val_split["months"] is None:
-        val_split["months"] = df.date.dt.month.unique().tolist()
-    if train_split["days"] is None:
-        train_split["days"] = df.date.dt.day.unique().tolist()
-    if val_split["days"] is None:
-        val_split["days"] = df.date.dt.day.unique().tolist()
+    if split_dict["years"] is None:
+        logger.info("No years specified for split. Using all years.")
+        split_dict["years"] = df.date.dt.year.unique().tolist()
+    if split_dict["months"] is None:
+        logger.info("No months specified for split. Using all months.")
+        split_dict["months"] = df.date.dt.month.unique().tolist()
+    if split_dict["days"] is None:
+        logger.info("No days specified for split. Using all days.")
+        split_dict["days"] = df.date.dt.day.unique().tolist()
 
-    # Determine conditions for training and validation sets
-    train_condition = (df.date.dt.year.isin(train_split["years"])) & \
-                        (df.date.dt.month.isin(train_split["months"])) & \
-                        (df.date.dt.day.isin(train_split["days"]))
-    val_condition = (df.date.dt.year.isin(val_split["years"])) & \
-                        (df.date.dt.month.isin(val_split["months"])) & \
-                        (df.date.dt.day.isin(val_split["days"]))
-    
+    # Determine conditions specified split
+    condition = (df.date.dt.year.isin(split_dict["years"])) & \
+                (df.date.dt.month.isin(split_dict["months"])) & \
+                (df.date.dt.day.isin(split_dict["days"]))
+        
     # Extract filenames based on conditions
-    train_files = df[train_condition].filename.tolist()
-    val_files = df[val_condition].filename.tolist()
+    files = df[condition].filename.tolist()
 
     # Check if files are allocated properly
-    if len(train_files) == 0:
-        raise ValueError("No training files found. Check split specification.")
-    if len(val_files) == 0:
-        raise ValueError("No validation files found. Check split specification.")
-    if len(train_files) + len(val_files) > len(filenames):
-        raise ValueError("Duplicate file allocation. Check split specification.")
-
-    return train_files, val_files
+    if len(files) == 0:
+        raise ValueError("No files found. Check split specification.")
+    
+    return files
 
 def get_date_from_file(filename: str) -> datetime:
     """
