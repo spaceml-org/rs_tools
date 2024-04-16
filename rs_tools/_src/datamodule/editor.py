@@ -1,3 +1,5 @@
+from iti.data.editor import Editor
+
 from torchvision.transforms import (
     Compose,
     Lambda,
@@ -18,5 +20,9 @@ from torchvision.transforms import (
 # - Random Brightness Contrast
 # - Nan mask
 # - Unit conversion
+
+class OrderBandEditor(Editor):
+    def call(self, data, **kwargs):
+        pass
 
 
