@@ -25,6 +25,7 @@ from rs_tools._src.datamodule.utils import get_split
 from iti.data.editor import Editor
 from iti.data.dataset import BaseDataset, ITIDataModule
 
+# TODO: To be moved into ITI repo
 class GeoDataset(BaseDataset):
     def __init__(
         self,

@@ -24,6 +24,8 @@ from torchvision.transforms import (
 # - Nan mask
 # - Unit conversion
 
+# TODO: To be moved into ITI repo
+
 # NOTE: Maybe not needed?
 class BandOrderEditor(Editor):
     def call(self, data, **kwargs):
