@@ -22,8 +22,8 @@ from torch.utils.data import Dataset, DataLoader, RandomSampler
 from rs_tools._src.utils.io import get_list_filenames
 from rs_tools._src.datamodule.utils import get_split
 
-# TODO: Import from ITI rather than rs_tools
-from rs_tools._src.datamodule.base import BaseDataset
+from iti.data.editor import Editor
+from iti.data.dataset import BaseDataset, ITIDataModule
 
 class GeoDataset(BaseDataset):
     def __init__(
@@ -33,25 +33,31 @@ class GeoDataset(BaseDataset):
         splits_dict: Dict=None,
         ext: str="nc",
         limit: int=None,
-        bands: List[int]=None,
-        include_coords: bool=True,
-        include_cloudmask: bool=True, 
-        include_nanmask: bool=True,
-        band_norm: xr.Dataset=None,
-        coord_norm: bool=False,
+        load_coords: bool=True,
+        load_cloudmask: bool=True, 
         **kwargs
     ):
+        """
+        Initialize the GeoDataset class.
+
+        Args:
+            data_dir (List[str]): A list of directories containing the data files.
+            editors (List[Editor]): A list of editors for data preprocessing.
+            splits_dict (Dict, optional): A dictionary specifying the splits for the dataset. Defaults to None.
+            ext (str, optional): The file extension of the data files. Defaults to "nc".
+            limit (int, optional): The maximum number of files to load. Defaults to None.
+            load_coords (bool, optional): Whether to load the coordinates. Defaults to True.
+            load_cloudmask (bool, optional): Whether to load the cloud mask. Defaults to True.
+            **kwargs: Additional keyword arguments.
+
+        """
         self.data_dir = data_dir
         self.editors = editors
         self.splits_dict = splits_dict
         self.ext = ext
         self.limit = limit
-        self.bands = bands
-        self.include_coords = include_coords
-        self.include_cloudmask = include_cloudmask
-        self.include_nanmask = include_nanmask
-        self.band_norm = band_norm
-        self.coord_norm = coord_norm
+        self.load_coords = load_coords
+        self.load_cloudmask = load_cloudmask
 
         self.data = self.get_files()
 
@@ -74,44 +80,27 @@ class GeoDataset(BaseDataset):
         return len(self.file_list)
 
     def __getitem__(self, idx):
+        data_dict = {}
         # Load dataset
         ds: xr.Dataset = xr.load_dataset(self.file_list[idx], engine="netcdf4")
 
-        # apply normalization per entity
-        if self.band_norm is not None:
-            radiances: np.ndarray = apply_spectral_normalizer(ds.values, self.band_norm)
-        else:
-            radiances: np.ndarray = ds.values
-        
-        if self.coord_norm:
-            # TODO: Check if this is extracting x/y or lat/lon
-            coords_: np.ndarray = apply_coordinate_normalizer(ds.spatial_coords)
-        else:
-            coords_: np.ndarray = ds.spatial_coords
+        # Extract data
+        data = ds.Rad.compute().to_numpy()
+        data_dict["data"] = data
+        # Extract wavelengths
+        wavelengths = ds.band_wavelength.compute().to_numpy()
+        data_dict["wavelengths"] = wavelengths
 
-        # TODO: Add band selection
-        # TODO: Add checks & cloudmask selection
-        # TODO: Add checks & nanmask creation
-        # TODO: Apply transforms
+        # Extract coordinates
+        if self.load_coords:
+            latitude = ds.latitude.compute().to_numpy()
+            longitude = ds.longitude.compute().to_numpy()
+            coords = np.stack([latitude, longitude], axis=0)
+            data_dict["coords"] = coords
 
-        
+        # Extract cloud mask
+        if self.load_cloudmask:
+            cloudmask = ds.cloud_mask.compute().to_numpy()
+            data_dict["cloudmask"] = cloudmask
 
-        #==========================
-        # - Load it from file
-        # - Reshape Dataset to Array
-        # - choose the channels (bands, coordinates, cloud-mask, etc)
-        # - Convert to numpy/etc
-        # - apply transforms
-        # - output dictionary
-        # Psuedo-Code
-        # # Load dataset
-        # ds: xr.Dataset = xr.load_dataset(...)
-        # # apply normalization per entity
-        # radiances: Array["C H W"] = apply_spectral_normalizer(ds.values)
-        # coords_: Array["2 H W"] = apply_coordinate_normalizer(ds.spatial_coords)
-        # time_: Array["T H W"] = apply_time_normalizer(ds.time)
-        # mask_: Array["M H W"] = apply_mask_normalizer(ds.mask)
-        # MASKS
-        # Q: per band, per space
-        # nan_mask: Array["H W"] = np.isnan()
-        # pass
+        return data_dict

@@ -204,6 +204,10 @@ class GOES16GeoProcessing:
         # concatenate in new band dimension
         ds = xr.concat(ds, dim="band")
 
+        # Correct latitude longitude assignment after multiprocessing
+        ds['latitude'] = ds.latitude.isel(band=0)
+        ds['longitude'] = ds.longitude.isel(band=0)
+
         # NOTE: Keep only certain relevant attributes
         attrs_rad = ds["Rad"].attrs
 

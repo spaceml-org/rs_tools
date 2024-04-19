@@ -1,4 +1,5 @@
 from iti.data.editor import Editor
+from abc import ABC, abstractmethod
 
 from torchvision.transforms import (
     Compose,
@@ -11,18 +12,38 @@ from torchvision.transforms import (
     ToTensor,
 )
 
-# TODO: Add transform to organize bands by wavelength
+# Editors that already exist (but not for dictionaries)
+# - NormalizeEditor / ImageNormalizeEditor]
+# - NanEditor
 
 # TODO: Potential Transformations
-# - Normalize (of course)
+# - Normalize data
+# - Normalize coordinates
 # - Reorder Bands
-# - Random Flipping (Maybe?)
-# - Random Brightness Contrast
+# - Band Selection
 # - Nan mask
 # - Unit conversion
 
-class OrderBandEditor(Editor):
+# NOTE: Maybe not needed?
+class BandOrderEditor(Editor):
     def call(self, data, **kwargs):
         pass
+
+class BandSelectionEditor(Editor):
+    def call(self, data, **kwargs):
+        pass
+
+class NanMaskEditor(Editor):
+    def call(self, data, **kwargs):
+        pass      
+
+class CoordNormEditor(Editor):
+    def call(self, data, **kwargs):
+        pass  
+class RadUnitEditor(Editor):
+    def call(self, data, **kwargs):
+        pass
+
+
 
 
