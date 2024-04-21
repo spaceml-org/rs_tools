@@ -1,19 +1,13 @@
 dataloader:
-  _target_: rs_tools._src.datamodule.ITIDataModule
+  _target_: rs_tools._src.datamodule.ITIDataModule # TODO: update
 
   datasets_spec:
     msg:
       data_path: /path/to/your/data
-      bands: all
-      transforms: 
     goes:
       data_path: /path/to/your/data
-      bands: all
-      transforms:
-  include_coords: True
-  include_cloudmask: True
-  include_nanmask: True
-  normalize_coords: False
+  load_coords: True
+  load_cloudmask: True
 
   datasets_split:
     train:

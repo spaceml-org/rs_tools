@@ -1,29 +1,22 @@
 from __future__ import annotations
+import collections
+import collections.abc
 
-import gc
-import glob
-import logging
-import os
-import random
-from collections import Iterable
+#hyper needs the four following aliases to be done manually.
+collections.Iterable = collections.abc.Iterable
+collections.Mapping = collections.abc.Mapping
+collections.MutableSet = collections.abc.MutableSet
+collections.MutableMapping = collections.abc.MutableMapping
+
+import numpy as np
+import xarray as xr
 from typing import List, Union, Dict
 
-import numpy as np
-from dateutil.parser import parse
-from torch.utils.data import Dataset, DataLoader, RandomSampler
-from tqdm import tqdm
-import numpy as np
-from typing import List
-from loguru import logger
-from torch.utils.data import Dataset
-from rs_tools._src.preprocessing.normalize import apply_spectral_normalizer, apply_coordinate_normalizer
-import xarray as xr
-from torch.utils.data import Dataset, DataLoader, RandomSampler
+from iti.data.editor import Editor
+from iti.data.dataset import BaseDataset
+
 from rs_tools._src.utils.io import get_list_filenames
 from rs_tools._src.datamodule.utils import get_split
-
-from iti.data.editor import Editor
-from iti.data.dataset import BaseDataset, ITIDataModule
 
 # TODO: To be moved into ITI repo
 class GeoDataset(BaseDataset):
@@ -31,7 +24,7 @@ class GeoDataset(BaseDataset):
         self,
         data_dir: List[str],
         editors: List[Editor],
-        splits_dict: Dict=None,
+        splits_dict: Dict,
         ext: str="nc",
         limit: int=None,
         load_coords: bool=True,
@@ -60,10 +53,10 @@ class GeoDataset(BaseDataset):
         self.load_coords = load_coords
         self.load_cloudmask = load_cloudmask
 
-        self.data = self.get_files()
+        self.files = self.get_files()
 
         super().__init__(
-            data=self.data,
+            data=self.files,
             editors=self.editors,
             ext=self.ext,
             limit=self.limit,
@@ -72,18 +65,18 @@ class GeoDataset(BaseDataset):
 
     def get_files(self):
         # Get filenames from data_dir
-        self.filenames = get_list_filenames(data_path=self.data_dir, ext=self.ext)
+        files = get_list_filenames(data_path=self.data_dir, ext=self.ext)
         # split files based on split criteria
-        files = get_split(filenames=self.filenames, split_dict=self.splits_dict)
+        files = get_split(files=files, split_dict=self.splits_dict)
         return files
 
     def __len__(self):
-        return len(self.file_list)
+        return len(self.files)
 
     def __getitem__(self, idx):
         data_dict = {}
         # Load dataset
-        ds: xr.Dataset = xr.load_dataset(self.file_list[idx], engine="netcdf4")
+        ds: xr.Dataset = xr.load_dataset(self.files[idx], engine="netcdf4")
 
         # Extract data
         data = ds.Rad.compute().to_numpy()

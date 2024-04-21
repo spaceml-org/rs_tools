@@ -46,6 +46,10 @@ class RadUnitEditor(Editor):
     def call(self, data, **kwargs):
         pass
 
+# NOTE: Already exists in ITI repo for fits files
+class RemoveOffLimbEditor(Editor):
+    def call(self, data, **kwargs):
+        pass
 
 
 
