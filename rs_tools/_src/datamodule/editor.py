@@ -72,16 +72,17 @@ class NanDictEditor(Editor):
     """
     Removes NaN values from data dictionary
     """
-    def __init__(self, key="data", nan=0):
+    def __init__(self, key="data", fill_value=0):
         self.key = key
-        self.nan = nan
+        self.fill_value = fill_value
     def call(self, data_dict, **kwargs):
         data = data_dict[self.key]
         # Replace NaN values
-        data = np.nan_to_num(data, nan=self.nan)
+        data = np.nan_to_num(data, nan=self.fill_value)
         # Update dictionary
         data_dict[self.key] = data
         return data_dict
+    
 class CoordNormEditor(Editor):
     """
     Normalize latitude and longitude coordinates
@@ -116,7 +117,7 @@ class StackDictEditor(Editor):
     """
     Stack data dictionary into a single array
     """
-    def __init__(self, allowed_keys=["data", "coords", "cloud_mask", "nan_mask"], axis=0):
+    def __init__(self, allowed_keys=["data", "cloud_mask", "nan_mask", "coords"], axis=0):
         self.allowed_keys = allowed_keys
         self.axis = axis
     def call(self, data_dict, **kwargs):
