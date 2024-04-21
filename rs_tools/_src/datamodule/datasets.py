@@ -95,6 +95,6 @@ class GeoDataset(BaseDataset):
         # Extract cloud mask
         if self.load_cloudmask:
             cloudmask = ds.cloud_mask.compute().to_numpy()
-            data_dict["cloudmask"] = cloudmask
+            data_dict["cloud_mask"] = cloudmask
 
         return data_dict
