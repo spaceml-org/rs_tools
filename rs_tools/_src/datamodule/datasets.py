@@ -8,6 +8,7 @@ collections.Mapping = collections.abc.Mapping
 collections.MutableSet = collections.abc.MutableSet
 collections.MutableMapping = collections.abc.MutableMapping
 
+import logging
 import numpy as np
 import xarray as xr
 from typing import List, Union, Dict
@@ -72,6 +73,14 @@ class GeoDataset(BaseDataset):
 
     def __len__(self):
         return len(self.files)
+    
+    def getIndex(self, data_dict, idx):
+        # Attempt applying editors
+        try:
+            return self.convertData(data_dict)
+        except Exception as ex:
+            logging.error('Unable to convert %s: %s' % (self.files[idx], ex))
+            raise ex
 
     def __getitem__(self, idx):
         data_dict = {}
@@ -97,4 +106,8 @@ class GeoDataset(BaseDataset):
             cloud_mask = ds.cloud_mask.compute().to_numpy()
             data_dict["cloud_mask"] = cloud_mask
 
-        return data_dict
+        # Apply editors
+        data, _ = self.getIndex(data_dict, idx)
+        return data
+
+        
