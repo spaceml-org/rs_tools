@@ -1,0 +1,24 @@
+dataloader:
+  _target_: rs_tools._src.datamodule.ITIDataModule # TODO: update
+
+  datasets_spec:
+    msg:
+      data_path: /path/to/your/data
+    goes:
+      data_path: /path/to/your/data
+  load_coords: True
+  load_cloudmask: True
+
+  datasets_split:
+    train:
+      years:
+      months:
+      days:
+    val: 
+      years:
+      months:
+      days:
+
+  batch_size: int=4,
+  iterations_per_epoch: int=1e4,
+  num_workers: int=1,

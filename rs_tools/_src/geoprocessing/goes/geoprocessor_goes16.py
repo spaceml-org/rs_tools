@@ -204,6 +204,10 @@ class GOES16GeoProcessing:
         # concatenate in new band dimension
         ds = xr.concat(ds, dim="band")
 
+        # Correct latitude longitude assignment after multiprocessing
+        ds['latitude'] = ds.latitude.isel(band=0)
+        ds['longitude'] = ds.longitude.isel(band=0)
+
         # NOTE: Keep only certain relevant attributes
         attrs_rad = ds["Rad"].attrs
 
@@ -280,7 +284,13 @@ class GOES16GeoProcessing:
                 continue
             
             # interpolate cloud mask to data
+            # fill in zeros for all nan values
+            ds_clouds = ds_clouds.fillna(0)
+            # NOTE: Interpolation changes values from integers to floats
+            # NOTE: This is fixed through rounding 
             ds_clouds = ds_clouds.interp(x=ds.x, y=ds.y)
+            ds_clouds = ds_clouds.round()
+
             # save cloud mask as data coordinate
             ds = ds.assign_coords({"cloud_mask": (("y", "x"), ds_clouds.values.squeeze())})
             ds["cloud_mask"].attrs = ds_clouds.attrs

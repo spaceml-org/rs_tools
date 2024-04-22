@@ -57,5 +57,5 @@ def format_goes_dates(time: str) -> str:
     dt = date + time
     # Convert the datetime object to a string in the format "YYYYMMDDHHMMSS"
     str_time = dt.strftime("%Y%m%d%H%M%S")
-
+    
     return str_time

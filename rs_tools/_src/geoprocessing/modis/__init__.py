@@ -50,7 +50,6 @@ MODIS_WAVELENGTHS = {
     "35": 13.935,
     "36": 14.235,
 }
-<<<<<<< HEAD
 
 def parse_modis_dates_from_file(file: str):
     """
@@ -92,5 +91,3 @@ def format_modis_dates(time: str) -> str:
     str_time = dt.strftime("%Y%m%d%H%M%S")
 
     return str_time
-=======
->>>>>>> 5-pipeline-extension
