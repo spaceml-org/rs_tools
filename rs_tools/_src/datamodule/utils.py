@@ -4,6 +4,7 @@ from datetime import datetime
 import pandas as pd
 from loguru import logger
 
+# NOTE: Code already moved to ITI repo
 def split_train_val(files: List, split_spec: DictConfig) -> Tuple[List, List]:
     """
     Split files into training and validation sets based on dataset specification.

@@ -19,7 +19,7 @@ from iti.data.dataset import BaseDataset
 from rs_tools._src.utils.io import get_list_filenames
 from rs_tools._src.datamodule.utils import get_split
 
-# TODO: To be moved into ITI repo
+# NOTE: Code already moved to ITI repo
 class GeoDataset(BaseDataset):
     def __init__(
         self,
