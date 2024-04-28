@@ -28,10 +28,6 @@ def main(cfg):
         print(geoprocess)
         hydra.utils.call(geoprocess)
     
-    elif cfg.stage == "preprocess":
-        logger.debug(f"starting preprocessing script...")
-        raise NotImplementedError()
-    
     elif cfg.stage == "patch":
         logger.debug(f"Instantiating Prepatcher: {cfg.satellite.patch['_target_']}")
         patch = hydra.utils.instantiate(cfg.satellite.patch)
