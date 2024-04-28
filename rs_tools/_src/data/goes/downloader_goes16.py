@@ -109,6 +109,7 @@ def download(
     Returns:
         List[str]: List of downloaded file names
     """
+    logger.debug(f"TIME STEP: {time_step}")
     # Initialize GOES 16 Downloader
     logger.info("Initializing GOES16 Downloader...")
     dc_goes16_download = GOES16Download(
