@@ -2,30 +2,39 @@
 name = "rs-tools"
 version = "0.0.1"
 description = "Remote Sensing Tools"
-authors = [
-    "Juan Emmanuel Johnson <jemanjohnson34@gmail.com>",
-]
+authors = ["Juan Emmanuel Johnson <jemanjohnson34@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/jejjohnson/rs_tools"
 keywords = ["rasterio", "remote sensing"]
 classifiers = [
-    "Topic :: Scientific/Engineering",
-    "Topic :: Software Development :: Libraries",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.10",
-    "Operating System :: MACOS/Linux",
-    "Natural Language :: English",
-    "License :: OSI Approved :: MIT License",
-    "Intended Audience :: Science/Research",
-    "Development Status :: 2 - Pre-Alpha copy",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Software Development :: Libraries",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.10",
+  "Operating System :: MACOS/Linux",
+  "Natural Language :: English",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Science/Research",
+  "Development Status :: 2 - Pre-Alpha copy",
 
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
 beartype = "^0.13.1"
-rastervision-core = "^0.21.3"
+earthaccess = "^0.9.0"
+goes2go = "^2024.4.0"
+loguru = "^0.7.2"
+hydra-core = "^1.3.2"
+omegaconf = "^2.3.0"
+xarray = "^2024.3.0"
+tqdm = "^4.66.2"
+pandas = "^2.2.2"
+numpy = "^1.26.4"
+matplotlib = "^3.8.4"
+eumdac = "^2.2.2"
+python-dotenv = "^1.0.1"
 
 
 [tool.poetry.group.test.dependencies]
@@ -70,10 +79,14 @@ autoroot = "^1.0.0"
 linkify-it-py = "^2.0.0"
 jinja2 = "^3.1.2"
 matplotlib = "^3.7.1"
+seaborn = "^0.12.2"
+jupytext = "^1.14.5"
 ipython = "^8.11.0"
 ipykernel = "^6.22.0"
 watermark = "^2.3.1"
-jupytext = "^1.14.5"
+ipywidgets = "^8.0.5"
+fsspec = "^2023.4.0"
+aiohttp = "^3.8.4"
 mkdocs = "^1.4.2"
 mkdocs-material = "^9.1.8"
 pymdown-extensions = "^9.11"
@@ -88,7 +101,6 @@ mkdocs-literate-nav = "^0.6.0"
 mkdocs-git-authors-plugin = "^0.7.0"
 mkdocstrings = { version = "^0.21.2", extras = ["python"] }
 markdown-katex = "^202112.1034"
-
 
 
 [build-system]

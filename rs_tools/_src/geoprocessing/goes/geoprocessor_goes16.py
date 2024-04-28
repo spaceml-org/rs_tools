@@ -278,7 +278,7 @@ class GOES16GeoProcessing:
             except AssertionError:
                 logger.error(f"Skipping {itime} due to missing cloud mask")
                 continue
-            
+            pbar_time.set_description(f"Loaded data...")
             # interpolate cloud mask to data
             ds_clouds = ds_clouds.interp(x=ds.x, y=ds.y)
             # save cloud mask as data coordinate
@@ -296,6 +296,8 @@ class GOES16GeoProcessing:
                 logger.info(f"File already exists. Overwriting file: {save_filename}")
                 os.remove(save_filename)
             # save to netcdf
+            pbar_time.set_description(f"Saving to file...:{save_filename}")
+            # TODO: Add "metrics" for printing (e.g., filesize)
             ds.to_netcdf(save_filename, engine="netcdf4")
 
 
@@ -319,6 +321,7 @@ def geoprocess(
     Returns:
         None
     """
+    print("PATH!!!:", read_path)
     # Initialize GOES 16 GeoProcessor
     logger.info(f"Initializing GOES16 GeoProcessor...")
     # Extracting region from str

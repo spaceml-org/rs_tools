@@ -1,3 +1,12 @@
+""""
+EXAMPLES:
+    python rs_tools satellite=goes stage=download
+    python rs_tools satellite=goes stage=geoprocess
+    python rs_tools satellite=msg stage=geoprocess
+    python rs_tools satellite=terra stage=geoprocess
+"""
+
+
 import hydra
 from typing import Dict
 from loguru import logger
@@ -16,6 +25,7 @@ def main(cfg):
     elif cfg.stage == "geoprocess":
         logger.info(f"Instantiating Geoprocessor: {cfg.satellite.geoprocess['_target_']}")
         geoprocess = hydra.utils.instantiate(cfg.satellite.geoprocess)
+        print(geoprocess)
         hydra.utils.call(geoprocess)
     
     elif cfg.stage == "preprocess":
@@ -31,12 +41,4 @@ def main(cfg):
 
 if __name__ == "__main__":
     main()
-
-""""
-EXAMPLES:
-    python rs_tools satellite=goes stage=download
-    python rs_tools satellite=goes stage=geoprocess
-    python rs_tools satellite=msg stage=geoprocess
-    python rs_tools satellite=terra stage=geoprocess
-"""
 
