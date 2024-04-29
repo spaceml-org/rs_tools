@@ -55,7 +55,7 @@ We try to keep as much meta-data as possible which could be useful for downstrea
 A user can do some further analysis on these
 
 <center>
-    <img src="./assets/analysis_ready_data.png" alt="drawing" width="500"/>
+    <img src="docs/assets/analysis_ready_data.png" alt="drawing" width="500"/>
 </center>
 
 A user can get started right away by simply running the following snippet in the command line.
@@ -81,7 +81,7 @@ A user can user whichever ML dataset/dataloader framework that they choose.
 
 
 <center>
-    <img src="./assets/ml_ready_data.png" alt="drawing" width="500"/>
+    <img src="docs/assets/ml_ready_data.png" alt="drawing" width="500"/>
 </center>
 
 A user can get started right away by simply running the following snippet in the command line.
