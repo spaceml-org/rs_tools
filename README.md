@@ -31,7 +31,7 @@ In addition, we provide many small bite-sized functions which users can piece to
 #### Data Downloader
 
 With a few simple commands, we can download some raw level 1 data products with minimum preprocessing.
-We currently have data downloaders for [MODIS Level 1]() data, [MSG Level 1]() data, and [GOES16 Level 1]() data.
+We currently have data downloaders for [MODIS Level 1](https://spaceml-org.github.io/rs_tools/datasets/modis) data, [MSG Level 1](https://spaceml-org.github.io/rs_tools/datasets/msg) data, and [GOES16 Level 1](https://spaceml-org.github.io/rs_tools/datasets/goes/) data.
 
 
 A user can get started right away by simply running the following snippet in the command line.
