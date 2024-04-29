@@ -87,6 +87,7 @@ plugins:
           options:
             inherited_members: true  # Allow looking up inherited methods
             docstring_style: "google"
+            paths: [rs_tools]
 
 
 extra_javascript:

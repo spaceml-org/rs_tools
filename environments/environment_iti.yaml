@@ -49,6 +49,23 @@ dependencies:
       - mypy
       - pytest
       - pre-commit
+      # Docs
+      - mkdocs-gen-files
+      - mkdocs-literate-nav
+      - mkdocs-git-authors-plugin
+      - mkdocstrings
+      - markdown-katex
+      - pytkdocs
+      - mdx-truly-sane-lists
+      - mkdocs-jupyter
+      - mkdocs-bibtex
+      - pygments
+      - mknotebooks
+      - pymdown-extensions
+      - mkdocs-material 
+      - mkdocs
+      - "mkdocstrings[crystal,python]"
+      - aiohttp
       # Notebook stuff
       - autoroot
       - pyprojroot

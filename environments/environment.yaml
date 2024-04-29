@@ -75,6 +75,7 @@ dependencies:
       - pymdown-extensions
       - mkdocs-material 
       - mkdocs
+      - "mkdocstrings[crystal,python]"
       - aiohttp
       # ITI
       # PYTORCH
