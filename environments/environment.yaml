@@ -1,4 +1,4 @@
-# name: rs_tools
+name: rs_tools
 channels:
   - conda-forge
 dependencies:
@@ -77,6 +77,10 @@ dependencies:
       - mkdocs
       - aiohttp
       # ITI
+      # PYTORCH
+      - torch
+      - torchvision
       - git+https://github.com/spaceml-org/InstrumentToInstrument.git@development
       - wandb
+      - xrpatcher
       

@@ -4,6 +4,11 @@
 
 ## What are RS-Tools?
 
+<center>
+    <img src="docs/assets/iti_structure.jpg" alt="drawing" width="500"/>
+</center>
+
+
 `rs_tools` is a toolbox of functions designed to 
 There is a high barrier to entry when working with remote sensing data for machine learning (ML) research.
 This is especially true for level 1 data which is typically raw radiance observations.

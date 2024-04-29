@@ -39,7 +39,8 @@ dependencies:
       - torch
       - torchvision
       - lightning
-      # - git+https://github.com/spaceml-org/InstrumentToInstrument.git@development
+      - git+https://github.com/spaceml-org/InstrumentToInstrument.git@development
+      - xrpatcher
       # formatting
       - black
       - pylint
