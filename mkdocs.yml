@@ -7,7 +7,7 @@ repo_name: rs_tools
 edit_uri: ""
 
 nav:
-  - HOME: index.md
+  - Home: index.md
   - Getting Started:
     - 🛠️ Installation: installation.md
   - Datasets:
@@ -15,7 +15,10 @@ nav:
     - 🛰 MSG: datasets/msg.md
     - 🛰 GOES16: datasets/goes.md
   - Pipelines:
-    - 📏 GOES16: pipelines/goes16.md
+    - 📏 GOES16: pipelines/goes16.ipynb
+    - 📏 MODIS-Aqua: pipelines/modis_aqua.ipynb
+    - 📏 MSG: pipelines/msg.ipynb
+    - 📏 Analysis-Ready Data: pipelines/analysis_datasets.ipynb
   - 📕 Reference: api/
     
 theme:
@@ -59,6 +62,7 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 plugins:
+  - mkdocs-jupyter
   - search
   - gen-files:
       scripts:

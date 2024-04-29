@@ -292,7 +292,7 @@ def geoprocess(
     """
     # Initialize MODIS GeoProcessor
     logger.info(f"Initializing {satellite.upper()} GeoProcessor...")
-
+    logger.debug(f"PATHH: {read_path}")
     modis_geoprocessor = MODISGeoProcessing(
         satellite=satellite, 
         read_path=read_path, 
