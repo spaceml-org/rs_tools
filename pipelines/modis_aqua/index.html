@@ -10,9 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://spaceml.github.io/rs_tools/scripts/gen_pages/">
+        <link rel="canonical" href="https://spaceml.github.io/rs_tools/pipelines/modis_aqua/">
       
       
+        <link rel="prev" href="../goes16/">
+      
+      
+        <link rel="next" href="../msg/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -20,7 +24,7 @@
     
     
       
-        <title>Gen pages - RS-Tools</title>
+        <title>📏 MODIS-Aqua - RS-Tools</title>
       
     
     
@@ -65,6 +69,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#download" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -97,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Gen pages
+              📏 MODIS-Aqua
             
           </span>
         </div>
@@ -415,8 +424,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -426,13 +437,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
@@ -446,7 +455,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Pipelines
@@ -460,7 +469,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipelines/goes16/" class="md-nav__link">
+      <a href="../goes16/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -478,10 +487,28 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../pipelines/modis_aqua/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    📏 MODIS-Aqua
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -490,6 +517,81 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#download" class="md-nav__link">
+    <span class="md-ellipsis">
+      Download
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Download">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#save-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Save Directory
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#account" class="md-nav__link">
+    <span class="md-ellipsis">
+      Account
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Account">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config" class="md-nav__link">
+    <span class="md-ellipsis">
+      Config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geoprocessing" class="md-nav__link">
+    <span class="md-ellipsis">
+      GeoProcessing
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -502,7 +604,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipelines/msg/" class="md-nav__link">
+      <a href="../msg/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -523,7 +625,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipelines/analysis_datasets/" class="md-nav__link">
+      <a href="../analysis_datasets/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1894,6 +1996,71 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#download" class="md-nav__link">
+    <span class="md-ellipsis">
+      Download
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Download">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#save-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Save Directory
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#account" class="md-nav__link">
+    <span class="md-ellipsis">
+      Account
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Account">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#config" class="md-nav__link">
+    <span class="md-ellipsis">
+      Config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geoprocessing" class="md-nav__link">
+    <span class="md-ellipsis">
+      GeoProcessing
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1907,7 +2074,7 @@
                   
 
 
-  <h1>Gen pages</h1>
+  <h1>📏 MODIS-Aqua</h1>
 
 <script>
 (function (global, factory) {
@@ -2344,13 +2511,42 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </style>
 <!-- End of mermaid configuration --><div class="jupyter-wrapper">
 <div class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5777f976">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c103011a-4a1d-412f-9200-b823c9dd37bc">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>MODIS Pipeline</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=cb92d3f7-b31e-41ba-8ade-ae3961a0b5b7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<blockquote>
+<p>In this tutorial, we will walk through how one can download data and prep for any further machine learning work with the GOES16 dataset.
+We will:</p>
+<ol>
+<li>download the data</li>
+<li>harmonize the data</li>
+<li>create patches that are ready for ML consumption.</li>
+</ol>
+</blockquote>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e5d9b01f-9b02-4888-b8c2-42fdf3dfb27e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy for="cell-1">
@@ -2363,21 +2559,107 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">autoroot</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">dotenv</span> <span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
+<span class="kn">import</span> <span class="nn">rasterio</span>
+<span class="kn">import</span> <span class="nn">cartopy</span>
+<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
+<span class="kn">import</span> <span class="nn">cartopy.feature</span> <span class="k">as</span> <span class="nn">cfeature</span>
+<span class="kn">from</span> <span class="nn">cartopy.mpl.gridliner</span> <span class="kn">import</span> <span class="n">LONGITUDE_FORMATTER</span><span class="p">,</span> <span class="n">LATITUDE_FORMATTER</span>
+<span class="n">xr</span><span class="o">.</span><span class="n">set_options</span><span class="p">(</span>
+    <span class="n">keep_attrs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="n">display_expand_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="n">display_expand_coords</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="n">display_expand_data_vars</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="n">display_expand_indexes</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">edgeitems</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">reset_defaults</span><span class="p">()</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set_context</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="s2">"talk"</span><span class="p">,</span> <span class="n">font_scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-1">from pathlib import Path</div>
+<div class="clipboard-copy-txt" id="cell-1">import autoroot
+import os
+from dotenv import load_dotenv
+import xarray as xr
+import numpy as np
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import rasterio
+import cartopy
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+xr.set_options(
+    keep_attrs=True, 
+    display_expand_data=False, 
+    display_expand_coords=False, 
+    display_expand_data_vars=False, 
+    display_expand_indexes=False
+)
+np.set_printoptions(threshold=10, edgeitems=2)
+
+import seaborn as sns
+sns.reset_defaults()
+sns.set_context(context="talk", font_scale=1.0)
+
+%matplotlib inline</div>
 </div>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=070298b8-c943-4e73-a6fe-8e471b81c530">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
+<h2 id="download">Download<a class="anchor-link" href="#download">¶</a></h2><p>Firstly, we need to download the data.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=62bfd570-ca59-4820-ad0f-ca74b652c7fb">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="save-directory">Save Directory<a class="anchor-link" href="#save-directory">¶</a></h4>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a231a650-b349-40f3-a0ad-3a3e7a9c16db">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>This is arguably the most important part.
+We need to define where we want to save the data.</p>
+<p>We use the <code>autoroot</code> package to manually handle all of the</p>
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=856eebe7">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=4eb1b8c6-8646-4861-943b-d651dfb1bdee">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy for="cell-2">
@@ -2390,27 +2672,32 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">mkdocs_gen_files</span>
-<span class="kn">from</span> <span class="nn">mkdocs_gen_files</span> <span class="kn">import</span> <span class="n">Nav</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">dataclasses</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">root_dir</span> <span class="o">=</span> <span class="n">autoroot</span><span class="o">.</span><span class="n">root</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-2">import mkdocs_gen_files
-from mkdocs_gen_files import Nav
-from typing import Iterable, Mapping, Union
-import dataclasses</div>
+<div class="clipboard-copy-txt" id="cell-2">root_dir = autoroot.root</div>
 </div>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=981748d3-0966-431f-803a-40fdc71501b3">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><strong>Note</strong>: The data is very heavy! So make sure you have adequate space.</p>
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=a5b2288c">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c84f34f6-1e67-4c63-aa14-386c225181f8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy for="cell-3">
@@ -2423,83 +2710,72 @@ import dataclasses</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">class</span> <span class="nc">CustomNav</span><span class="p">(</span><span class="n">Nav</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
-    <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-    <span class="k">class</span> <span class="nc">Item</span><span class="p">:</span>
-        <span class="n">level</span><span class="p">:</span> <span class="nb">int</span>
-        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
-        <span class="n">filename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_items</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Item</span><span class="p">]:</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"rs_tools"</span><span class="p">:</span>
-                    <span class="n">title</span> <span class="o">=</span> <span class="s2">"RSTOOLS"</span>
-                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"_src"</span><span class="p">:</span>
-                    <span class="n">title</span> <span class="o">=</span> <span class="s2">"Source"</span>
-                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"modis"</span><span class="p">:</span>
-                    <span class="n">title</span> <span class="o">=</span> <span class="s2">"MODIS"</span>
-                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"msg"</span><span class="p">:</span>
-                    <span class="n">title</span> <span class="o">=</span> <span class="s2">"MSG"</span>
-                <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">"goes"</span><span class="p">:</span>
-                    <span class="n">title</span> <span class="o">=</span> <span class="s2">"GOES"</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">title</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
-
-                <span class="c1"># title = title.replace("_", " ")</span>
-                <span class="c1"># title = title.replace("Matern", "Matérn")</span>
-
-                <span class="k">yield</span> <span class="bp">cls</span><span class="o">.</span><span class="n">Item</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
-                <span class="k">yield from</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_items</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">save_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"ITI_DATA_SAVEDIR"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-3">class CustomNav(Nav):
-    def __init__(self):
-        super().__init__()
-
-    @dataclasses.dataclass
-    class Item:
-        level: int
-        title: str
-        filename: Union[str, None]
-
-    @classmethod
-    def _items(cls, data: Mapping, level: int) -&gt; Iterable[Item]:
-        for key, value in data.items():
-            if key is not None:
-                if key == "rs_tools":
-                    title = "RSTOOLS"
-                elif key == "_src":
-                    title = "Source"
-                elif key == "modis":
-                    title = "MODIS"
-                elif key == "msg":
-                    title = "MSG"
-                elif key == "goes":
-                    title = "GOES"
-                else:
-                    title = key.title()
-
-                # title = title.replace("_", " ")
-                # title = title.replace("Matern", "Matérn")
-
-                yield cls.Item(level=level, title=title, filename=value.get(None))
-                yield from cls._items(value, level + 1)</div>
+<div class="clipboard-copy-txt" id="cell-3">save_dir = os.getenv("ITI_DATA_SAVEDIR")</div>
 </div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c03bf7a8">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=857c8271-47b8-45e5-b469-513c35b68941">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="account">Account<a class="anchor-link" href="#account">¶</a></h3>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=eff7d344-d09f-4d7a-ad45-032d644a205d">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>We use the NASA data registry which hosts all of the datasets.
+We use the <a href="https://earthaccess.readthedocs.io/en/stable/tutorials/getting-started/">EarthAccess</a> API which enables us to easily download data using python.</p>
+<p><strong>Warning</strong>: the user <strong>must</strong> have an account for the <a href="https://urs.earthdata.nasa.gov">NASA EarthData</a> API.
+Please follow the link to register for an account.
+There are different ways to authenticate your account.
+We recommend you log in once and store it to your local <code>~/.netrc</code> file or alternatively, setting the <code>.env</code> variable to your <code>EARTHDATA_USERNAME</code> and <code>EARTH_PASSWORD</code>.
+See these <a href="https://earthaccess.readthedocs.io/en/stable/tutorials/getting-started/#auth">instructions</a> for more information.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fbb0d83e-54cb-4c4d-a65f-0cd620067fff">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h4 id="config">Config<a class="anchor-link" href="#config">¶</a></h4>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1fd46b9e-579c-417c-a6e5-6b261d95c2a1">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>We have a configuration file which features some of the options available for downloading data.
+One can take a peek using the command below.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=db2d8893-4f32-4fa8-b546-73cc576f6c8b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy for="cell-4">
@@ -2512,21 +2788,61 @@ import dataclasses</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">nav</span> <span class="o">=</span> <span class="n">CustomNav</span><span class="p">()</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="err">!</span><span class="n">cat</span> <span class="err">$</span><span class="n">autoroot</span><span class="o">.</span><span class="n">root</span><span class="o">/</span><span class="n">config</span><span class="o">/</span><span class="n">example</span><span class="o">/</span><span class="n">download</span><span class="o">.</span><span class="n">yaml</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-4">nav = CustomNav()</div>
+<div class="clipboard-copy-txt" id="cell-4">!cat $autoroot.root/config/example/download.yaml</div>
 </div>
 </div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre># PERIOD
+period:
+  start_date: '2020-10-01'
+  start_time: '00:00:00'
+  end_date: '2020-10-31'
+  end_time: '23:59:00'
+
+# CLOUD MASK
+cloud_mask: True
+  
+# PATH FOR SAVING DATA
+save_dir: data
+
+defaults:
+  - _self_
+  
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8684ff91-8f65-4ccc-9b6c-90f0691b65d9">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>We also have some more things we can change that are satellite specific.</p>
+<p>We can see them using the command below.</p>
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f27aa32e">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=7b92c827-8a66-4173-8ef8-6f588d7531e3">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy for="cell-5">
@@ -2539,89 +2855,85 @@ import dataclasses</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">"rs_tools"</span><span class="p">)</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*.py"</span><span class="p">)):</span>
-    <span class="n">module_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
-    <span class="n">doc_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="s2">"rs_tools"</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">".md"</span><span class="p">)</span>
-    <span class="n">full_doc_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"api"</span><span class="p">,</span> <span class="n">doc_path</span><span class="p">)</span>
-
-    <span class="n">parts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">module_path</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"__init__"</span><span class="p">:</span>
-        <span class="n">parts</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">doc_path</span> <span class="o">=</span> <span class="n">doc_path</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">"index.md"</span><span class="p">)</span>
-        <span class="n">full_doc_path</span> <span class="o">=</span> <span class="n">full_doc_path</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">"index.md"</span><span class="p">)</span>
-        <span class="k">continue</span>
-    <span class="k">elif</span> <span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
-        <span class="k">continue</span>
-
-    <span class="c1"># final_part = parts[-1].title()</span>
-    <span class="c1"># parts = parts[:-1] + [final_part]</span>
-    <span class="n">nav</span><span class="p">[</span><span class="n">parts</span><span class="p">]</span> <span class="o">=</span> <span class="n">doc_path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
-
-    <span class="c1"># print(full_doc_path)</span>
-    <span class="k">with</span> <span class="n">mkdocs_gen_files</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">full_doc_path</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
-        <span class="n">identifier</span> <span class="o">=</span> <span class="s2">"."</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
-        <span class="n">title</span> <span class="o">=</span> <span class="n">identifier</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"_"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
-        <span class="c1"># if title == "Gps":</span>
-        <span class="c1">#     title = "GPs"</span>
-        <span class="c1"># elif title == "Rbf":</span>
-        <span class="c1">#     title = "RBF"</span>
-
-        <span class="c1"># if "Matern" in title:</span>
-        <span class="c1">#     title = title.replace("Matern", "Matérn")</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"# </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">fd</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">"::: "</span> <span class="o">+</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">fd</span><span class="p">)</span>  <span class="c1">#</span>
-
-    <span class="n">mkdocs_gen_files</span><span class="o">.</span><span class="n">set_edit_path</span><span class="p">(</span><span class="n">full_doc_path</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># !cat $autoroot.root/config/example/satellite/aqua.yaml</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-5">for path in sorted(Path("rs_tools").rglob("*.py")):
-    module_path = path.relative_to(".").with_suffix("")
-    doc_path = path.relative_to("rs_tools").with_suffix(".md")
-    full_doc_path = Path("api", doc_path)
-
-    parts = list(module_path.parts)
-
-    if parts[-1] == "__init__":
-        parts = parts[:-1]
-        doc_path = doc_path.with_name("index.md")
-        full_doc_path = full_doc_path.with_name("index.md")
-        continue
-    elif parts[-1] == "__main__":
-        continue
-
-    # final_part = parts[-1].title()
-    # parts = parts[:-1] + [final_part]
-    nav[parts] = doc_path.as_posix()
-
-    # print(full_doc_path)
-    with mkdocs_gen_files.open(full_doc_path, "w") as fd:
-        identifier = ".".join(parts)
-        title = identifier.split(".")[-1].replace("_", " ").title()
-        # if title == "Gps":
-        #     title = "GPs"
-        # elif title == "Rbf":
-        #     title = "RBF"
-
-        # if "Matern" in title:
-        #     title = title.replace("Matern", "Matérn")
-
-        print(f"# {title}\n", file=fd)
-        print("::: " + identifier, file=fd)  #
-
-    mkdocs_gen_files.set_edit_path(full_doc_path, path)</div>
+<div class="clipboard-copy-txt" id="cell-5"># !cat $autoroot.root/config/example/satellite/aqua.yaml</div>
 </div>
 </div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ec17acb5-f695-4b6f-b83c-56255341e7e5">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="highlight"><pre><span></span><span class="nt">download</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">_target_</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rs_tools._src.data.modis.downloader_aqua.download</span>
+<span class="w">  </span><span class="nt">save_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${save_dir}/aqua/</span>
+<span class="w">  </span><span class="nt">start_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${period.start_date}</span>
+<span class="w">  </span><span class="nt">start_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${period.start_time}</span>
+<span class="w">  </span><span class="nt">end_date</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${period.end_date}</span>
+<span class="w">  </span><span class="nt">end_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${period.end_time}</span>
+<span class="w">  </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="s">"-130</span><span class="nv"> </span><span class="s">-15</span><span class="nv"> </span><span class="s">-90</span><span class="nv"> </span><span class="s">5"</span><span class="w"> </span><span class="c1"># "lon_min lat_min lon_max lat_max"</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d7f54487-358b-42e9-bd4c-ebe3b415bbf1">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>For this tutorial, we will change the save directory, start/end time, and the time step.</p>
+<p>Notice how we will change some configurations within the <code>download.yaml</code> file and some others that are within the <code>satellite.yaml</code> file, in particular the <code>aqua.yaml</code>.</p>
+<div class="highlight"><pre><span></span>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">satellite</span><span class="o">=</span>aqua<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">stage</span><span class="o">=</span>download<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">save_dir</span><span class="o">=</span><span class="s2">"/path/to/savedir"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>period.start_date<span class="o">=</span><span class="s2">"2020-10-01"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>period.end_date<span class="o">=</span><span class="s2">"2020-10-02"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>period.start_time<span class="o">=</span><span class="s2">"09:00:00"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>period.end_time<span class="o">=</span><span class="s2">"21:00:00"</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e399b813-0540-4cce-b4c1-32a14424fbfa">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
+<h2 id="geoprocessing">GeoProcessing<a class="anchor-link" href="#geoprocessing">¶</a></h2>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=edf13380-752d-4f48-9d4b-185f29b64bb2">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>We have an extensive geoprocessing steps to be able to</p>
+<p>We can peek into the <code>rs_tools/config/example/download.yaml</code> configuration file to see some of the options we have to modify this.</p>
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=7b39d568">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=77ec517f-3fad-480d-9e41-65fbbf2d363f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy for="cell-6">
@@ -2634,11 +2946,359 @@ import dataclasses</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="k">with</span> <span class="n">mkdocs_gen_files</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"api/SUMMARY.md"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">nav_file</span><span class="p">:</span>
-    <span class="n">nav_file</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">nav</span><span class="o">.</span><span class="n">build_literate_nav</span><span class="p">())</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># !cat $autoroot.root/config/example/satellite/aqua.yaml</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-6">with mkdocs_gen_files.open("api/SUMMARY.md", "w") as nav_file:
-    nav_file.writelines(nav.build_literate_nav())</div>
+<div class="clipboard-copy-txt" id="cell-6"># !cat $autoroot.root/config/example/satellite/aqua.yaml</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fac7e9c6-ea1a-4af1-a513-6ef91ec5389e">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="highlight"><pre><span></span><span class="nt">geoprocess</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">_target_</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rs_tools._src.geoprocessing.modis.geoprocessor_modis.geoprocess</span>
+<span class="w">  </span><span class="nt">read_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${read_path}/aqua/raw</span>
+<span class="w">  </span><span class="nt">save_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${save_path}/aqua/geoprocessed</span>
+<span class="w">  </span><span class="nt">satellite</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aqua</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9a77a4d9-5cae-4590-879d-8948336525ca">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>In particular, we will focus on the <code>geoprocess</code> step within the configuration.
+The most important options are the <code>resolution</code> and the <code>region</code>.
+The resolution is a float or integer that is measured in km.</p>
+<p>Below, we have an example of the command we</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=40b90173-93b5-4a91-85ba-2611ffcd7dde">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="highlight"><pre><span></span>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">satellite</span><span class="o">=</span>goes<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">stage</span><span class="o">=</span>geoprocess<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">read_path</span><span class="o">=</span><span class="s2">"/path/to/savedir/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">save_path</span><span class="o">=</span><span class="s2">"/path/to/savedir/"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>satellite.geoprocess.resolution<span class="o">=</span><span class="m">5000</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=12ff6d62-2c29-4d16-abd0-d8153ffae126">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>We can see the saved data are clean</p>
+<div class="highlight"><pre><span></span>/path/to/savedir/goes16/geoprocessed/20201001150019_goes16.nc
+/path/to/savedir/goes16/geoprocessed/20201002150019_goes16.nc
+</pre></div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d1640e24-912c-4ce0-bced-471b0ec4625f">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-7">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">satpy</span>
+<span class="kn">from</span> <span class="nn">satpy</span> <span class="kn">import</span> <span class="n">Scene</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-7">import satpy
+from satpy import Scene</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=b0ac7db1-d090-4613-8ce8-bac2ce7f8796">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-8">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">rs_tools._src.utils.io</span> <span class="kn">import</span> <span class="n">get_list_filenames</span>
+<span class="n">list_of_files</span> <span class="o">=</span> <span class="n">get_list_filenames</span><span class="p">(</span><span class="s2">"/pool/usuarios/juanjohn/data/iti/aqua/raw/aqua/L1b/"</span><span class="p">,</span> <span class="s2">".hdf"</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-8">from rs_tools._src.utils.io import get_list_filenames
+list_of_files = get_list_filenames("/pool/usuarios/juanjohn/data/iti/aqua/raw/aqua/L1b/", ".hdf")</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4b6dbd17-3d1a-4f70-8350-a8c025a4d0a0">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-9">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">list_of_files</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-9">xr.open_dataset(list_of_files[0])</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">ValueError</span>                                Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[10], line 1</span>
+<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">xr</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">open_dataset</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">list_of_files</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">0</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">)</span>
+
+File <span class="ansi-green-fg">~/miniconda/envs/rs_tools/lib/python3.11/site-packages/xarray/backends/api.py:554</span>, in <span class="ansi-cyan-fg">open_dataset</span><span class="ansi-blue-fg">(filename_or_obj, engine, chunks, cache, decode_cf, mask_and_scale, decode_times, decode_timedelta, use_cftime, concat_characters, decode_coords, drop_variables, inline_array, chunked_array_type, from_array_kwargs, backend_kwargs, **kwargs)</span>
+<span class="ansi-green-intense-fg ansi-bold">    551</span>     kwargs<span style="color: rgb(98,98,98)">.</span>update(backend_kwargs)
+<span class="ansi-green-intense-fg ansi-bold">    553</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> engine <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-fg">--&gt; 554</span>     engine <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">plugins</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">guess_engine</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">filename_or_obj</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    556</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> from_array_kwargs <span class="ansi-bold" style="color: rgb(175,0,255)">is</span> <span class="ansi-bold" style="color: rgb(0,135,0)">None</span>:
+<span class="ansi-green-intense-fg ansi-bold">    557</span>     from_array_kwargs <span style="color: rgb(98,98,98)">=</span> {}
+
+File <span class="ansi-green-fg">~/miniconda/envs/rs_tools/lib/python3.11/site-packages/xarray/backends/plugins.py:197</span>, in <span class="ansi-cyan-fg">guess_engine</span><span class="ansi-blue-fg">(store_spec)</span>
+<span class="ansi-green-intense-fg ansi-bold">    189</span> <span class="ansi-bold" style="color: rgb(0,135,0)">else</span>:
+<span class="ansi-green-intense-fg ansi-bold">    190</span>     error_msg <span style="color: rgb(98,98,98)">=</span> (
+<span class="ansi-green-intense-fg ansi-bold">    191</span>         <span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">found the following matches with the input file in xarray</span><span style="color: rgb(175,0,0)">'</span><span style="color: rgb(175,0,0)">s IO </span><span style="color: rgb(175,0,0)">"</span>
+<span class="ansi-green-intense-fg ansi-bold">    192</span>         <span style="color: rgb(175,0,0)">f</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">backends: </span><span class="ansi-bold" style="color: rgb(175,95,135)">{</span>compatible_engines<span class="ansi-bold" style="color: rgb(175,95,135)">}</span><span style="color: rgb(175,0,0)">. But their dependencies may not be installed, see:</span><span class="ansi-bold" style="color: rgb(175,95,0)">\n</span><span style="color: rgb(175,0,0)">"</span>
+<span class="ansi-green-intense-fg ansi-bold">    193</span>         <span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">https://docs.xarray.dev/en/stable/user-guide/io.html </span><span class="ansi-bold" style="color: rgb(175,95,0)">\n</span><span style="color: rgb(175,0,0)">"</span>
+<span class="ansi-green-intense-fg ansi-bold">    194</span>         <span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">https://docs.xarray.dev/en/stable/getting-started-guide/installing.html</span><span style="color: rgb(175,0,0)">"</span>
+<span class="ansi-green-intense-fg ansi-bold">    195</span>     )
+<span class="ansi-green-fg">--&gt; 197</span> <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ValueError</span>(error_msg)
+
+<span class="ansi-red-fg">ValueError</span>: did not find a match in any of xarray's currently installed IO backends ['netcdf4', 'h5netcdf', 'scipy', 'gini', 'rasterio', 'zarr']. Consider explicitly selecting one of the installed engines via the ``engine`` parameter, or installing additional IO dependencies, see:
+https://docs.xarray.dev/en/stable/getting-started-guide/installing.html
+https://docs.xarray.dev/en/stable/user-guide/io.html</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=068671e1-769f-4851-b512-80140e3210d4">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-10">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">scn</span> <span class="o">=</span> <span class="n">Scene</span><span class="p">(</span>
+    <span class="n">reader</span><span class="o">=</span><span class="s2">"modis_l1b"</span><span class="p">,</span> 
+    <span class="n">filenames</span><span class="o">=</span><span class="p">[</span><span class="n">list_of_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> 
+<span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-10">scn = Scene(
+    reader="modis_l1b", 
+    filenames=[list_of_files[0]], 
+)</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>Don't know how to open the following files: {'/pool/usuarios/juanjohn/data/iti/aqua/raw/aqua/L1b/MYD021KM.A2020275.1955.061.2020276153609.hdf'}
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">ValueError</span>                                Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[11], line 1</span>
+<span class="ansi-green-fg">----&gt; 1</span> scn <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">Scene</span><span class="ansi-yellow-bg">(</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">reader</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">modis_l1b</span><span class="ansi-yellow-bg" style="color: rgb(175,0,0)">"</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-yellow-bg">    </span><span class="ansi-yellow-bg">filenames</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg">list_of_files</span><span class="ansi-yellow-bg">[</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">0</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">]</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span>
+<span class="ansi-green-intense-fg ansi-bold">      4</span> <span class="ansi-yellow-bg">)</span>
+
+File <span class="ansi-green-fg">~/miniconda/envs/rs_tools/lib/python3.11/site-packages/satpy/scene.py:152</span>, in <span class="ansi-cyan-fg">Scene.__init__</span><span class="ansi-blue-fg">(self, filenames, reader, filter_parameters, reader_kwargs)</span>
+<span class="ansi-green-intense-fg ansi-bold">    149</span> <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> filenames:
+<span class="ansi-green-intense-fg ansi-bold">    150</span>     filenames <span style="color: rgb(98,98,98)">=</span> convert_remote_files_to_fsspec(filenames, storage_options)
+<span class="ansi-green-fg">--&gt; 152</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>_readers <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg" style="color: rgb(0,135,0)">self</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">.</span><span class="ansi-yellow-bg">_create_reader_instances</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">filenames</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">filenames</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">    153</span> <span class="ansi-yellow-bg">                                              </span><span class="ansi-yellow-bg">reader</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">reader</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">    154</span> <span class="ansi-yellow-bg">                                              </span><span class="ansi-yellow-bg">reader_kwargs</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">cleaned_reader_kwargs</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    155</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>_datasets <span style="color: rgb(98,98,98)">=</span> DatasetDict()
+<span class="ansi-green-intense-fg ansi-bold">    156</span> <span style="color: rgb(0,135,0)">self</span><span style="color: rgb(98,98,98)">.</span>_wishlist <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(0,135,0)">set</span>()
+
+File <span class="ansi-green-fg">~/miniconda/envs/rs_tools/lib/python3.11/site-packages/satpy/scene.py:173</span>, in <span class="ansi-cyan-fg">Scene._create_reader_instances</span><span class="ansi-blue-fg">(self, filenames, reader, reader_kwargs)</span>
+<span class="ansi-green-intense-fg ansi-bold">    168</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span> <span style="color: rgb(0,0,255)">_create_reader_instances</span>(<span style="color: rgb(0,135,0)">self</span>,
+<span class="ansi-green-intense-fg ansi-bold">    169</span>                              filenames<span style="color: rgb(98,98,98)">=</span><span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-intense-fg ansi-bold">    170</span>                              reader<span style="color: rgb(98,98,98)">=</span><span class="ansi-bold" style="color: rgb(0,135,0)">None</span>,
+<span class="ansi-green-intense-fg ansi-bold">    171</span>                              reader_kwargs<span style="color: rgb(98,98,98)">=</span><span class="ansi-bold" style="color: rgb(0,135,0)">None</span>):
+<span class="ansi-green-intense-fg ansi-bold">    172</span> <span style="color: rgb(188,188,188)">    </span><span style="color: rgb(175,0,0)">"""Find readers and return their instances."""</span>
+<span class="ansi-green-fg">--&gt; 173</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> <span class="ansi-yellow-bg">load_readers</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">filenames</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">filenames</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">    174</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">reader</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">reader</span><span class="ansi-yellow-bg">,</span>
+<span class="ansi-green-intense-fg ansi-bold">    175</span> <span class="ansi-yellow-bg">                        </span><span class="ansi-yellow-bg">reader_kwargs</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">reader_kwargs</span><span class="ansi-yellow-bg">)</span>
+
+File <span class="ansi-green-fg">~/miniconda/envs/rs_tools/lib/python3.11/site-packages/satpy/readers/__init__.py:587</span>, in <span class="ansi-cyan-fg">load_readers</span><span class="ansi-blue-fg">(filenames, reader, reader_kwargs)</span>
+<span class="ansi-green-intense-fg ansi-bold">    584</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">break</span>
+<span class="ansi-green-intense-fg ansi-bold">    586</span> _check_remaining_files(remaining_filenames)
+<span class="ansi-green-fg">--&gt; 587</span> <span class="ansi-yellow-bg">_check_reader_instances</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">reader_instances</span><span class="ansi-yellow-bg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">    588</span> <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> reader_instances
+
+File <span class="ansi-green-fg">~/miniconda/envs/rs_tools/lib/python3.11/site-packages/satpy/readers/__init__.py:626</span>, in <span class="ansi-cyan-fg">_check_reader_instances</span><span class="ansi-blue-fg">(reader_instances)</span>
+<span class="ansi-green-intense-fg ansi-bold">    624</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span> <span style="color: rgb(0,0,255)">_check_reader_instances</span>(reader_instances):
+<span class="ansi-green-intense-fg ansi-bold">    625</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> reader_instances:
+<span class="ansi-green-fg">--&gt; 626</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ValueError</span>(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">No supported files found</span><span style="color: rgb(175,0,0)">"</span>)
+<span class="ansi-green-intense-fg ansi-bold">    627</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">if</span> <span class="ansi-bold" style="color: rgb(175,0,255)">not</span> <span style="color: rgb(0,135,0)">any</span>(<span style="color: rgb(0,135,0)">list</span>(r<span style="color: rgb(98,98,98)">.</span>available_dataset_ids) <span class="ansi-bold" style="color: rgb(0,135,0)">for</span> r <span class="ansi-bold" style="color: rgb(175,0,255)">in</span> reader_instances<span style="color: rgb(98,98,98)">.</span>values()):
+<span class="ansi-green-intense-fg ansi-bold">    628</span>         <span class="ansi-bold" style="color: rgb(0,135,0)">raise</span> <span class="ansi-bold" style="color: rgb(215,95,95)">ValueError</span>(<span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">No dataset could be loaded. Either missing </span><span style="color: rgb(175,0,0)">"</span>
+<span class="ansi-green-intense-fg ansi-bold">    629</span>                          <span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">requirements (such as Epilog, Prolog) or none of the </span><span style="color: rgb(175,0,0)">"</span>
+<span class="ansi-green-intense-fg ansi-bold">    630</span>                          <span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">provided files match the filter parameters.</span><span style="color: rgb(175,0,0)">"</span>)
+
+<span class="ansi-red-fg">ValueError</span>: No supported files found</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bac06899-94cf-4469-9485-67bf2ef88988">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-11">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">scn</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">get_modis_channel_numbers</span><span class="p">(),</span> <span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">calibration</span><span class="o">=</span><span class="s2">"radiance"</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-11">scn.load(get_modis_channel_numbers(), resolution = resolution, calibration="radiance")</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr" tabindex="0">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[6], line 1</span>
+<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">scn</span><span style="color: rgb(98,98,98)">.</span>load(get_modis_channel_numbers(), resolution <span style="color: rgb(98,98,98)">=</span> resolution, calibration<span style="color: rgb(98,98,98)">=</span><span style="color: rgb(175,0,0)">"</span><span style="color: rgb(175,0,0)">radiance</span><span style="color: rgb(175,0,0)">"</span>)
+
+<span class="ansi-red-fg">NameError</span>: name 'scn' is not defined</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=b26e4d7c-6d6b-4ca8-b128-69457a284225">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-12">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-12"></div>
 </div>
 </div>
 </div>
@@ -2648,6 +3308,10 @@ import dataclasses</div>
 </div> <!-- jp-Notebook -->
 </div> <!-- jupyter-wrapper -->
 
+        <style>
+        ['pre { line-height: 125%; }\ntd.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }\nspan.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }\ntd.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }\nspan.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }\n.highlight-ipynb .hll { background-color: var(--jp-cell-editor-active-background) }\n.highlight-ipynb { background: var(--jp-cell-editor-background); color: var(--jp-mirror-editor-variable-color) }\n.highlight-ipynb .c { color: var(--jp-mirror-editor-comment-color); font-style: italic } /* Comment */\n.highlight-ipynb .err { color: var(--jp-mirror-editor-error-color) } /* Error */\n.highlight-ipynb .k { color: var(--jp-mirror-editor-keyword-color); font-weight: bold } /* Keyword */\n.highlight-ipynb .o { color: var(--jp-mirror-editor-operator-color); font-weight: bold } /* Operator */\n.highlight-ipynb .p { color: var(--jp-mirror-editor-punctuation-color) } /* Punctuation */\n.highlight-ipynb .ch { color: var(--jp-mirror-editor-comment-color); font-style: italic } /* Comment.Hashbang */\n.highlight-ipynb .cm { color: var(--jp-mirror-editor-comment-color); font-style: italic } /* Comment.Multiline */\n.highlight-ipynb .cp { color: var(--jp-mirror-editor-comment-color); font-style: italic } /* Comment.Preproc */\n.highlight-ipynb .cpf { color: var(--jp-mirror-editor-comment-color); font-style: italic } /* Comment.PreprocFile */\n.highlight-ipynb .c1 { color: var(--jp-mirror-editor-comment-color); font-style: italic } /* Comment.Single */\n.highlight-ipynb .cs { color: var(--jp-mirror-editor-comment-color); font-style: italic } /* Comment.Special */\n.highlight-ipynb .kc { color: var(--jp-mirror-editor-keyword-color); font-weight: bold } /* Keyword.Constant */\n.highlight-ipynb .kd { color: var(--jp-mirror-editor-keyword-color); font-weight: bold } /* Keyword.Declaration */\n.highlight-ipynb .kn { color: var(--jp-mirror-editor-keyword-color); font-weight: bold } /* Keyword.Namespace */\n.highlight-ipynb .kp { color: var(--jp-mirror-editor-keyword-color); font-weight: bold } /* Keyword.Pseudo */\n.highlight-ipynb .kr { color: var(--jp-mirror-editor-keyword-color); font-weight: bold } /* Keyword.Reserved */\n.highlight-ipynb .kt { color: var(--jp-mirror-editor-keyword-color); font-weight: bold } /* Keyword.Type */\n.highlight-ipynb .m { color: var(--jp-mirror-editor-number-color) } /* Literal.Number */\n.highlight-ipynb .s { color: var(--jp-mirror-editor-string-color) } /* Literal.String */\n.highlight-ipynb .ow { color: var(--jp-mirror-editor-operator-color); font-weight: bold } /* Operator.Word */\n.highlight-ipynb .pm { color: var(--jp-mirror-editor-punctuation-color) } /* Punctuation.Marker */\n.highlight-ipynb .w { color: var(--jp-mirror-editor-variable-color) } /* Text.Whitespace */\n.highlight-ipynb .mb { color: var(--jp-mirror-editor-number-color) } /* Literal.Number.Bin */\n.highlight-ipynb .mf { color: var(--jp-mirror-editor-number-color) } /* Literal.Number.Float */\n.highlight-ipynb .mh { color: var(--jp-mirror-editor-number-color) } /* Literal.Number.Hex */\n.highlight-ipynb .mi { color: var(--jp-mirror-editor-number-color) } /* Literal.Number.Integer */\n.highlight-ipynb .mo { color: var(--jp-mirror-editor-number-color) } /* Literal.Number.Oct */\n.highlight-ipynb .sa { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Affix */\n.highlight-ipynb .sb { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Backtick */\n.highlight-ipynb .sc { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Char */\n.highlight-ipynb .dl { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Delimiter */\n.highlight-ipynb .sd { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Doc */\n.highlight-ipynb .s2 { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Double */\n.highlight-ipynb .se { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Escape */\n.highlight-ipynb .sh { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Heredoc */\n.highlight-ipynb .si { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Interpol */\n.highlight-ipynb .sx { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Other */\n.highlight-ipynb .sr { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Regex */\n.highlight-ipynb .s1 { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Single */\n.highlight-ipynb .ss { color: var(--jp-mirror-editor-string-color) } /* Literal.String.Symbol */\n.highlight-ipynb .il { color: var(--jp-mirror-editor-number-color) } /* Literal.Number.Integer.Long */']
+        </style>
+        
 
 
 

@@ -229,7 +229,7 @@
         
   
   <span class="md-ellipsis">
-    HOME
+    Home
   </span>
   
 
@@ -474,6 +474,48 @@
   
   <span class="md-ellipsis">
     GOES16 Pipeline
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../pipelines/modis_aqua/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📏 MODIS-Aqua
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../pipelines/msg/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📏 MSG
   </span>
   
 
@@ -3826,7 +3868,7 @@
 <a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="c1"># Initialize MODIS GeoProcessor</span>
 <a id="__codelineno-0-294" name="__codelineno-0-294"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initializing </span><span class="si">{</span><span class="n">satellite</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> GeoProcessor...&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-295" name="__codelineno-0-295"></a>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PATHH: </span><span class="si">{</span><span class="n">read_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-296" name="__codelineno-0-296"></a>    <span class="n">modis_geoprocessor</span> <span class="o">=</span> <span class="n">MODISGeoProcessing</span><span class="p">(</span>
 <a id="__codelineno-0-297" name="__codelineno-0-297"></a>        <span class="n">satellite</span><span class="o">=</span><span class="n">satellite</span><span class="p">,</span> 
 <a id="__codelineno-0-298" name="__codelineno-0-298"></a>        <span class="n">read_path</span><span class="o">=</span><span class="n">read_path</span><span class="p">,</span> 

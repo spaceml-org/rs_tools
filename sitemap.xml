@@ -206,6 +206,16 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://spaceml.github.io/rs_tools/pipelines/modis_aqua/</loc>
+         <lastmod>2024-04-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://spaceml.github.io/rs_tools/pipelines/msg/</loc>
+         <lastmod>2024-04-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://spaceml.github.io/rs_tools/scripts/gen_pages/</loc>
          <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>

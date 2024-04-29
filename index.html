@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              HOME
+              Home
             
           </span>
         </div>
@@ -236,7 +236,7 @@
           
   
   <span class="md-ellipsis">
-    HOME
+    Home
   </span>
   
 
@@ -247,7 +247,7 @@
         
   
   <span class="md-ellipsis">
-    HOME
+    Home
   </span>
   
 
@@ -587,6 +587,48 @@
   
   <span class="md-ellipsis">
     GOES16 Pipeline
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="pipelines/modis_aqua/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📏 MODIS-Aqua
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="pipelines/msg/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    📏 MSG
   </span>
   
 
@@ -2074,11 +2116,18 @@
 
 <h1 id="welcome-to-rstools">Welcome to <code>RSTools</code><a class="headerlink" href="#welcome-to-rstools" title="Permanent link"></a></h1>
 <h2 id="what-are-rs-tools">What are RS-Tools?<a class="headerlink" href="#what-are-rs-tools" title="Permanent link"></a></h2>
+<p><code>rs_tools</code> is a toolbox of functions designed to 
+There is a high barrier to entry when working with remote sensing data for machine learning (ML) research.
+This is especially true for level 1 data which is typically raw radiance observations.
+There are often many domain-specific transformations that can completely make or break the success of the ML task.
+<code>rs_tools</code> seeks to lower the barrier to entry cost for ML researchers to make meaningful progress when dealing with remote sensing data. 
+It features a standardized, transparent and flexible procedure for defining data and evaluation pipelines for data-intensive level 1 data products.</p>
 <hr />
 <h3 id="agnostic-toolbox-of-functions">Agnostic Toolbox of Functions<a class="headerlink" href="#agnostic-toolbox-of-functions" title="Permanent link"></a></h3>
 <p>We provide a suite of useful functions which can be used to clean level-1 remote sensing data to be used for downstream tasks.
-It is an agnostic suite 
-We take care of all of the nitty-gritty details which are </p>
+It is an agnostic suite of functions that can be piped together to create preprocessing and evaluation chains.
+We take care of all of the nitty-gritty details which are often common for these types of datasets.
+However, we take care not to hard-code anything and try to be as transparent as possible so that users can understand and modify the scripts for their own use cases.</p>
 <hr />
 <h3 id="pipelines">Pipelines<a class="headerlink" href="#pipelines" title="Permanent link"></a></h3>
 <p>We provide some hydra-integrated pipelines which allow users to do some high-level processing to produce ML-ready datasets.
@@ -2086,28 +2135,56 @@ We follow best principles to be as agnostic as possible so that users are not bo
 In addition, we provide many small bite-sized functions which users can piece together in their own way for their own applications.</p>
 <hr />
 <h4 id="data-downloader">Data Downloader<a class="headerlink" href="#data-downloader" title="Permanent link"></a></h4>
-<p>With a few simple commands, we can download some raw level 1 data products with minimum preprocessing.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>goes<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>download
+<p>With a few simple commands, we can download some raw level 1 data products with minimum preprocessing.
+We currently have data downloaders for <a href="">MODIS Level 1</a> data, <a href="">MSG Level 1</a> data, and <a href="">GOES16 Level 1</a> data.</p>
+<p>A user can get started right away by simply running the following snippet in the command line.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># GOES 16</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>goes<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>download
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># MODIS - AQUA (or TERRA)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>aqua<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>download
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># MSG</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>msg<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>download
 </code></pre></div>
-<p>We currently have data downloaders for <a href="">MODIS Level 1</a> data, <a href="">MSG Level 1</a> data, and <a href="">GOES16 Level 1</a> data.</p>
 <hr />
 <h4 id="analysis-ready-data">Analysis-Ready Data<a class="headerlink" href="#analysis-ready-data" title="Permanent link"></a></h4>
+<p>We have scripts to generate some <em>analysis-ready data</em>.
+These are datasets that have been harmonized under a common data structure.
+We try to keep as much meta-data as possible which could be useful for downstream tasks, e.g., coordinates, time stamps, units and cloud masks.
+A user can do some further analysis on these</p>
 <p><center>
     <img src="./assets/analysis_ready_data.png" alt="drawing" width="500"/>
 </center></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>goes<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>geoprocess
+<p>A user can get started right away by simply running the following snippet in the command line.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># GOES16</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>goes<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>geoprocess
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># MODIS - AQUA (or TERRA)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>aqua<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>geoprocess
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># MSG</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>msg<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>geoprocess
 </code></pre></div>
+<p>For more examples, see our pipelines sections for MODIS, MSG and GOES16.</p>
 <hr />
 <h4 id="machine-learning-ready-data">Machine-Learning Ready Data<a class="headerlink" href="#machine-learning-ready-data" title="Permanent link"></a></h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>goes<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>patching
-</code></pre></div>
+<p>We also feature some <em>ML-Ready</em> data which is immediately ready for ML-specific tasks.
+These are data that have already been divided into patches which sufficiently span the space for the ML task.
+A user can user whichever ML dataset/dataloader framework that they choose.</p>
 <p><center>
     <img src="./assets/ml_ready_data.png" alt="drawing" width="500"/>
 </center></p>
+<p>A user can get started right away by simply running the following snippet in the command line.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># GOES16</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>goes<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>patch
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># MODIS - AQUA (or TERRA)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>aqua<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>patch
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># MSG</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>msg<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>patch
+</code></pre></div>
 <hr />
 <h4 id="use-case-instrument-to-instrument-translation-work-in-progress">Use Case: Instrument-to-Instrument Translation (Work In Progress)<a class="headerlink" href="#use-case-instrument-to-instrument-translation-work-in-progress" title="Permanent link"></a></h4>
-<p>We also feature an Instrument-2-Instrument translation usecase</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>rs_tools<span class="w"> </span><span class="nv">satellite</span><span class="o">=</span>goes<span class="w"> </span><span class="nv">stage</span><span class="o">=</span>patching
+<p>We also feature an Instrument-2-Instrument translation use-case.
+See <a href="https://github.com/RobertJaro/InstrumentToInstrument/tree/master">github/InstrumentToInstrument</a> repo for more details.
+In the rs-tools library, we have a simple example training script.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python<span class="w"> </span>rs_tools<span class="w"> </span>...
 </code></pre></div>
 
 
