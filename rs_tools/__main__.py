@@ -11,9 +11,11 @@ import hydra
 from typing import Dict
 from loguru import logger
 from omegaconf import OmegaConf, DictConfig
+import autoroot
 
+# TODO add option to provide config path via command line
 
-@hydra.main(config_path="../config/example/", config_name="main", version_base="1.3")
+@hydra.main(config_path="../config/miniset/", config_name="main", version_base="1.3")
 def main(cfg):
     # instantiate the config 
     logger.debug(f"Choosing Stage...")
@@ -36,5 +38,6 @@ def main(cfg):
         raise ValueError(f"Unrecognized stage: {cfg.stage}")
 
 if __name__ == "__main__":
+    root_dir = autoroot.root
     main()
 
