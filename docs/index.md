@@ -1,4 +1,4 @@
-# `rs-tools`
+# Welcome to `RSTools`
 
 
 
@@ -31,7 +31,7 @@ In addition, we provide many small bite-sized functions which users can piece to
 #### Data Downloader
 
 With a few simple commands, we can download some raw level 1 data products with minimum preprocessing.
-We currently have data downloaders for [MODIS Level 1](https://spaceml-org.github.io/rs_tools/datasets/modis) data, [MSG Level 1](https://spaceml-org.github.io/rs_tools/datasets/msg) data, and [GOES16 Level 1](https://spaceml-org.github.io/rs_tools/datasets/goes/) data.
+We currently have data downloaders for [MODIS Level 1]() data, [MSG Level 1]() data, and [GOES16 Level 1]() data.
 
 
 A user can get started right away by simply running the following snippet in the command line.
@@ -55,7 +55,7 @@ We try to keep as much meta-data as possible which could be useful for downstrea
 A user can do some further analysis on these
 
 <center>
-    <img src="docs/assets/analysis_ready_data.png" alt="drawing" width="500"/>
+    <img src="./assets/analysis_ready_data.png" alt="drawing" width="500"/>
 </center>
 
 A user can get started right away by simply running the following snippet in the command line.
@@ -81,7 +81,7 @@ A user can user whichever ML dataset/dataloader framework that they choose.
 
 
 <center>
-    <img src="docs/assets/ml_ready_data.png" alt="drawing" width="500"/>
+    <img src="./assets/ml_ready_data.png" alt="drawing" width="500"/>
 </center>
 
 A user can get started right away by simply running the following snippet in the command line.
@@ -106,77 +106,3 @@ In the rs-tools library, we have a simple example training script.
 ```bash
 python rs_tools ...
 ```
-
-***
-## Installation
-
-### Conda (Recommended)
-
-We recommend the user to use `conda` with the associated environment for the environment.
-
-```bash
-conda env create -f environments/environment.yaml
-conda activate rs_tools
-```
-
-***
-### Pip (Alpha-Version)
-
-We can install via the github repo through pip.
-
-```bash
-pip install git+https://github.com/space-ml/rs_tools.git
-```
-
-**Warning**: This is an alpha version.
-
-***
-### Development Version
-
-
-
-```bash
-git clone https://github.com/space-ml/rs_tools.git
-cd rs_tools
-poetry install
-```
-
-!!! tip 
-    We advise you to create a virtual environment before installing:
-
-    ```bash
-    conda env create -f environment.yaml
-    conda activate rs_tools
-    ```
-
-    and recommend you check your installation passes the supplied unit tests:
-
-    ```bash
-    poetry run pytest tests/
-    ```
-
-***
-### Instrument To Instrument (Work-in-Progress)
-
-We have an example where we could do inference using a pre-trainined model from the ITI repo.
-This would require us to install the `itipy` repo directly.
-
-We can use
-
-
-```bash
-conda env create -f environments/environment_iti.yaml
-conda activate rs_tools
-```
-
-
-Please see the [InstrumentToInstrument](https://github.com/spaceml-org/InstrumentToInstrument/tree/development-eo) repo with the [example](https://github.com/spaceml-org/InstrumentToInstrument/blob/development-eo/iti/train/msg_to_goes.py) for more details.
-
-
-
----
-## References
-
-**Software**
-
-* [InstrumentToInstrument](https://github.com/RobertJaro/InstrumentToInstrument/tree/master) - Instrument-to-Instrument Translation.

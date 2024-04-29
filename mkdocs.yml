@@ -1,0 +1,98 @@
+site_name: RS-Tools
+site_description: The documentation for the RS-Toolz Library
+site_url: https://spaceml-org.github.io/rs_tools/
+repo_url: https://github.com/spaceml-org/rs_tools/
+repo_name: rs_tools
+
+edit_uri: ""
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - 🛠️ Installation: installation.md
+  - Datasets:
+    - 🛰 MODIS: datasets/modis.md
+    - 🛰 MSG: datasets/msg.md
+    - 🛰 GOES16: datasets/goes.md
+  - Pipelines:
+    - 🛰 GOES-16: pipelines/goes16.ipynb
+    - 🛠️ MODIS-Aqua: pipelines/modis_aqua.ipynb
+    - MSG: pipelines/msg.ipynb
+    - 🛠️ Analysis-Ready Data: pipelines/analysis_datasets.ipynb
+    - 🛠️ ML-Ready Data: pipelines/ml_ready_datasets.ipynb
+  - 📕 Reference: api/
+    
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top # Show a back to top button
+    - content.code.copy
+    - search.suggest # Show search suggestions
+    - search.highlight # Highlight search results in results
+    - content.code.annotate # Allow individual lines of code to be annotated
+
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+  - admonition
+  - pymdownx.details # Enhance admonitions with collapse/expand
+  - markdown_katex:
+      no_inline_svg: True
+      insert_fonts_css: True
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.tabbed
+  - toc:
+      permalink: ''
+      toc_depth: 4
+  - footnotes
+  # - pymdownx.arithmatex:
+  #     generic: true
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - mkdocs-jupyter
+  - search
+  - gen-files:
+      scripts:
+        - docs/scripts/gen_pages.py  # or any other name or path
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mkdocstrings:
+      watch:
+        - rs_tools
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_root_heading: true
+            show_root_full_path: true
+            show_if_no_docstring: true
+            show_signature_annotations: true
+            show_source: false
+            members_order: source  # order methods according to their order of definition in the source code, not alphabetical order
+            heading_level: 4
+          options:
+            inherited_members: true  # Allow looking up inherited methods
+            docstring_style: "google"
+
+
+extra_javascript:
+  - javascripts/katex.js
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js
+
+extra_css:
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css

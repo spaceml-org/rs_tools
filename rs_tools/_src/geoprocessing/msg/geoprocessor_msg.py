@@ -1,4 +1,5 @@
 import autoroot
+from dotenv import load_dotenv
 import os
 import numpy as np
 import rioxarray
@@ -24,6 +25,8 @@ from datetime import datetime
 from functools import partial
 import dask
 import warnings
+load_dotenv()
+
 
 dask.config.set(**{'array.slicing.split_large_chunks': False})
 warnings.filterwarnings('ignore', category=FutureWarning)

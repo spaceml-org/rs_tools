@@ -13,6 +13,7 @@ dependencies:
   - earthaccess
   - eumdac
   - pyinterp
+  - satpy
   # - conda-forge::torchgeo
   - pandas # Data structure
   - scikit-learn # Machine Learning
@@ -36,7 +37,9 @@ dependencies:
       - toolz
       - typer
       - einops
+      - cartopy
       # formatting
+      - rasterio
       - black
       - pylint
       - isort
@@ -57,5 +60,23 @@ dependencies:
       # experiment
       - hydra-core
       - hydra-zen
+      # Docs
+      - mkdocs-gen-files
+      - mkdocs-literate-nav
+      - mkdocs-git-authors-plugin
+      - mkdocstrings
+      - markdown-katex
+      - pytkdocs
+      - mdx-truly-sane-lists
+      - mkdocs-jupyter
+      - mkdocs-bibtex
+      - pygments
+      - mknotebooks
+      - pymdown-extensions
+      - mkdocs-material 
+      - mkdocs
+      - aiohttp
+      # ITI
+      - git+https://github.com/spaceml-org/InstrumentToInstrument.git@development
       - wandb
       

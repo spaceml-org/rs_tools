@@ -1,8 +1,6 @@
 from typing import Optional, List, Union
 import os
 import xarray as xr
-import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
 import tqdm
 import typer

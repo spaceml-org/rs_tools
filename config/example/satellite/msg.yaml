@@ -1,6 +1,6 @@
 download:
   _target_: rs_tools._src.data.msg.downloader_msg.download
-  save_dir: ${save_dir}/msg/
+  save_dir: ${save_dir}/msg/raw
   start_date: ${period.start_date}
   start_time: ${period.start_time}
   end_date: ${period.end_date}

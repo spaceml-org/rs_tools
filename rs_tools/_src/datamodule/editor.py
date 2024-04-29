@@ -16,8 +16,11 @@ from torchvision.transforms import (
 )
 
 # NOTE: Code already moved to ITI repo
+class EditorPatch(Editor):
+    def __call__(self, data_dict, **kwargs):
+        return self.call(data_dict, **kwargs)
 
-class BandOrderEditor(Editor):
+class BandOrderEditor(EditorPatch):
     """
     Reorders bands in data dictionary.
     """
@@ -45,7 +48,7 @@ class BandOrderEditor(Editor):
         data_dict["wavelengths"] = np.array(self.target_order)
         return data_dict
 
-class BandSelectionEditor(Editor):
+class BandSelectionEditor(EditorPatch):
     """
     Selects a subset of available bands from data dictionary
     """
@@ -72,7 +75,7 @@ class BandSelectionEditor(Editor):
         data_dict["wavelengths"] = np.array(self.target_bands)
         return data_dict
 
-class NanMaskEditor(Editor):
+class NanMaskEditor(EditorPatch):
     """
     Returns mask for NaN values in data dictionary
     """
@@ -87,7 +90,7 @@ class NanMaskEditor(Editor):
         data_dict["nan_mask"] = mask
         return data_dict
 
-class NanDictEditor(Editor):
+class NanDictEditor(EditorPatch):
     """
     Removes NaN values from data dictionary.
     Can also be used to replace NaN values of coordinates to remove off limb data.
@@ -103,7 +106,7 @@ class NanDictEditor(Editor):
         data_dict[self.key] = data
         return data_dict
     
-class CoordNormEditor(Editor):
+class CoordNormEditor(EditorPatch):
     """
     Normalize latitude and longitude coordinates
     """
@@ -118,7 +121,7 @@ class CoordNormEditor(Editor):
         data_dict["coords"] = np.stack([lats, lons], axis=0)
         return data_dict
      
-class RadUnitEditor(Editor):
+class RadUnitEditor(EditorPatch):
     """
     Convert radiance values from mW/m^2/sr/cm^-1 to W/m^2/sr/um
     """
@@ -133,7 +136,7 @@ class RadUnitEditor(Editor):
         data_dict[self.key] = data
         return data_dict
     
-class StackDictEditor(Editor):
+class StackDictEditor(EditorPatch):
     """
     Stack data dictionary into a single array
     """
@@ -155,7 +158,7 @@ class StackDictEditor(Editor):
         # Return numpy array
         return data
     
-class ToTensorEditor(Editor):
+class ToTensorEditor(EditorPatch):
     """
     Convert numpy array to PyTorch tensor
     """

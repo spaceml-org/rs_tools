@@ -3,6 +3,8 @@ from omegaconf import DictConfig
 from datetime import datetime
 import pandas as pd
 from loguru import logger
+import xarray as xr
+import numpy as np
 
 # NOTE: Code already moved to ITI repo
 def split_train_val(files: List, split_spec: DictConfig) -> Tuple[List, List]:
@@ -93,6 +95,37 @@ def get_dates_from_files(filenames: List[str]) -> List[datetime]:
     """
     dates = [datetime.strptime(filename.split("_")[0], "%Y%m%d%H%M%S") for filename in filenames]
     return dates
+
+
+def load_nc_file(
+    file: str, 
+    load_coords: bool=True,
+    load_cloudmask: bool=True,
+):
+    data_dict = {}
+    # Load dataset
+    ds: xr.Dataset = xr.load_dataset(file, engine="netcdf4")
+
+    # Extract data
+    data = ds.Rad.compute().to_numpy()
+    data_dict["data"] = data
+    # Extract wavelengths
+    wavelengths = ds.band_wavelength.compute().to_numpy()
+    data_dict["wavelengths"] = wavelengths
+
+    # Extract coordinates
+    if load_coords:
+        latitude = ds.latitude.compute().to_numpy()
+        longitude = ds.longitude.compute().to_numpy()
+        coords = np.stack([latitude, longitude], axis=0)
+        data_dict["coords"] = coords
+
+    # Extract cloud mask
+    if load_cloudmask:
+        cloud_mask = ds.cloud_mask.compute().to_numpy()
+        data_dict["cloud_mask"] = cloud_mask
+
+    return data_dict
 
 
 
