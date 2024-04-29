@@ -23,6 +23,7 @@ dependencies:
   - netCDF4
   - zarr
   - h5netcdf
+  - pyhdf
   - nvidia/label/cuda-12.2.0::cuda
   # - h5py
   # GUI

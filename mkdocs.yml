@@ -1,7 +1,7 @@
 site_name: RS-Tools
 site_description: The documentation for the RS-Toolz Library
-site_url: https://spaceml.github.io/rs_tools/
-repo_url: https://github.com/spaceml/rs_tools
+site_url: https://spaceml-org.github.io/rs_tools/
+repo_url: https://github.com/spaceml-org/rs_tools/
 repo_name: rs_tools
 
 edit_uri: ""
@@ -15,10 +15,11 @@ nav:
     - 🛰 MSG: datasets/msg.md
     - 🛰 GOES16: datasets/goes.md
   - Pipelines:
-    - 📏 GOES16: pipelines/goes16.ipynb
-    - 📏 MODIS-Aqua: pipelines/modis_aqua.ipynb
-    - 📏 MSG: pipelines/msg.ipynb
-    - 📏 Analysis-Ready Data: pipelines/analysis_datasets.ipynb
+    - 🛰 GOES-16: pipelines/goes16.ipynb
+    - 🛠️ MODIS-Aqua: pipelines/modis_aqua.ipynb
+    - MSG: pipelines/msg.ipynb
+    - 🛠️ Analysis-Ready Data: pipelines/analysis_datasets.ipynb
+    - 🛠️ ML-Ready Data: pipelines/ml_ready_datasets.ipynb
   - 📕 Reference: api/
     
 theme:
