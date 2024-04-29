@@ -1,0 +1,64 @@
+# name: rs_tools
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  # Standard Libraries
+  - numpy # Numerical Linear Algebra
+  # - scipy # Scientific Computing
+  # - scikit-image
+  - xarray
+  - rioxarray
+  - goes2go
+  - earthaccess
+  - eumdac
+  - pyinterp
+  # - conda-forge::torchgeo
+  - pandas # Data structure
+  - scikit-learn # Machine Learning
+  # PLOTTING LIBRARY
+  - matplotlib # standard plotting library
+  - seaborn # Stats viz library
+  # Storage
+  - netCDF4
+  - zarr
+  - h5netcdf
+  - nvidia/label/cuda-12.2.0::cuda
+  # - h5py
+  # GUI
+  - ipywidgets
+  - ipykernel
+  - tqdm
+  - pip
+  - pip:
+      - toolz
+      - typer
+      - einops
+      # PYTORCH
+      - torch
+      - torchvision
+      - lightning
+      # - git+https://github.com/spaceml-org/InstrumentToInstrument.git@development
+      # formatting
+      - black
+      - pylint
+      - isort
+      - flake8
+      - mypy
+      - pytest
+      - pre-commit
+      # Notebook stuff
+      - autoroot
+      - pyprojroot
+      - python-dotenv
+      # logging
+      - loguru
+      # plotting
+      - celluloid
+      - corner
+      - tabulate
+      # experiment
+      - hydra-core
+      - hydra-zen
+      - wandb
+      
