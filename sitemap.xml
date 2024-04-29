@@ -2,207 +2,212 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://spaceml.github.io/rs_tools/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/installation/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/SUMMARY/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/train/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/data/goes/download/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/data/goes/downloader_goes16/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/data/modis/bands/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/data/modis/download/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/data/modis/downloader_aqua/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/data/modis/downloader_terra/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/data/msg/download/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/data/msg/downloader_msg/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/datamodule/datasets/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/datamodule/editor/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/datamodule/utils/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/grid/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/interp/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/match/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/reproject/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/units/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/utils/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/goes/geoprocessor_goes16/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/goes/interp/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/goes/reproject/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/goes/validation/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/modis/geoprocessor_modis/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/modis/interp/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/modis/reproject/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/modis/rescale/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/msg/geoprocessor_msg/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/geoprocessing/msg/reproject/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/preprocessing/normalize/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/preprocessing/prepatcher/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/utils/io/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/api/_src/utils/math/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/datasets/goes/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/datasets/modis/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/datasets/msg/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://spaceml.github.io/rs_tools/pipelines/analysis_datasets/</loc>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/pipelines/goes16/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/pipelines/goes16_/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://spaceml.github.io/rs_tools/scripts/gen_pages/</loc>
-         <lastmod>2024-04-28</lastmod>
+         <lastmod>2024-04-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
