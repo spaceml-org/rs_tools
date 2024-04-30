@@ -27,7 +27,7 @@ def msg_download(
     eumdac_secret: Optional[str]="",
 ):
     """
-    Downloads GOES satellite data for a specified time period and set of bands.
+    Downloads MSG satellite data for a specified time period and set of bands.
 
     Args:
         start_date (str): The start date of the data download in the format 'YYYY-MM-DD'.
@@ -296,7 +296,7 @@ def _check_input_processing_level(processing_level: str) -> bool:
         raise ValueError(msg)
 
 def _check_instrument(instrument: str) -> bool:
-    """checks instrument for GOES data."""
+    """checks instrument for MSG data."""
     if instrument in ["HRSEVIRI", "CLM"]:
         return True
     else:
