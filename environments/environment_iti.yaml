@@ -1,4 +1,4 @@
-# name: rs_tools
+name: rs_tools_iti
 channels:
   - conda-forge
 dependencies:
@@ -62,4 +62,5 @@ dependencies:
       - hydra-core
       - hydra-zen
       - wandb
+      - xrpatcher
       

@@ -19,11 +19,11 @@ geoprocess:
 
 # preprocess:
 
-# patch:
-#   _target_: rs_tools._src.preprocessing.prepatcher.prepatch
-#   read_path: ${read_path}/msg/geoprocessed
-#   save_path: ${save_path}/msg/analysis
-#   patch_size: ${patch_size}
-#   stride_size: ${stride_size}
-#   nan_cutoff: ${nan_cutoff}
-#   save_filetype: ${save_filetype}
+patch:
+  _target_: rs_tools._src.preprocessing.prepatcher.prepatch
+  read_path: ${read_path}/msg/geoprocessed
+  save_path: ${save_path}/msg/analysis
+  patch_size: ${patch_size}
+  stride_size: ${stride_size}
+  nan_cutoff: ${nan_cutoff}
+  save_filetype: ${save_filetype}

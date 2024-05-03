@@ -1,7 +1,7 @@
 defaults:
   - download
   - geoprocess
-  # - patch
+  - patch
   - satellite: goes
 
 stage: download

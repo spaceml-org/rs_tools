@@ -1,15 +1,15 @@
 # PATH WITH GEOPROCESSED DATA
-read_path: data
+read_path: /mnt/disks/data/miniset/
 
 # PATH FOR SAVING PATCHES
-save_path: data
+save_path: /mnt/disks/data/miniset/
 
 # PATCH PARAMETERS
 patch_size: 256
 stride_size: 256
 
-# NAN CUTOFF
-nan_cutoff: 0.5
+# NAN CUTOFF: maximum allowed ratio of nan values to nonan values in a patch
+nan_cutoff: 0.1
 
 # FILETYPE TO SAVE [nc = netcdf, np = numpy]
 save_filetype: nc
