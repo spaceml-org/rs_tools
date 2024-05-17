@@ -1,6 +1,8 @@
 name: rs_tools_iti
 channels:
   - conda-forge
+  - pytorch
+  - nvidia
 dependencies:
   - python=3.11
   # Standard Libraries
@@ -24,7 +26,8 @@ dependencies:
   - zarr
   - h5netcdf
   - pyhdf
-  - nvidia/label/cuda-12.2.0::cuda
+  # - nvidia/label/cuda-12.2.0::cuda
+  - pytorch-cuda
   # - h5py
   # GUI
   - ipywidgets

@@ -8,7 +8,6 @@ import numpy as np
 def spatial_mean(ds: xr.Dataset, spatial_variables: List[str]) -> xr.Dataset:
     return ds.mean(spatial_variables)
 
-# TODO: Check this function
 def normalize(
         files: List[str],
         temporal_variables: List[str]=["time"], 
