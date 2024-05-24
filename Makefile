@@ -2,13 +2,13 @@
 .DEFAULT_GOAL = help
 
 PYTHON = python
-VERSION = 3.10
+VERSION = 3.11
 NAME = py_name
 ROOT = ./
 PIP = pip
 CONDA = conda
 SHELL = bash
-PKGROOT = finitevolx
+PKGROOT = rs_tools
 
 
 help:	## Display this help
@@ -32,5 +32,5 @@ format: ## Code styling - black, isort
 ##@ Testing
 test:  ## Test code using pytest.
 		@printf "\033[1;34mRunning tests with pytest...\033[0m\n\n"
-		pytest -v finitevolx
+		pytest -v rs_tools
 		@printf "\033[1;34mPyTest passes!\033[0m\n\n"
