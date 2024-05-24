@@ -1,71 +1,54 @@
-# name: rs_tools
+name: rs_tools_iti
 channels:
   - conda-forge
+  # - pytorch
+  # - nvidia
 dependencies:
   - python=3.11
   # Standard Libraries
   - numpy # Numerical Linear Algebra
-  # - scipy # Scientific Computing
-  # - scikit-image
   - xarray
-  - rioxarray
-  - goes2go
-  - earthaccess
-  - eumdac
-  - pyinterp
-  # - conda-forge::torchgeo
   - pandas # Data structure
+  - scikit-image
   - scikit-learn # Machine Learning
   # PLOTTING LIBRARY
   - matplotlib # standard plotting library
   - seaborn # Stats viz library
   # Storage
   - netCDF4
-  - zarr
-  - h5netcdf
-  - pyhdf
-  - nvidia/label/cuda-12.2.0::cuda
+  # - zarr
+  # - h5netcdf
+  # - pyhdf
+  # - nvidia/label/cuda-12.2.0::cuda
+  # - pytorch-cuda
   # - h5py
   # GUI
   - ipywidgets
   - ipykernel
   - tqdm
   - pip
+  - sunpy>=2.0
+  - astropy
+  - aiapy
+  - drms
   - pip:
-      - toolz
-      - typer
-      - einops
+      # - toolz
+      # - typer
+      # - einops
       # PYTORCH
-      - torch
+      - torch>=1.8
       - torchvision
       - lightning
       - git+https://github.com/spaceml-org/InstrumentToInstrument.git@development
       - xrpatcher
       # formatting
-      - black
-      - pylint
-      - isort
-      - flake8
-      - mypy
-      - pytest
-      - pre-commit
-      # Docs
-      - mkdocs-gen-files
-      - mkdocs-literate-nav
-      - mkdocs-git-authors-plugin
-      - mkdocstrings
-      - markdown-katex
-      - pytkdocs
-      - mdx-truly-sane-lists
-      - mkdocs-jupyter
-      - mkdocs-bibtex
-      - pygments
-      - mknotebooks
-      - pymdown-extensions
-      - mkdocs-material 
-      - mkdocs
-      - "mkdocstrings[crystal,python]"
-      - aiohttp
+      # - black
+      # - pylint
+      # - isort
+      # - flake8
+      # - mypy
+      # - pytest
+      # - pre-commit
       # Notebook stuff
       - autoroot
       - pyprojroot
@@ -73,11 +56,12 @@ dependencies:
       # logging
       - loguru
       # plotting
-      - celluloid
-      - corner
-      - tabulate
+      # - celluloid
+      # - corner
+      # - tabulate
       # experiment
       - hydra-core
       - hydra-zen
       - wandb
+      - xrpatcher
       

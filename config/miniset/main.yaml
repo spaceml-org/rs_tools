@@ -1,0 +1,7 @@
+defaults:
+  - download
+  - geoprocess
+  - patch
+  - satellite: goes
+
+stage: download

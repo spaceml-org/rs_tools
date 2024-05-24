@@ -2,7 +2,7 @@ name: rs_tools
 channels:
   - conda-forge
 dependencies:
-  - python=3.10
+  - python=3.11
   # Standard Libraries
   - numpy # Numerical Linear Algebra
   # - scipy # Scientific Computing
@@ -75,13 +75,8 @@ dependencies:
       - pymdown-extensions
       - mkdocs-material 
       - mkdocs
-      - "mkdocstrings[crystal,python]"
       - aiohttp
       # ITI
-      # PYTORCH
-      - torch
-      - torchvision
       - git+https://github.com/spaceml-org/InstrumentToInstrument.git@development
       - wandb
-      - xrpatcher
       

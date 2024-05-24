@@ -1,0 +1,29 @@
+download:
+  _target_: rs_tools._src.data.msg.downloader_msg.download
+  save_dir: ${save_dir}/msg/raw
+  start_date: ${period.start_date}
+  start_time: ${period.start_time}
+  end_date: ${period.end_date}
+  end_time: ${period.end_time}
+  daily_window_t0: "13:00:00"
+  daily_window_t1: "17:00:00"
+  time_step: "1:00:00"
+
+geoprocess:
+  _target_: rs_tools._src.geoprocessing.msg.geoprocessor_msg.geoprocess
+  read_path: ${read_path}/msg/raw
+  save_path: ${save_path}/msg/geoprocessed
+  resolution: null
+  region: "-45 0 -20 40"
+  resample_method: null
+
+# preprocess:
+
+patch:
+  _target_: rs_tools._src.preprocessing.prepatcher.prepatch
+  read_path: ${read_path}/msg/geoprocessed
+  save_path: ${save_path}/msg/analysis
+  patch_size: ${patch_size}
+  stride_size: ${stride_size}
+  nan_cutoff: ${nan_cutoff}
+  save_filetype: ${save_filetype}
