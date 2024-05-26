@@ -23,7 +23,6 @@ import warnings
 dask.config.set(**{'array.slicing.split_large_chunks': False})
 warnings.filterwarnings('ignore', category=FutureWarning)
 
-# TODO: Add unit conversion?
 @dataclass
 class GOES16GeoProcessing:
     """
@@ -73,11 +72,6 @@ class GOES16GeoProcessing:
         Returns:
             Tuple[xr.Dataset, xr.Dataset]: The preprocessed dataset and the original dataset.
         """
-        # logger.debug('copying ds')
-        # # copy to avoid modifying original dataset
-        # ds = ds.copy() 
-
-        logger.debug('correcting satheight')
         # convert measurement angles to horizontal distance in meters
         ds = correct_goes16_satheight(ds) 
         try:
@@ -88,7 +82,6 @@ class GOES16GeoProcessing:
         # assign coordinate reference system
         ds = add_goes16_crs(ds)
 
-        logger.debug('region subsetting')
         if self.region is not None:
             logger.info(f"Subsetting data to region: {self.region}")
             # subset data
@@ -115,13 +108,11 @@ class GOES16GeoProcessing:
             # resampling
             ds_subset = resample_rioxarray(ds_subset, resolution=(self.resolution, self.resolution), method=self.resample_method)
         
-        logger.debug('assigning lat lon')
+        logger.info('Assigning latitude and longitude coordinates')
         # assign coordinates
         ds_subset = calc_latlon(ds_subset)
-        logger.debug('assigned lat lon, deleting ds')
-        del ds
-        logger.debug('returning ds_subset')
-        return ds_subset #, ds
+        del ds # delete to avoid memory problems
+        return ds_subset
 
     def preprocess_fn_radiances(self, ds: xr.Dataset) -> xr.Dataset:
         """
@@ -135,7 +126,7 @@ class GOES16GeoProcessing:
         """
         variables = ["Rad", "DQF"] # "Rad" = radiance, "DQF" = data quality flag
 
-        # TODO comment
+        # Extract relevant attributes from original dataset
         time_stamp = pd.to_datetime(ds.t.values) 
         band_attributes = ds.band.attrs
         band_wavelength_attributes = ds.band_wavelength.attrs
@@ -148,7 +139,6 @@ class GOES16GeoProcessing:
         # select relevant variables
         ds_subset = ds_subset[variables]
         # convert measurement time (in seconds) to datetime
-        # time_stamp = pd.to_datetime(ds.t.values) 
         time_stamp = time_stamp.strftime("%Y-%m-%d %H:%M") 
         # assign bands data to each variable
         ds_subset[variables] = ds_subset[variables].expand_dims({"band": band_values})
@@ -158,11 +148,9 @@ class GOES16GeoProcessing:
         ds_subset = ds_subset.drop_vars(["t", "y_image", "x_image", "goes_imager_projection"])
         # assign band attributes to dataset
         ds_subset.band.attrs = band_attributes
-        # TODO: Correct wavelength assignment. This attaches 16 wavelengths to each band.
         # assign band wavelength to each variable
         ds_subset = ds_subset.assign_coords({"band_wavelength": band_wavelength_values})
         ds_subset.band_wavelength.attrs = band_wavelength_attributes
-        logger.debug('finished preprocess fn radiances')
         return ds_subset
 
     def preprocess_fn_cloudmask(self, ds: xr.Dataset) -> xr.Dataset:
@@ -185,8 +173,6 @@ class GOES16GeoProcessing:
         # select relevant variable
         ds_subset = ds_subset[variables]
         # convert measurement time (in seconds) to datetime
-        # logger.debug(f'{ds.t.values}  --- {ds_subset.t.values}')
-        # time_stamp = pd.to_datetime(ds.t.values)
         time_stamp = time_stamp.strftime("%Y-%m-%d %H:%M")
         # assign time data to variable
         ds_subset = ds_subset.assign_coords({"time": [time_stamp]})
@@ -212,39 +198,27 @@ class GOES16GeoProcessing:
         logger.info(f"Number of radiance files: {len(files)}")
         assert len(files) == 16
 
-        # ds_list = []
         for i, ifile in enumerate(files):
-            logger.debug(f"Loading file {i}: {ifile}")
-            # ds_file = xr.load_dataset(ifile, engine='h5netcdf')#, preprocess=self.preprocess_fn_radiances, concat_dim="band", combine="nested") 
             with xr.load_dataset(ifile, engine='h5netcdf') as ds_file:
                 ds_file = self.preprocess_fn_radiances(ds_file)
                 if i == 0: 
-                    # ds_list = [ds_file]
                     ds = ds_file
                 else:
-                    logger.debug("Starting interpolation {i}...")
                     # reinterpolate to match coordinates of the first image
                     ds_file = ds_file.interp(x=ds.x, y=ds.y)
-                    logger.debug("appending ds {i}...")
-                    # ds_list.append(ds_file)
+                    # concatenate in new band dimension
                     ds = xr.concat([ds, ds_file], dim="band")
-                del ds_file
-        # concatenate in new band dimension
-        # ds = xr.concat(ds_list, dim="band")
-
+                del ds_file # delete to avoid memory problems
 
         # # open multiple files as a single dataset
         # ds = [xr.open_mfdataset(ifile, preprocess=self.preprocess_fn_radiances, concat_dim="band", combine="nested") for
         #       ifile in files]
         
-        # logger.debug("Starting interpolation...")
         # # reinterpolate to match coordinates of the first image
         # ds = [ds[0]] + [ids.interp(x=ds[0].x, y=ds[0].y) for ids in ds[1:]]
-        # logger.debug("Starting concatenation...")
         # # concatenate in new band dimension
         # ds = xr.concat(ds, dim="band")
 
-        logger.debug("Further processing...")
         # Correct latitude longitude assignment after multiprocessing
         ds['latitude'] = ds.latitude.isel(band=0)
         ds['longitude'] = ds.longitude.isel(band=0)
@@ -259,8 +233,6 @@ class GOES16GeoProcessing:
             units=attrs_rad["units"],
         )
         ds["DQF"].attrs = {}
-        logger.debug("Finished preprocess radiances")
-
         return ds
 
     def preprocess_cloud_mask(self, files: List[str]) -> xr.Dataset:
@@ -311,7 +283,6 @@ class GOES16GeoProcessing:
 
             # get files from unique times
             files = list(filter(lambda x: itime in x, self.goes_files))
-            logger.debug(f"Loading radiances ...")
             try:
                 # load radiances
                 ds = self.preprocess_radiances(files)
@@ -337,7 +308,6 @@ class GOES16GeoProcessing:
             ds = ds.assign_coords({"cloud_mask": (("y", "x"), ds_clouds.values.squeeze())})
             ds["cloud_mask"].attrs = ds_clouds.attrs
 
-            logger.debug("Attempts saving to file...")
             # check if save path exists, and create if not
             if not os.path.exists(self.save_path):
                 os.makedirs(self.save_path)
@@ -353,12 +323,10 @@ class GOES16GeoProcessing:
             pbar_time.set_description(f"Saving to file...:{save_filename}")
             # TODO: Add "metrics" for printing (e.g., filesize)
             ds.to_netcdf(save_filename, engine="netcdf4")
-            logger.debug("Saved to file.")
-            del ds
 
 def geoprocess(
         resolution: float = None, # defined in meters
-        read_path: str = "./",
+        read_path: str = "/mnt/disks/data/miniset/goes16/raw",
         save_path: str = "./",
         region: str = None,
         resample_method: str = "bilinear",
@@ -376,8 +344,6 @@ def geoprocess(
     Returns:
         None
     """
-    print("READ PATH!!!:", read_path)
-    print("SAVE PATH!!!:", save_path)
     # Initialize GOES 16 GeoProcessor
     logger.info(f"Initializing GOES16 GeoProcessor...")
     # Extracting region from str

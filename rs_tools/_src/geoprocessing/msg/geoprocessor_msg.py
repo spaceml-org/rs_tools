@@ -136,6 +136,7 @@ class MSGGeoProcessing:
             ds_subset = resample_rioxarray(ds_subset, resolution=(self.resolution, self.resolution), method=self.resample_method)
 
         # assign coordinates
+        logger.info('Assigning latitude and longitude coordinates')
         ds_subset = calc_latlon(ds_subset)
 
         return ds_subset, ds
