@@ -321,7 +321,6 @@ class GOES16GeoProcessing:
                 os.remove(save_filename)
             # save to netcdf
             pbar_time.set_description(f"Saving to file...:{save_filename}")
-            # TODO: Add "metrics" for printing (e.g., filesize)
             ds.to_netcdf(save_filename, engine="netcdf4")
 
 def geoprocess(

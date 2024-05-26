@@ -206,8 +206,6 @@ class MSGGeoProcessing:
             units=attrs_dict[list(attrs_dict.keys())[0]]["units"],
             orbital_parameters=attrs_dict[list(attrs_dict.keys())[0]]["orbital_parameters"]
         )
-        
-        # TODO: Correct wavelength assignment. This attaches 36++ wavelengths to each band.
         # assign band wavelengths 
         ds_subset = ds_subset.assign_coords({"band_wavelength": list(MSG_WAVELENGTHS.values())}) 
 

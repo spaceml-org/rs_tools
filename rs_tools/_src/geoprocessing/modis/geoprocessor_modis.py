@@ -133,8 +133,6 @@ class MODISGeoProcessing:
             sensor=attrs_dict[list(attrs_dict.keys())[0]]["sensor"],
             units=attrs_dict[list(attrs_dict.keys())[0]]["units"],
         )
-        
-        # TODO: Correct wavelength assignment. This attaches 36++ wavelengths to each band.
         # assign band wavelengths 
         ds = ds.assign_coords({"band_wavelength": list(MODIS_WAVELENGTHS.values())})   
 
