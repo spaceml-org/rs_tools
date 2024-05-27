@@ -332,7 +332,7 @@ class MSGGeoProcessing:
 
 def geoprocess(
         resolution: float = None, # defined in meters
-        read_path: str = "/mnt/disks/data/miniset/msg/raw",
+        read_path: str = "./",
         save_path: str = "./",
         region: str = None,
         resample_method: str = "bilinear",
