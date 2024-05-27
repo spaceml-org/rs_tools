@@ -28,6 +28,8 @@ def calc_latlon(ds: xr.Dataset) -> xr.Dataset:
     """
     XX, YY = np.meshgrid(ds.x.data, ds.y.data)
     lons, lats = convert_x_y_to_lat_lon(ds.rio.crs, XX, YY)
+    lons = np.float32(lons)
+    lats = np.float32(lats)
     # Check if lons and lons_trans are close in value
     # Set inf to NaN values
     lons[lons == np.inf] = np.nan

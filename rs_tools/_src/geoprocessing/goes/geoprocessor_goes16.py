@@ -108,9 +108,8 @@ class GOES16GeoProcessing:
             # resampling
             ds_subset = resample_rioxarray(ds_subset, resolution=(self.resolution, self.resolution), method=self.resample_method)
         
-        logger.info('Assigning latitude and longitude coordinates')
         # assign coordinates
-        ds_subset = calc_latlon(ds_subset)
+        # ds_subset = calc_latlon(ds_subset)
         del ds # delete to avoid memory problems
         return ds_subset
 
@@ -124,7 +123,7 @@ class GOES16GeoProcessing:
         Returns:
             xr.Dataset: The preprocessed dataset.
         """
-        variables = ["Rad", "DQF"] # "Rad" = radiance, "DQF" = data quality flag
+        variables = ["Rad"] # "Rad" = radiance, "DQF" = data quality flag
 
         # Extract relevant attributes from original dataset
         time_stamp = pd.to_datetime(ds.t.values) 
@@ -136,12 +135,11 @@ class GOES16GeoProcessing:
         # do core preprocess function (e.g. to correct band coordinates, subset data, resample, etc.)
         ds_subset = self.preprocess_fn(ds)
 
-        # select relevant variables
-        ds_subset = ds_subset[variables]
         # convert measurement time (in seconds) to datetime
         time_stamp = time_stamp.strftime("%Y-%m-%d %H:%M") 
         # assign bands data to each variable
-        ds_subset[variables] = ds_subset[variables].expand_dims({"band": band_values})
+        ds_subset = ds_subset[variables]
+        ds_subset = ds_subset.expand_dims({"band": band_values})
         # attach time coordinate
         ds_subset = ds_subset.assign_coords({"time": [time_stamp]})
         # drop variables that will no longer be needed
@@ -198,7 +196,7 @@ class GOES16GeoProcessing:
         logger.info(f"Number of radiance files: {len(files)}")
         assert len(files) == 16
 
-        for i, ifile in enumerate(files):
+        for i, ifile in tqdm(enumerate(files)):
             with xr.load_dataset(ifile, engine='h5netcdf') as ds_file:
                 ds_file = self.preprocess_fn_radiances(ds_file)
                 if i == 0: 
@@ -209,6 +207,10 @@ class GOES16GeoProcessing:
                     # concatenate in new band dimension
                     ds = xr.concat([ds, ds_file], dim="band")
                 del ds_file # delete to avoid memory problems
+
+        # assign coordinates
+        logger.info("Assigning latitude and longitude coordinates.")
+        ds = calc_latlon(ds)
 
         # # open multiple files as a single dataset
         # ds = [xr.open_mfdataset(ifile, preprocess=self.preprocess_fn_radiances, concat_dim="band", combine="nested") for
@@ -232,7 +234,7 @@ class GOES16GeoProcessing:
             standard_name=attrs_rad["standard_name"],
             units=attrs_rad["units"],
         )
-        ds["DQF"].attrs = {}
+        # ds["DQF"].attrs = {}
         return ds
 
     def preprocess_cloud_mask(self, files: List[str]) -> xr.Dataset:

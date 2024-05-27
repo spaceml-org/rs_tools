@@ -35,8 +35,6 @@ warnings.filterwarnings('ignore', category=UserWarning)
 from datetime import datetime
 from pathlib import Path
 
-# TODO: Add unit conversion?
-
 def parse_msg_dates_from_file(file: str):
     """
     Parses the date and time information from a MSG file name.
@@ -334,7 +332,7 @@ class MSGGeoProcessing:
 
 def geoprocess(
         resolution: float = None, # defined in meters
-        read_path: str = "./",
+        read_path: str = "/mnt/disks/data/miniset/msg/raw",
         save_path: str = "./",
         region: str = None,
         resample_method: str = "bilinear",
