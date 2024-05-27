@@ -11,10 +11,10 @@ download:
 
 geoprocess:
   _target_: rs_tools._src.geoprocessing.goes.geoprocessor_goes16.geoprocess
-  read_path: ${read_path}/goes16/raw
-  save_path: ${save_path}/goes16/geoprocessed
+  read_path: /mnt/disks/data/miniset/goes16/raw
+  save_path: /mnt/disks/data/miniset-full-disk/goes16/geoprocessed
   resolution: null
-  # region: "-45 0 -20 40"
+  region: null # "-45 0 -20 40"
   resample_method: null
 
 patch:
