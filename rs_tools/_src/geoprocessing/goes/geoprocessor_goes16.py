@@ -1,5 +1,6 @@
 import autoroot
 import os
+import gc
 import numpy as np
 import rioxarray
 from pathlib import Path
@@ -16,6 +17,7 @@ from rs_tools._src.geoprocessing.goes.validation import correct_goes16_bands, co
 from rs_tools._src.geoprocessing.goes.reproject import add_goes16_crs
 from rs_tools._src.geoprocessing.reproject import convert_lat_lon_to_x_y, calc_latlon
 from rs_tools._src.geoprocessing.utils import check_sat_FOV
+from rs_tools._src.geoprocessing.goes import GOES_WAVELENGTHS, GOES_CHANNELS
 import pandas as pd
 import dask
 import warnings
@@ -62,12 +64,13 @@ class GOES16GeoProcessing:
         files = get_list_filenames(self.read_path, ".nc")
         return files
 
-    def preprocess_fn(self, ds: xr.Dataset) -> Tuple[xr.Dataset, xr.Dataset]:
+    def preprocess_fn(self, ds: xr.Dataset, calc_coords=False) -> Tuple[xr.Dataset, xr.Dataset]:
         """
         Preprocesses the input dataset by applying corrections, subsetting, and resampling etc.
 
         Args:
             ds (xr.Dataset): The input dataset.
+            calc_coords (bool): Whether to calculate latitude and longitude coordinates. Defaults to False.
 
         Returns:
             Tuple[xr.Dataset, xr.Dataset]: The preprocessed dataset and the original dataset.
@@ -109,16 +112,19 @@ class GOES16GeoProcessing:
             ds_subset = resample_rioxarray(ds_subset, resolution=(self.resolution, self.resolution), method=self.resample_method)
         
         # assign coordinates
-        # ds_subset = calc_latlon(ds_subset)
+        if calc_coords:
+            logger.info("Assigning latitude and longitude coordinates.")
+            ds_subset = calc_latlon(ds_subset)
         del ds # delete to avoid memory problems
         return ds_subset
 
-    def preprocess_fn_radiances(self, ds: xr.Dataset) -> xr.Dataset:
+    def preprocess_fn_radiances(self, ds: xr.Dataset, calc_coords=False) -> xr.Dataset:
         """
         Preprocesses the GOES16 radiance dataset.
 
         Args:
             ds (xr.Dataset): The input dataset.
+            calc_coords (bool): Whether to calculate latitude and longitude coordinates. Defaults to False.
 
         Returns:
             xr.Dataset: The preprocessed dataset.
@@ -131,9 +137,13 @@ class GOES16GeoProcessing:
         band_wavelength_attributes = ds.band_wavelength.attrs
         band_wavelength_values = ds.band_wavelength.values
         band_values = ds.band.values
+        # # Convert keys in dictionary to strings for easier comparison
+        # GOES_CHANNELS_STR = {f'{round(key, 1)}': value for key, value in GOES_CHANNELS.items()}
+        # # Round value and extract channel number
+        # band_values = int(GOES_CHANNELS_STR[f'{round(band_wavelength_values[0], 1):.1f}'])
 
         # do core preprocess function (e.g. to correct band coordinates, subset data, resample, etc.)
-        ds_subset = self.preprocess_fn(ds)
+        ds_subset = self.preprocess_fn(ds, calc_coords=calc_coords)
 
         # convert measurement time (in seconds) to datetime
         time_stamp = time_stamp.strftime("%Y-%m-%d %H:%M") 
@@ -196,21 +206,25 @@ class GOES16GeoProcessing:
         logger.info(f"Number of radiance files: {len(files)}")
         assert len(files) == 16
 
-        for i, ifile in tqdm(enumerate(files)):
+        for i, ifile in enumerate(files):
             with xr.load_dataset(ifile, engine='h5netcdf') as ds_file:
-                ds_file = self.preprocess_fn_radiances(ds_file)
+                logger.info(f"Loading file {i}/{len(files)}: {ifile}")
                 if i == 0: 
+                    # Preprocess first file and assign lat lon coords
+                    ds_file = self.preprocess_fn_radiances(ds_file, calc_coords=True)
                     ds = ds_file
                 else:
+                    # Preprocess other files without calculating lat lon coords
+                    ds_file = self.preprocess_fn_radiances(ds_file, calc_coords=False)
                     # reinterpolate to match coordinates of the first image
                     ds_file = ds_file.interp(x=ds.x, y=ds.y)
                     # concatenate in new band dimension
                     ds = xr.concat([ds, ds_file], dim="band")
                 del ds_file # delete to avoid memory problems
+                gc.collect() # Call the garbage collector to avoid memory problems
 
-        # assign coordinates
-        logger.info("Assigning latitude and longitude coordinates.")
-        ds = calc_latlon(ds)
+        # Fix band naming
+        ds = ds.assign_coords(band=list(GOES_CHANNELS.values()))
 
         # # open multiple files as a single dataset
         # ds = [xr.open_mfdataset(ifile, preprocess=self.preprocess_fn_radiances, concat_dim="band", combine="nested") for
@@ -222,10 +236,10 @@ class GOES16GeoProcessing:
         # ds = xr.concat(ds, dim="band")
 
         # Correct latitude longitude assignment after multiprocessing
-        ds['latitude'] = ds.latitude.isel(band=0)
-        ds['longitude'] = ds.longitude.isel(band=0)
+        # ds['latitude'] = ds.latitude.isel(band=0)
+        # ds['longitude'] = ds.longitude.isel(band=0)
 
-        # NOTE: Keep only certain relevant attributes
+        # Keep only certain relevant attributes
         attrs_rad = ds["Rad"].attrs
 
         ds["Rad"].attrs = {}
@@ -324,6 +338,8 @@ class GOES16GeoProcessing:
             # save to netcdf
             pbar_time.set_description(f"Saving to file...:{save_filename}")
             ds.to_netcdf(save_filename, engine="netcdf4")
+            del ds # delete to avoid memory problems
+            gc.collect() # Call the garbage collector to avoid memory problems
 
 def geoprocess(
         resolution: float = None, # defined in meters
