@@ -14,7 +14,7 @@ geoprocess:
   read_path: /mnt/disks/data/miniset/msg/raw
   save_path: /mnt/disks/data/miniset-full-disk/msg/geoprocessed
   resolution: null
-  region: null # "-45 0 -20 40"
+  region: "-45 0 -20 40"
   resample_method: null
 
 patch:

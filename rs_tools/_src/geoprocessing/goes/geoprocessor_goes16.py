@@ -361,6 +361,8 @@ def geoprocess(
     Returns:
         None
     """
+    logger.debug(f"Read Path: {read_path}")
+    logger.debug(f"Save Path: {save_path}")
     # Initialize GOES 16 GeoProcessor
     logger.info(f"Initializing GOES16 GeoProcessor...")
     # Extracting region from str
