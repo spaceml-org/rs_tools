@@ -35,8 +35,6 @@ warnings.filterwarnings('ignore', category=UserWarning)
 from datetime import datetime
 from pathlib import Path
 
-# TODO: Add unit conversion?
-
 def parse_msg_dates_from_file(file: str):
     """
     Parses the date and time information from a MSG file name.
@@ -136,6 +134,7 @@ class MSGGeoProcessing:
             ds_subset = resample_rioxarray(ds_subset, resolution=(self.resolution, self.resolution), method=self.resample_method)
 
         # assign coordinates
+        logger.info('Assigning latitude and longitude coordinates')
         ds_subset = calc_latlon(ds_subset)
 
         return ds_subset, ds
@@ -205,8 +204,6 @@ class MSGGeoProcessing:
             units=attrs_dict[list(attrs_dict.keys())[0]]["units"],
             orbital_parameters=attrs_dict[list(attrs_dict.keys())[0]]["orbital_parameters"]
         )
-        
-        # TODO: Correct wavelength assignment. This attaches 36++ wavelengths to each band.
         # assign band wavelengths 
         ds_subset = ds_subset.assign_coords({"band_wavelength": list(MSG_WAVELENGTHS.values())}) 
 

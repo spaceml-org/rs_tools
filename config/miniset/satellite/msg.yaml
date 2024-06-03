@@ -11,13 +11,11 @@ download:
 
 geoprocess:
   _target_: rs_tools._src.geoprocessing.msg.geoprocessor_msg.geoprocess
-  read_path: ${read_path}/msg/raw
-  save_path: ${save_path}/msg/geoprocessed
+  read_path: /mnt/disks/data/miniset/msg/raw
+  save_path: /mnt/disks/data/miniset-full-disk/msg/geoprocessed
   resolution: null
-  region: "-45 0 -20 40"
+  region: null # "-45 0 -20 40"
   resample_method: null
-
-# preprocess:
 
 patch:
   _target_: rs_tools._src.preprocessing.prepatcher.prepatch
