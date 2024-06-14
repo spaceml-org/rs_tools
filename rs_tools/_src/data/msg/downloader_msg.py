@@ -76,7 +76,7 @@ def download(
         daily_window_t0 (str): The start time of the daily window (format: 'HH:MM:SS')
         daily_window_t1 (str): The end time of the daily window (format: 'HH:MM:SS')
         time_step (str): The time step between consecutive data downloads (format: 'HH:MM:SS')
-        save_path (str): The path to save the downloaded data
+        save_dir (str): The path to save the downloaded data
         cloud_mask (bool, optional): Whether to download the cloud mask data (default: True)
 
     Returns:

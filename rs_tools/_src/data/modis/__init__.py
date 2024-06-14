@@ -1,7 +1,9 @@
+import os
 from typing import List
 from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime
+import earthaccess
 
 # TODO: Expand mapping to other resolutions (250m, 500m)
 MODIS_NAME_TO_ID= dict(
@@ -156,3 +158,60 @@ def get_modis_paired_files(files: List[MODISFileName], satellite="aqua"):
         paired[itime] = ifile
 
     return paired
+
+
+def query_modis_timestamps(
+        short_name: str,
+        bounding_box: tuple,
+        temporal: tuple,
+        ):
+    """
+    Function to query the Earthdata API for MODIS data timestamps.
+    :param short_name: MODIS short name (e.g. 'MOD021KM' for Terra MODIS Level 1B data at 1km resolution)
+    :param bounding_box (tuple, optional): The region to be queried. Follows format (min_lon, min_lat, max_lon, max_lat).
+    :param temporal: Min and max date/time to be queried. Follows format (start_datetime: YYYY-MM-DD HH:MM:SS, end_datetime: YYYY-MM-DD HH:MM:SS).
+    :return: result object
+    """
+    results = earthaccess.search_data(
+        short_name=short_name,
+        cloud_hosted=True,
+        bounding_box=bounding_box,
+        temporal=temporal,
+        count=-1
+    )
+    return results
+
+
+def modis_granule_to_datetime(granule: earthaccess.results.DataGranule) -> datetime:
+    """
+    Function to convert a MODIS granule to a datetime object.
+    :param granule: MODIS granule
+    :return: datetime object
+    """
+    return datetime.strptime(granule['umm']['TemporalExtent']['RangeDateTime']['BeginningDateTime'], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def _check_earthdata_login() -> bool:
+    """check if earthdata login is available in environment variables"""
+
+    if os.environ.get("EARTHDATA_USERNAME") is None or os.environ.get("EARTHDATA_PASSWORD") is None:
+        msg = "Please set your Earthdata credentials as environment variables using:"
+        msg += "\nexport EARTHDATA_USERNAME=<your username>"
+        msg += "\nexport EARTHDATA_PASSWORD=<your password>"
+        msg += "\nOr provide them as command line arguments using:"
+        msg += "\n--earthdata-username <your username> --earthdata-password <your password>"
+        raise ValueError(msg)
+    
+    # check if credentials are valid
+    auth_obj = earthaccess.login('environment')
+
+    if auth_obj.authenticated: 
+        return True
+    else:
+        msg = "Earthdata login failed."
+        msg += "\nPlease check your credentials and set them as environment variables using:"
+        msg += "\nexport EARTHDATA_USERNAME=<your username>"
+        msg += "\nexport EARTHDATA_PASSWORD=<your password>"
+        msg += "\nOr provide them as command line arguments using:"
+        msg += "\n--earthdata-username <your username> --earthdata-password <your password>"
+        raise ValueError(msg)
