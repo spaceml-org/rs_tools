@@ -154,17 +154,15 @@ def msg_download(
 
         sub_files_list = _download(time=itime, data_product=data_product, save_dir=save_dir, datastore=datastore)
         if sub_files_list is None:
-            if itime != list_of_dates[-1]:
-                logger.info(f"Could not find data for time {itime}. Trying to add 5 mins to timestamp.")
-                time_delta = timedelta(hours=0, minutes=5, seconds=0)
-                itime_5 = itime+ time_delta
-                sub_files_list = _download(time=itime_5, data_product=data_product, save_dir=save_dir, datastore=datastore)
+            logger.info(f"Could not find data for time {itime}. Trying to remove 5 mins from timestamp {itime}.")
+            time_delta = timedelta(hours=0, minutes=5, seconds=0)
+            itime_minus5 = itime - time_delta
+            sub_files_list = _download(time=itime_minus5, data_product=data_product, save_dir=save_dir, datastore=datastore)
         if sub_files_list is None:
-            if itime != list_of_dates[-1]:
-                logger.info(f"Could not find data for time {itime}. Trying to add 10 mins to timestamp.")
-                time_delta = timedelta(hours=0, minutes=10, seconds=0)
-                itime_10 = itime+ time_delta
-                sub_files_list = _download(time=itime_10, data_product=data_product, save_dir=save_dir, datastore=datastore)
+            logger.info(f"Could not find data for time {itime_minus5}. Trying to add 5 mins to timestamp {itime}.")
+            time_delta = timedelta(hours=0, minutes=5, seconds=0)
+            itime_plus5 = itime+ time_delta
+            sub_files_list = _download(time=itime_plus5, data_product=data_product, save_dir=save_dir, datastore=datastore)
 
         if sub_files_list is None:
             logger.info(f"Could not find data for time {itime}. Skipping to next time.")
