@@ -1,9 +1,6 @@
 """
-A General Pipeline for create ML-Ready Data
-- Downloading the Data
-- Data Harmonization
-- Normalizing
-- Patching
+Pipeline for downloading TERRA MODIS data
+- Daytime and nightime data
 """
 import autoroot
 import numpy as np
@@ -39,7 +36,7 @@ class MODISTerraDownload:
             processing_level='L1b',
             resolution="1KM",
             bounding_box=self.bounding_box,
-            day_night_flag="day",
+            day_night_flag=None,
             identifier= "02"
             )
         return terra_files
@@ -56,7 +53,7 @@ class MODISTerraDownload:
             processing_level='L2',
             resolution="1KM",
             bounding_box=self.bounding_box,
-            day_night_flag="day",
+            day_night_flag=None,
             identifier= "35"
             )
         return terra_files

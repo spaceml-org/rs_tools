@@ -1,6 +1,6 @@
 """
 Pipeline for downloading AQUA MODIS data
-- Daytime and nightime data
+- Only daytime data
 """
 import autoroot
 import numpy as np
@@ -36,7 +36,7 @@ class MODISAquaDownload:
             processing_level='L1b',
             resolution="1KM",
             bounding_box=self.bounding_box,
-            day_night_flag=None,
+            day_night_flag="day",
             identifier= "02"
             )
         return aqua_files
@@ -53,7 +53,7 @@ class MODISAquaDownload:
             processing_level='L2',
             resolution="1KM",
             bounding_box=self.bounding_box,
-            day_night_flag=None,
+            day_night_flag="day",
             identifier= "35"
             )
         return aqua_files
