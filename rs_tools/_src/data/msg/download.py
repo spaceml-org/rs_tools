@@ -19,7 +19,7 @@ def msg_download(
     daily_window_t0: Optional[str]='00:00:00',
     daily_window_t1: Optional[str]='23:59:00',
     time_step: Optional[str]=None,
-    predefined_timestamps: Optional[List[str]]=None,
+    predefined_timestamps: Optional[List]=None,
     satellite: str="MSG",
     instrument: str ="HRSEVIRI",
     processing_level: Optional[str] = "L1",
@@ -38,7 +38,7 @@ def msg_download(
         daily_window_t0 (str, optional): The start time of the daily window in the format 'HH:MM:SS'. Default is '00:00:00'. Used if e.g., only day/night measurements are required.
         daily_window_t1 (str, optional): The end time of the daily window in the format 'HH:MM:SS'. Default is '23:59:00'. Used if e.g., only day/night measurements are required.
         time_step (str, optional): The time step between each data download in the format 'HH:MM:SS'. If not provided, the default is 1 hour.
-        predefined_timestamps (list, optional): A list of timestamps to download. Expected format is 'YYYY-MM-DD HH:MM:SS'. If provided, start/end dates/times will be ignored.
+        predefined_timestamps (list, optional): A list of timestamps to download. Expected format is datetime or str following 'YYYY-MM-DD HH:MM:SS'. If provided, start/end dates/times will be ignored.
         satellite (str): The satellite. Default is MSG.
         instrument (str): The data product to download. Default is 'HRSEVIRI', also implemented for Cloud Mask (CLM).
         processing_level (str, optional): The processing level of the data. Default is 'L1'.
@@ -114,6 +114,7 @@ def msg_download(
     # check if save_dir is valid before attempting to download
     _check_save_dir(save_dir=save_dir)
 
+    successful_queries = []
     files = []
 
     # create progress bars for dates and bands
@@ -139,8 +140,9 @@ def msg_download(
             logger.info(f"Could not find data for time {itime}. Skipping to next time.")
         else:
             files += sub_files_list
+            successful_queries.append(itime)
 
-    return files
+    return (files, successful_queries)
 
 def _download(time: datetime, data_product: str, save_dir: str, datastore):
     products = _compile_msg_products(data_product=data_product, time=time, datastore=datastore)
@@ -214,7 +216,10 @@ def _check_netcdf4_backend() -> bool:
 def _compile_list_of_dates(timestamp_dict: dict, predefined_timestamps: List[str]) -> List[datetime]:
     if predefined_timestamps is not None:
         _check_predefined_timestamps(predefined_timestamps=predefined_timestamps)
-        list_of_dates = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in predefined_timestamps]
+        if type(predefined_timestamps[0]) is datetime:
+            list_of_dates = predefined_timestamps
+        elif type(predefined_timestamps[0]) is str:
+            list_of_dates = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in predefined_timestamps]
         logger.info(f"Using predefined timestamps.")
     elif timestamp_dict['start_date'] is not None:
         # check start/end dates/times
@@ -272,14 +277,21 @@ def _check_predefined_timestamps(predefined_timestamps: List[str]) -> bool:
     if type(predefined_timestamps) is not list:
         msg = "Please provide predefined timestamps as a list"
         raise ValueError(msg)
-    try:
-        for x in predefined_timestamps:
-            datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+    if type(predefined_timestamps[0]) is str: # Check type of first element
+        try:
+            for x in predefined_timestamps:
+                datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+            return True
+        except Exception as e:
+            msg = "Please check predefined timestamps"
+            msg += "\nExpected date format: %Y-%m-%d"
+            msg += "\nExpected time format: %H:%M:%S"
+            raise SyntaxError(msg)
+    elif type(predefined_timestamps[0]) is datetime: # Check type of first element
         return True
-    except Exception as e:
+    else:
         msg = "Please check predefined timestamps"
-        msg += "\nExpected date format: %Y-%m-%d"
-        msg += "\nExpected time format: %H:%M:%S"
+        msg += "\nExpected either datetime objects or strings in the format %Y-%m-%d %H:%M:%S"
         raise SyntaxError(msg)
 
 def _check_datetime_format(start_datetime_str: str, end_datetime_str: str) -> bool:

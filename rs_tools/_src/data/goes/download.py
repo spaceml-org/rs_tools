@@ -57,7 +57,7 @@ def goes_download(
         daily_window_t0 (str, optional): The start time of the daily window in the format 'HH:MM:SS'. Default is '00:00:00'. Used if e.g., only day/night measurements are required.
         daily_window_t1 (str, optional): The end time of the daily window in the format 'HH:MM:SS'. Default is '23:59:00'. Used if e.g., only day/night measurements are required.
         time_step (str, optional): The time step between each data download in the format 'HH:MM:SS'. If not provided, the default is 1 hour.
-        predefined_timestamps (list, optional): A list of timestamps to download. Expected format is 'YYYY-MM-DD HH:MM:SS'. If provided, start/end dates/times will be ignored.        
+        predefined_timestamps (list, optional): A list of timestamps to download. Expected format is datetime or str following 'YYYY-MM-DD HH:MM:SS'. If provided, start/end dates/times will be ignored.
         satellite_number (int, optional): The satellite number. Default is 16.
         save_dir (str, optional): The directory where the downloaded files will be saved. Default is the current directory.
         instrument (str, optional): The instrument name. Default is 'ABI'.
@@ -232,7 +232,10 @@ def _goes_level1_download(time,
 def _compile_list_of_dates(timestamp_dict: dict, predefined_timestamps: List[str]) -> List[datetime]:
     if predefined_timestamps is not None:
         _check_predefined_timestamps(predefined_timestamps=predefined_timestamps)
-        list_of_dates = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in predefined_timestamps]
+        if type(predefined_timestamps[0]) is datetime:
+            list_of_dates = predefined_timestamps
+        elif type(predefined_timestamps[0]) is str:
+            list_of_dates = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in predefined_timestamps]
         logger.info(f"Using predefined timestamps.")
     elif timestamp_dict['start_date'] is not None:
         # check start/end dates/times
@@ -291,16 +294,22 @@ def _check_predefined_timestamps(predefined_timestamps: List[str]) -> bool:
     if type(predefined_timestamps) is not list:
         msg = "Please provide predefined timestamps as a list"
         raise ValueError(msg)
-    try:
-        for x in predefined_timestamps:
-            datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+    if type(predefined_timestamps[0]) is str: # Check type of first element
+        try:
+            for x in predefined_timestamps:
+                datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+            return True
+        except Exception as e:
+            msg = "Please check predefined timestamps"
+            msg += "\nExpected date format: %Y-%m-%d"
+            msg += "\nExpected time format: %H:%M:%S"
+            raise SyntaxError(msg)
+    elif type(predefined_timestamps[0]) is datetime: # Check type of first element
         return True
-    except Exception as e:
+    else:
         msg = "Please check predefined timestamps"
-        msg += "\nExpected date format: %Y-%m-%d"
-        msg += "\nExpected time format: %H:%M:%S"
+        msg += "\nExpected either datetime objects or strings in the format %Y-%m-%d %H:%M:%S"
         raise SyntaxError(msg)
-
 
 def _check_datetime_format(start_datetime_str: str, end_datetime_str: str) -> bool:
     try:
