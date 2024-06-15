@@ -1,5 +1,6 @@
 from typing import Optional, List, Union
 import os
+import warnings
 import xarray as xr
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -10,6 +11,10 @@ import typer
 import eumdac
 from loguru import logger
 from datetime import datetime, timedelta
+
+# Ignore FutureWarning
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def msg_download(
     start_date: Optional[str]=None, # TODO: Wrap date/time parameters in dict to reduce arguments?

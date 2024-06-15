@@ -46,8 +46,8 @@ def download(
         start_date: str="2010-01-01",
         end_date: str="2010-01-01", 
         start_time: str="00:00:00", 
-        end_time: str="00:00:01", 
-        save_dir: str='./data/', 
+        end_time: str="23:59:00", 
+        save_dir: str='.', 
         cloud_mask: bool = True
 ):
     """
