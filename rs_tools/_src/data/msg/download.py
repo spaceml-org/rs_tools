@@ -173,8 +173,9 @@ def _msg_data_download(products, save_dir: str):
                             shutil.copyfileobj(fsrc, fdst)
                         print(f"Successfully downloaded {entry}.")
                         return [save_path]
-                except eumdac.product.ProductError as error:
-                    print(f"Could not download entry {entry} from product '{product}': '{error.msg}'")
+                except Exception as error:
+                    print(f"Could not download entry {entry} from product '{product}': '{error}'")
+                    pass
 
 def _check_eumdac_login(eumdac_key: str, eumdac_secret: str) -> bool:
     """check if eumdac login is available in environment variables / as input arguments"""
