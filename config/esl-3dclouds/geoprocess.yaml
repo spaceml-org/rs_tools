@@ -1,0 +1,8 @@
+# PATH WITH RAW DATA
+read_path: /mnt/disks/data/miniset/
+
+# PATH FOR SAVING GEOPROCESSED DATA
+save_path: /mnt/disks/data/miniset-full-disk/
+
+defaults:
+  - _self_

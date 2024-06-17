@@ -1,0 +1,16 @@
+# PERIOD
+period:
+  start_date: '2010-01-01'
+  start_time: '00:00:01'
+  end_date: '2010-06-30'
+  end_time: '23:59:59'
+
+# CLOUD MASK
+cloud_mask: True
+  
+# PATH FOR SAVING DATA
+save_dir: /mnt/disks/data/msg/2010
+
+defaults:
+  - _self_
+  
