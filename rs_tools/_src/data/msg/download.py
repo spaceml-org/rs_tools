@@ -162,10 +162,10 @@ def _compile_msg_products(data_product: str, time: datetime, datastore):
     return products
 
 def _msg_data_download(products, save_dir: str):
-    for product in products:
-        for entry in product.entries:
-            if entry.endswith(".nat") or entry.endswith(".grb"): 
-                try:
+    try:
+        for product in products:
+            for entry in product.entries:
+                if entry.endswith(".nat") or entry.endswith(".grb"): 
                     with product.open(entry=entry) as fsrc:
                         # Create a full file path for saving the file
                         save_path = os.path.join(save_dir, os.path.basename(fsrc.name))
@@ -173,9 +173,9 @@ def _msg_data_download(products, save_dir: str):
                             shutil.copyfileobj(fsrc, fdst)
                         print(f"Successfully downloaded {entry}.")
                         return [save_path]
-                except Exception as error:
-                    print(f"Could not download entry {entry} from product '{product}': '{error}'")
-                    pass
+    except Exception as error:
+        print(f"Error downloading product': '{error}'")
+        pass
 
 def _check_eumdac_login(eumdac_key: str, eumdac_secret: str) -> bool:
     """check if eumdac login is available in environment variables / as input arguments"""
