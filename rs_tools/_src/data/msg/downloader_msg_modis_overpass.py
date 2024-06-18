@@ -114,8 +114,12 @@ def download(
         if cloud_mask:
             assert len(msg_cm_filenames) == len(msg_cm_queries), "Mismatch between queries and downloaded files"
             list_msg_cm_times = [str(MSGFileName.from_filename(msg_cm_filenames[x]).datetime_acquisition) for x in range(len(msg_cm_filenames))]
-            df['MODIS_cloudmask'] = msg_cm_queries
-            df['MSG_cloudmask'] = list_msg_cm_times
+            try: # TODO: Add fix is length of cloud mask timestamps is not equal to MSG timestamps
+                df['MODIS_cloudmask'] = msg_cm_queries
+                df['MSG_cloudmask'] = list_msg_cm_times
+            except Exception as e:
+                logger.error(f"Error: {e}")
+                logger.error("Could add cloud mask timestamps to summary file...")
 
         df.to_csv(Path(save_dir).joinpath(f"msg-modis-timestamps_{start_date}_{end_date}.csv"), index=False)
 
