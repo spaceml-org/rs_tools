@@ -112,8 +112,9 @@ def download(
         df['MSG'] = list_msg_times
 
         if cloud_mask:
-            assert len(msg_filenames) == len(msg_cm_filenames), "Different number of MSG and cloud mask files downloaded"
+            assert len(msg_cm_filenames) == len(msg_cm_queries), "Mismatch between queries and downloaded files"
             list_msg_cm_times = [str(MSGFileName.from_filename(msg_cm_filenames[x]).datetime_acquisition) for x in range(len(msg_cm_filenames))]
+            df['MODIS_cloudmask'] = msg_cm_queries
             df['MSG_cloudmask'] = list_msg_cm_times
 
         df.to_csv(Path(save_dir).joinpath(f"msg-modis-timestamps_{start_date}_{end_date}.csv"), index=False)
