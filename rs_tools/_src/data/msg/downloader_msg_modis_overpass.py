@@ -119,7 +119,7 @@ def download(
                 df['MSG_cloudmask'] = list_msg_cm_times
             except Exception as e:
                 logger.error(f"Error: {e}")
-                logger.error("Could add cloud mask timestamps to summary file...")
+                logger.error("Could not add cloud mask timestamps to summary file...")
 
         df.to_csv(Path(save_dir).joinpath(f"msg-modis-timestamps_{start_date}_{end_date}.csv"), index=False)
 
