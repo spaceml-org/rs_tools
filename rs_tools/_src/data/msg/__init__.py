@@ -34,7 +34,6 @@ class MSGFileName:
         """
 
         file_name = Path(file_name)
-        print(file_name)
         components = file_name.name.split('-')
         save_path = str(file_name.parents[0])
 

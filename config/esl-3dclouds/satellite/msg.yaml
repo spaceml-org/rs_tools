@@ -1,5 +1,5 @@
 download:
-  _target_: rs_tools._src.data.msg.downloader_msg_(modis_overpass).download
+  _target_: rs_tools._src.data.msg.downloader_msg_modis_overpass.download
   save_dir: ${save_dir}
   start_date: ${period.start_date}
   start_time: ${period.start_time}
