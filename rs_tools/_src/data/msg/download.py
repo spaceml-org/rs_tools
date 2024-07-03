@@ -251,6 +251,8 @@ def _compile_list_of_dates(timestamp_dict: dict, predefined_timestamps: List[str
         if timestamp_dict['time_step'] is None: 
             time_step = '1:00:00'
             logger.info("No timedelta specified. Default is 1 hour.")
+        else:
+            time_step = timestamp_dict['time_step']
         _check_timedelta_format(time_delta=time_step)
         
         # convert str to datetime object
