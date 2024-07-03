@@ -1,5 +1,6 @@
 from typing import Optional, List, Union
 import os
+import warnings
 import xarray as xr
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -11,14 +12,19 @@ import eumdac
 from loguru import logger
 from datetime import datetime, timedelta
 
+# Ignore FutureWarning
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+
 def msg_download(
-    start_date: str,
+    start_date: Optional[str]=None, # TODO: Wrap date/time parameters in dict to reduce arguments?
     end_date: Optional[str]=None,
     start_time: Optional[str]='00:00:00', # EUMDAC did not find any data for 00:00:00
     end_time: Optional[str]='23:59:00', # EUMDAC did not find any data for 23:59:00
     daily_window_t0: Optional[str]='00:00:00',
     daily_window_t1: Optional[str]='23:59:00',
     time_step: Optional[str]=None,
+    predefined_timestamps: Optional[List]=None,
     satellite: str="MSG",
     instrument: str ="HRSEVIRI",
     processing_level: Optional[str] = "L1",
@@ -30,13 +36,14 @@ def msg_download(
     Downloads MSG satellite data for a specified time period and set of bands.
 
     Args:
-        start_date (str): The start date of the data download in the format 'YYYY-MM-DD'.
+        start_date (str, optional): The start date of the data download in the format 'YYYY-MM-DD'.
         end_date (str, optional): The end date of the data download in the format 'YYYY-MM-DD'. If not provided, the end date will be the same as the start date.
         start_time (str, optional): The start time of the data download in the format 'HH:MM:SS'. Default is '00:00:00'.
         end_time (str, optional): The end time of the data download in the format 'HH:MM:SS'. Default is '23:59:00'.
         daily_window_t0 (str, optional): The start time of the daily window in the format 'HH:MM:SS'. Default is '00:00:00'. Used if e.g., only day/night measurements are required.
         daily_window_t1 (str, optional): The end time of the daily window in the format 'HH:MM:SS'. Default is '23:59:00'. Used if e.g., only day/night measurements are required.
         time_step (str, optional): The time step between each data download in the format 'HH:MM:SS'. If not provided, the default is 1 hour.
+        predefined_timestamps (list, optional): A list of timestamps to download. Expected format is datetime or str following 'YYYY-MM-DD HH:MM:SS'. If provided, start/end dates/times will be ignored.
         satellite (str): The satellite. Default is MSG.
         instrument (str): The data product to download. Default is 'HRSEVIRI', also implemented for Cloud Mask (CLM).
         processing_level (str, optional): The processing level of the data. Default is 'L1'.
@@ -95,54 +102,24 @@ def msg_download(
     logger.info(f"Data Product: {data_product}")
     _check_data_product_name(data_product=data_product)
 
-    # check start/end dates/times
-    if end_date is None:
-        end_date = start_date
+    # TODO: Allow passing as argument?
+    timestamp_dict = { 
+        'start_date': start_date,
+        'end_date': end_date,
+        'start_time': start_time,
+        'end_time': end_time,
+        'daily_window_t0': daily_window_t0,
+        'daily_window_t1': daily_window_t1,
+        'time_step': time_step,
+    }
 
-    # combine date and time information
-    start_datetime_str = start_date + ' ' + start_time
-    end_datetime_str = end_date + ' ' + end_time
-    _check_datetime_format(start_datetime_str, end_datetime_str)
-    # datetime conversion 
-    start_datetime = datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M:%S")
-    end_datetime = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
-    _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
-
-    # define time step for data query                       
-    if time_step is None: 
-        time_step = '1:00:00'
-        logger.info("No timedelta specified. Default is 1 hour.")
-    _check_timedelta_format(time_delta=time_step)
-    
-    # convert str to datetime object
-    hours, minutes, seconds = convert_str2time(time=time_step)
-    time_delta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
-    
-    _check_timedelta(time_delta=time_delta)
-    
-    # Compile list of dates/times
-    list_of_dates = np.arange(start_datetime, end_datetime, time_delta).astype(datetime)
-    print('Times to check: ',list_of_dates[0], list_of_dates[-1])
-
-    window_date = '1991-10-19' # Add arbitrary date to convert into proper datetime object
-    start_datetime_window_str = window_date + ' ' + daily_window_t0
-    end_datetime_window_str = window_date + ' ' + daily_window_t1
-    _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
-    # datetime conversion 
-    daily_window_t0_datetime = datetime.strptime(start_datetime_window_str, "%Y-%m-%d %H:%M:%S")
-    daily_window_t1_datetime = datetime.strptime(end_datetime_window_str, "%Y-%m-%d %H:%M:%S")
-    _check_start_end_times(start_datetime=daily_window_t0_datetime, end_datetime=daily_window_t1_datetime)
-
-    # filter function - check that query times fall within desired time window
-    def is_in_between(date):
-       return daily_window_t0_datetime.time() <= date.time() <= daily_window_t1_datetime.time()
-
-    # compile new list of dates within desired time window
-    list_of_dates = list(filter(is_in_between, list_of_dates))
+    # compile list of dates
+    list_of_dates = _compile_list_of_dates(timestamp_dict=timestamp_dict, predefined_timestamps=predefined_timestamps)
 
     # check if save_dir is valid before attempting to download
     _check_save_dir(save_dir=save_dir)
 
+    successful_queries = []
     files = []
 
     # create progress bars for dates and bands
@@ -168,8 +145,9 @@ def msg_download(
             logger.info(f"Could not find data for time {itime}. Skipping to next time.")
         else:
             files += sub_files_list
+            successful_queries.append(itime)
 
-    return files
+    return (files, successful_queries)
 
 def _download(time: datetime, data_product: str, save_dir: str, datastore):
     products = _compile_msg_products(data_product=data_product, time=time, datastore=datastore)
@@ -184,19 +162,25 @@ def _compile_msg_products(data_product: str, time: datetime, datastore):
     return products
 
 def _msg_data_download(products, save_dir: str):
-    for product in products:
-        for entry in product.entries:
-            if entry.endswith(".nat") or entry.endswith(".grb"): 
-                try:
+    try:
+        for product in products:
+            for entry in product.entries:
+                if entry.endswith(".nat") or entry.endswith(".grb"): 
                     with product.open(entry=entry) as fsrc:
                         # Create a full file path for saving the file
                         save_path = os.path.join(save_dir, os.path.basename(fsrc.name))
-                        with open(save_path, mode='wb') as fdst:
-                            shutil.copyfileobj(fsrc, fdst)
-                        print(f"Successfully downloaded {entry}.")
-                        return [save_path]
-                except eumdac.product.ProductError as error:
-                    print(f"Could not download entry {entry} from product '{product}': '{error.msg}'")
+                        # Check if file already exists
+                        if os.path.exists(save_path):
+                            print(f"File {save_path} already exists. Skipping download.")
+                            return [save_path]
+                        else:
+                            with open(save_path, mode='wb') as fdst:
+                                shutil.copyfileobj(fsrc, fdst)
+                            print(f"Successfully downloaded {entry}.")
+                            return [save_path]
+    except Exception as error:
+        print(f"Error downloading product': '{error}'")
+        pass
 
 def _check_eumdac_login(eumdac_key: str, eumdac_secret: str) -> bool:
     """check if eumdac login is available in environment variables / as input arguments"""
@@ -239,7 +223,89 @@ def _check_netcdf4_backend() -> bool:
         msg += "\npip install netCDF4"
         msg += "\nconda install -c conda-forge netCDF4"
         raise ValueError(msg)
+    
+def _compile_list_of_dates(timestamp_dict: dict, predefined_timestamps: List[str]) -> List[datetime]:
+    if predefined_timestamps is not None:
+        _check_predefined_timestamps(predefined_timestamps=predefined_timestamps)
+        if type(predefined_timestamps[0]) is datetime:
+            list_of_dates = predefined_timestamps
+        elif type(predefined_timestamps[0]) is str:
+            list_of_dates = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in predefined_timestamps]
+        logger.info(f"Using predefined timestamps.")
+    elif timestamp_dict['start_date'] is not None:
+        # check start/end dates/times
+        if timestamp_dict['end_date'] is None:
+            end_date = timestamp_dict['start_date']
+        else:
+            end_date = timestamp_dict['end_date']
+        # combine date and time information
+        start_datetime_str = timestamp_dict['start_date'] + ' ' + timestamp_dict['start_time']
+        end_datetime_str = end_date + ' ' + timestamp_dict['end_time']
+        _check_datetime_format(start_datetime_str, end_datetime_str)
+        # datetime conversion 
+        start_datetime = datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M:%S")
+        end_datetime = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
+        _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
 
+        # define time step for data query                       
+        if timestamp_dict['time_step'] is None: 
+            time_step = '1:00:00'
+            logger.info("No timedelta specified. Default is 1 hour.")
+        else:
+            time_step = timestamp_dict['time_step']
+        _check_timedelta_format(time_delta=time_step)
+        
+        # convert str to datetime object
+        hours, minutes, seconds = convert_str2time(time=time_step)
+        time_delta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+        
+        _check_timedelta(time_delta=time_delta)
+        
+        # Compile list of dates/times
+        list_of_dates = np.arange(start_datetime, end_datetime, time_delta).astype(datetime)
+        print('Times to check: ',list_of_dates[0], list_of_dates[-1])
+
+        window_date = '1991-10-19' # Add arbitrary date to convert into proper datetime object
+        start_datetime_window_str = window_date + ' ' + timestamp_dict['daily_window_t0']
+        end_datetime_window_str = window_date + ' ' + timestamp_dict['daily_window_t1']
+        _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
+        # datetime conversion 
+        daily_window_t0_datetime = datetime.strptime(start_datetime_window_str, "%Y-%m-%d %H:%M:%S")
+        daily_window_t1_datetime = datetime.strptime(end_datetime_window_str, "%Y-%m-%d %H:%M:%S")
+        _check_start_end_times(start_datetime=daily_window_t0_datetime, end_datetime=daily_window_t1_datetime)
+
+        # filter function - check that query times fall within desired time window
+        def is_in_between(date):
+            return daily_window_t0_datetime.time() <= date.time() <= daily_window_t1_datetime.time()
+
+        # compile new list of dates within desired time window
+        list_of_dates = list(filter(is_in_between, list_of_dates))
+        logger.info("Compiling timestamps from specific parameters.")
+    else:
+        msg = "Please provide either predefined timestamps or start date"
+        raise ValueError(msg)
+    return list_of_dates
+
+def _check_predefined_timestamps(predefined_timestamps: List[str]) -> bool:
+    if type(predefined_timestamps) is not list:
+        msg = "Please provide predefined timestamps as a list"
+        raise ValueError(msg)
+    if type(predefined_timestamps[0]) is str: # Check type of first element
+        try:
+            for x in predefined_timestamps:
+                datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+            return True
+        except Exception as e:
+            msg = "Please check predefined timestamps"
+            msg += "\nExpected date format: %Y-%m-%d"
+            msg += "\nExpected time format: %H:%M:%S"
+            raise SyntaxError(msg)
+    elif type(predefined_timestamps[0]) is datetime: # Check type of first element
+        return True
+    else:
+        msg = "Please check predefined timestamps"
+        msg += "\nExpected either datetime objects or strings in the format %Y-%m-%d %H:%M:%S"
+        raise SyntaxError(msg)
 
 def _check_datetime_format(start_datetime_str: str, end_datetime_str: str) -> bool:
     try:

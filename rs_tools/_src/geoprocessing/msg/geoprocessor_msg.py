@@ -180,6 +180,7 @@ class MSGGeoProcessing:
         # concatinate in new band dimension
         # NOTE: Concatination overwrites attrs of bands.
         ds_subset = ds_subset.assign(Rad=xr.concat(list(map(lambda x: ds_subset[x], channels)), dim="band"))
+        ds_subset['Rad'] = ds_subset['Rad'].astype('float32')
         # rename band dimensions
         ds_subset = ds_subset.assign_coords(band=list(map(lambda x: x, channels)))
 
@@ -206,6 +207,8 @@ class MSGGeoProcessing:
         )
         # assign band wavelengths 
         ds_subset = ds_subset.assign_coords({"band_wavelength": list(MSG_WAVELENGTHS.values())}) 
+        # change to float32 to reduce file size
+        ds_subset['Rad'] = ds_subset['Rad'].astype('float32')
 
         return ds_subset
 
