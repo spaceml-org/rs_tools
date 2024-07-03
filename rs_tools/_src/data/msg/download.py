@@ -169,10 +169,15 @@ def _msg_data_download(products, save_dir: str):
                     with product.open(entry=entry) as fsrc:
                         # Create a full file path for saving the file
                         save_path = os.path.join(save_dir, os.path.basename(fsrc.name))
-                        with open(save_path, mode='wb') as fdst:
-                            shutil.copyfileobj(fsrc, fdst)
-                        print(f"Successfully downloaded {entry}.")
-                        return [save_path]
+                        # Check if file already exists
+                        if os.path.exists(save_path):
+                            print(f"File {save_path} already exists. Skipping download.")
+                            return [save_path]
+                        else:
+                            with open(save_path, mode='wb') as fdst:
+                                shutil.copyfileobj(fsrc, fdst)
+                            print(f"Successfully downloaded {entry}.")
+                            return [save_path]
     except Exception as error:
         print(f"Error downloading product': '{error}'")
         pass
