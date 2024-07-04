@@ -10,6 +10,7 @@ from tqdm import tqdm
 from rs_tools._src.utils.io import get_list_filenames
 import typer
 from loguru import logger
+from pathlib import Path
 import xarray as xr
 from rs_tools._src.geoprocessing.interp import resample_rioxarray
 from rs_tools._src.geoprocessing.goes import parse_goes16_dates_from_file, format_goes_dates
@@ -18,10 +19,13 @@ from rs_tools._src.geoprocessing.goes.reproject import add_goes16_crs
 from rs_tools._src.geoprocessing.reproject import convert_lat_lon_to_x_y, calc_latlon
 from rs_tools._src.geoprocessing.utils import check_sat_FOV
 from rs_tools._src.geoprocessing.goes import GOES_WAVELENGTHS, GOES_CHANNELS
+from rs_tools._src.data.goes.io import parse_goes16_dates_from_file
+from rs_tools._src.data.goes.bands import GOES16_CHANNELS
 import pandas as pd
 import dask
 import warnings
 from pyproj import CRS
+from odc.geo.geobox import GeoBox
 
 dask.config.set(**{'array.slicing.split_large_chunks': False})
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -54,7 +58,7 @@ class GOES16GeoProcessing:
     resample_method: str
 
     @property
-    def goes_files(self) -> List[str]:
+    def all_goes_files(self) -> List[str]:
         """
         Returns a list of all GOES files in the read path.
 
@@ -64,6 +68,19 @@ class GOES16GeoProcessing:
         # get a list of all GOES files from specified path
         files = get_list_filenames(self.read_path, ".nc")
         return files
+    
+    @property
+    def unique_times(self) -> List[str]:
+        """
+        Returns a list of all GOES files in the read path.
+
+        Returns:
+            List[str]: A list of file paths.
+        """
+        return list(set(map(parse_goes16_dates_from_file, self.all_goes_files)))
+    
+    def filter_files(self, time: str):
+        return list(filter(lambda x: time in x, self.all_goes_files))
 
     def preprocess_fn(self, ds: xr.Dataset) -> xr.Dataset:
         """
@@ -208,7 +225,7 @@ class GOES16GeoProcessing:
         files = list(filter(lambda x: "Rad" in x, files))
 
         # Check that all 16 bands are present
-        logger.info(f"Number of radiance files: {len(files)}")
+        logger.debug(f"Number of radiance files: {len(files)}")
         assert len(files) == 16
 
         for i, ifile in enumerate(files):
@@ -289,6 +306,24 @@ class GOES16GeoProcessing:
 
         return ds
 
+    def merge_radiance_and_cloud_mask(self, ds_rads, ds_clouds) -> xr.Dataset:
+
+        ds_clouds = ds_clouds["cloud_mask"]
+        # interpolate cloud mask to data
+        # fill in zeros for all nan values
+        ds_clouds = ds_clouds.fillna(0)
+        # NOTE: Interpolation changes values from integers to floats
+        # NOTE: This is fixed through rounding 
+        ds_clouds = ds_clouds.interp(x=ds_rads.x, y=ds_rads.y)
+        ds_clouds = ds_clouds.round()
+
+        # save cloud mask as data coordinate
+        ds_rads = ds_rads.assign_coords({"cloud_mask": (("y", "x"), ds_clouds.values.squeeze())})
+        ds_rads["cloud_mask"].attrs = ds_clouds.attrs
+        ds_rads["cloud_mask"].attrs = ds_clouds.attrs
+
+        return ds_rads
+
     def preprocess_files(self):
         """
         Preprocesses multiple files in read path and saves processed files to save path.
@@ -317,23 +352,13 @@ class GOES16GeoProcessing:
                 logger.error(f"Skipping {itime} due to missing cloud mask")
                 continue
             pbar_time.set_description(f"Loaded data...")
-            # interpolate cloud mask to data
-            # fill in zeros for all nan values
-            ds_clouds = ds_clouds.fillna(0)
-            # NOTE: Interpolation changes values from integers to floats
-            # NOTE: This is fixed through rounding 
-            ds_clouds = ds_clouds.interp(x=ds.x, y=ds.y)
-            ds_clouds = ds_clouds.round()
 
-            # save cloud mask as data coordinate
-            ds = ds.assign_coords({"cloud_mask": (("y", "x"), ds_clouds.values.squeeze())})
-            ds["cloud_mask"].attrs = ds_clouds.attrs
-
+            pbar_time.set_description(f"Merging Radiances & Cloud Masks...")
+            ds = self.merge_radiance_and_cloud_mask(ds_rads=ds, ds_clouds=ds_clouds)
             # check if save path exists, and create if not
             if not os.path.exists(self.save_path):
                 os.makedirs(self.save_path)
             
-
             # remove file if it already exists
             itime_name = format_goes_dates(itime)
             save_filename = Path(self.save_path).joinpath(f"{itime_name}_goes16.nc")
@@ -346,12 +371,97 @@ class GOES16GeoProcessing:
             del ds # delete to avoid memory problems
             gc.collect() # Call the garbage collector to avoid memory problems
 
+
+from typing import Union
+
+def geoprocess_goes16_file(
+        files: List[str],
+        resolution: int=1_000,
+        geometry: Optional[GeoBox]=None,
+        method: str="bounding_box",
+        ):
+    if geometry is None:
+        pass
+    elif geometry and method == "bounding_box":
+        # parse bounding box
+        bbox = geometry.boundingbox.bbox
+        dest_crs = geometry.boundingbox.crs
+    elif geometry and method == "polygon":
+        polygon = geometry.boundingbox.polygon
+        dest_crs = geometry.crs
+        geometry == "polygon"
+    else:
+        raise ValueError(f"Unrecognized geometry...")
+
+    def preprocess(ds):
+
+
+        # PREPROCESS BANDS
+        ds = preprocess_goes16_radiance_band(ds)
+
+        # APPLY RESOLUTION
+        ds = ds.rio.reproject(ds.rio.crs, resolution=resolution)
+
+        # CLIP BOUNDING BOX
+        # create a bounding box from xy
+        if geometry and method == "bounding_box":
+            ds = ds.rio.clip_box(*bbox, crs=dest_crs)
+        elif geometry and method == "polygon":
+            ds = ds.rio.clip(geometries=[polygon], crs=dest_crs)
+
+        # sort indices
+        ds = ds.sortby("x").sortby("y")
+
+        return ds
+    
+    import gc
+
+
+    pbar = tqdm(list(enumerate(files)))
+
+    band_names = list()
+
+    for i, ifile in pbar:
+        with xr.load_dataset(ifile, engine='h5netcdf') as ds_file:
+            
+            pbar.set_description(f"Loading Radiance file {i+1}/{len(files)}: {Path(ifile).name}")
+            if i == 0: 
+                # Preprocess first file and assign lat lon coords
+                ds_file = preprocess(ds_file)
+                band_names.append(ds_file.band.values.item())
+                ds = ds_file
+            else:
+                # Preprocess other files without calculating lat lon coords
+                ds_file = preprocess(ds_file)
+                band_names.append(ds_file.band.values.item())
+                # reinterpolate to match coordinates of the first image
+                ds_file = ds_file.interp(x=ds.x, y=ds.y)
+                # concatenate in new band dimension
+                ds = xr.concat([ds, ds_file], dim="band")
+            del ds_file # delete to avoid memory problems
+            gc.collect() # Call the garbage collector to avoid memory problems
+
+    ds = ds.assign_coords(band=band_names)
+    # Keep only certain relevant attributes
+    ds = ds.rename_vars({"Rad": "radiance"})
+    attrs_rad = ds["radiance"].attrs
+
+    ds["radiance"].attrs = {}
+    ds["radiance"].attrs = dict(
+        long_name=attrs_rad["long_name"],
+        standard_name=attrs_rad["standard_name"],
+        units=attrs_rad["units"],
+    )
+
+
+    return ds
+
 def geoprocess(
-        resolution: float = None, # defined in meters
-        read_path: str = "./",
-        save_path: str = "./",
-        region: str = None,
-        resample_method: str = "bilinear",
+    resolution: float = None, # defined in meters
+    read_path: str = "./",
+    save_path: str = "./",
+    region: str = None,
+    resample_method: str = "bilinear",
 ):
     """
     Geoprocesses GOES 16 files
@@ -399,6 +509,68 @@ def clean_coords_goes16(ds):
     ds = add_goes16_crs(ds)
 
     return ds
+
+
+def preprocess_goes16_radiance_band(ds: xr.Dataset) -> xr.Dataset:
+    """
+    Preprocesses the GOES16 radiance dataset.
+
+    Args:
+        ds (xr.Dataset): The input dataset.
+        calc_coords (bool): Whether to calculate latitude and longitude coordinates. Defaults to False.
+
+    Returns:
+        xr.Dataset: The preprocessed dataset.
+    """
+    variables = ["Rad"] # "Rad" = radiance, "DQF" = data quality flag
+
+    # Extract relevant attributes from original dataset
+    time_stamp = pd.to_datetime(ds.t.values) 
+    band_attributes = ds.band_id.attrs
+    band_wavelength_attributes = ds.band_wavelength.attrs
+    band_wavelength_values = ds.band_wavelength.values
+    band_values = ds.band_id.values
+    cc = CRS.from_cf(ds.goes_imager_projection.attrs)
+    # # Convert keys in dictionary to strings for easier comparison
+    # GOES_CHANNELS_STR = {f'{round(key, 1)}': value for key, value in GOES_CHANNELS.items()}
+    # # Round value and extract channel number
+    # band_values = int(GOES_CHANNELS_STR[f'{round(band_wavelength_values[0], 1):.1f}'])
+
+    # do core preprocess function (e.g. to correct band coordinates, subset data, resample, etc.)
+    # convert measurement angles to horizontal distance in meters
+    ds = correct_goes16_satheight(ds) 
+    try:
+        # correct band coordinates to reorganize xarray dataset
+        ds = correct_goes16_bands(ds) 
+    except AttributeError:
+        pass
+
+
+    # convert measurement time (in seconds) to datetime
+    time_stamp = time_stamp.strftime("%Y-%m-%d %H:%M") 
+    # assign bands data to each variable
+    ds = ds[variables]
+    ds = ds.expand_dims({"band": band_values})
+    # attach time coordinate
+    ds = ds.assign_coords({"time": [time_stamp]})
+    # drop variables that will no longer be needed
+    ds = ds.drop_vars(["t", "y_image", "x_image"])
+    # assign band attributes to dataset
+    ds.band.attrs = band_attributes
+    # assign band wavelength to each variable
+    ds = ds.assign_coords({"band_wavelength": band_wavelength_values})
+    ds.band_wavelength.attrs = band_wavelength_attributes
+
+    ds.rio.write_crs(cc.to_string(), inplace=True)
+    
+    return ds
+
+
+def geoprocess_goes16(
+        read_path: str="./",
+        save_path: str="./",
+):
+    return None
 
 
 if __name__ == '__main__':

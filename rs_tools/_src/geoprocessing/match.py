@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
+
 def match_timestamps(times_data: List[str], times_clouds: List[str], cutoff: int=15) -> pd.DataFrame:
     """
     Matches timestamps of data and cloudmask files, if not measured at exactly the same time.
@@ -41,3 +42,4 @@ def match_timestamps(times_data: List[str], times_clouds: List[str], cutoff: int
     })
             
     return matched_times
+

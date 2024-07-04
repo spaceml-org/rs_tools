@@ -1,5 +1,6 @@
 import rioxarray
 import xarray as xr
+from goes2go import GOES # activate the rio accessor
 
 
 def correct_goes16_satheight(ds: xr.Dataset) -> xr.Dataset:
@@ -12,18 +13,14 @@ def correct_goes16_satheight(ds: xr.Dataset) -> xr.Dataset:
     Returns:
     - xr.Dataset: The dataset with corrected perspective height.
     """
-
-    # get perspective height
-    sat_height = ds.goes_imager_projection.attrs["perspective_point_height"]
-
     # reassign coordinates to correct height
     x_attrs = ds.x.attrs
-    ds = ds.assign_coords({"x": ds.x.values * sat_height})
+    ds = ds.assign_coords({"x": ds.FOV.x})
     ds["x"].attrs = x_attrs
     ds["x"].attrs["units"] = "meters"
 
     y_attrs = ds.y.attrs
-    ds = ds.assign_coords({"y": ds.y.values * sat_height})
+    ds = ds.assign_coords({"y": ds.FOV.y})
     ds["y"].attrs = y_attrs
     ds["y"].attrs["units"] = "meters"
 

@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime
+
+
 @dataclass(order=True, frozen=True)
 class GOESFileName:
     """

@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime
 import earthaccess
+from rs_tools._src.utils.io import get_list_filenames
+
 
 # TODO: Expand mapping to other resolutions (250m, 500m)
 MODIS_NAME_TO_ID= dict(
@@ -24,6 +26,28 @@ MODIS_ID_TO_NAME = dict(
     MOD03="terra_geo",
     MOD35_L2="terra_cloud",
 )
+
+@dataclass
+class MODISRawFiles:
+    read_dir: str
+
+    @property
+    def modis_files(self):
+        return get_list_filenames(self.read_dir, ".hdf")
+
+    def get_modis_files_from_satellite(self, satellite_name: str="aqua"):
+        # get satellite ID
+        satellite_id = MODIS_NAME_TO_ID[satellite_name]
+        # filter files for aqua only
+        return list(filter(lambda x: satellite_id in x, self.modis_files))
+
+    @property
+    def modis_file_obj(self):
+        return list(map(lambda x: MODISFileName.from_filename(x), self.modis_files))
+
+    @property
+    def modis_file_obj_pairs(self):
+        return get_modis_paired_files(self.modis_file_obj)
 
 
 @dataclass(order=True, frozen=True)
@@ -125,6 +149,7 @@ class MODISFileName:
         """
         return Path(self.save_path).joinpath(self.modis_filename)
     
+
 # NOTE: we no longer download geo data
 def get_modis_paired_files(files: List[MODISFileName], satellite="aqua"):
     # get satellite filenames

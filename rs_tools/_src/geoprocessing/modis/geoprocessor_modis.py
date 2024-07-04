@@ -100,16 +100,16 @@ class MODISGeoProcessing:
         # Load radiance bands
         channels = get_modis_channel_numbers()
         scn.load(channels, generate=False, calibration='radiance')
-        
+
         # change to xarray data
-        ds = scn.to_xarray_dataset()  
+        ds = scn.to_xarray_dataset()
 
         # do core preprocess function (e.g. resample, add crs etc.)
-        ds = self.preprocess_fn(ds) 
+        ds = add_modis_crs(ds).copy()
 
         # Store the attributes in a dict before concatenation
         attrs_dict = {x: ds[x].attrs for x in channels}
-            
+
         # concatinate in new band dimension, and defining a new variable name
         # NOTE: Concatination overwrites attrs of bands.
         ds = ds.assign(Rad=xr.concat(list(map(lambda x: ds[x], channels)), dim="band"))
@@ -133,10 +133,12 @@ class MODISGeoProcessing:
             sensor=attrs_dict[list(attrs_dict.keys())[0]]["sensor"],
             units=attrs_dict[list(attrs_dict.keys())[0]]["units"],
         )
-        # assign band wavelengths 
-        ds = ds.assign_coords({"band_wavelength": list(MODIS_WAVELENGTHS.values())})   
+
+        # assign band wavelengths
+        ds = ds.assign_coords({"band_wavelength": list(MODIS_WAVELENGTHS.values())})
 
         return ds
+
 
     def preprocess_fn_cloudmask(self, file: List[str]) -> xr.Dataset:
         """
@@ -162,6 +164,7 @@ class MODISGeoProcessing:
         ds = scn.to_xarray_dataset()
 
         return ds
+
 
     def preprocess_radiances(self, files: List[str]) -> xr.Dataset:
         """
@@ -271,6 +274,107 @@ class MODISGeoProcessing:
 
             # save to netcdf
             ds.to_netcdf(save_filename, engine="netcdf4")
+
+
+def preprocess_modis_image_radiances(file: str) -> xr.Dataset:
+    """
+    Preprocesses MODIS image radiances.
+
+    Args:
+        file (str): The file path of the MODIS image.
+
+    Returns:
+        xr.Dataset: The preprocessed MODIS image radiances as an xarray dataset.
+    """
+
+    # load file with satpy
+    scn = Scene(
+        reader="modis_l1b",
+        filenames=[file,]
+    )
+
+    # get channels
+    channels = get_modis_channel_numbers()
+
+    # load image
+    scn.load(channels, generate=False, calibration='radiance')
+
+    # convert to xarray
+    ds = scn.to_xarray_dataset()
+
+    # Store the attributes in a dict before concatenation
+    attrs_dict = {x: ds[x].attrs for x in channels}
+
+    # concatinate in new band dimension, and defining a new variable name
+    # NOTE: Concatination overwrites attrs of bands.
+    ds = ds.assign(Rad=xr.concat(list(map(lambda x: ds[x], channels)), dim="band"))
+    # drop duplicate variables
+    ds = ds.drop_vars(list(map(lambda x: x, channels)))
+
+    # ================
+    # COORDINATES
+    # ================
+    # rename band dimensions
+    ds = ds.assign_coords(band=list(map(lambda x: x, channels)))
+
+    # convert measurement time (in seconds) to datetime
+    time_stamp = pd.to_datetime(ds.attrs['start_time'])
+    time_stamp = time_stamp.strftime("%Y-%m-%d %H:%M")  
+    # assign bands and time data to each variable
+    ds = ds.assign_coords({"time": [time_stamp]})
+
+    # assign band wavelengths
+    ds = ds.assign_coords({"band_wavelength": list(MODIS_WAVELENGTHS.values())})
+
+
+    # ================
+    # ATTRIBUTES
+    # ================
+
+    # NOTE: Keep only certain relevant attributes
+    ds.attrs = {}
+    ds.Rad.attrs = {}
+    ds.Rad.attrs = dict(
+        calibration=attrs_dict[list(attrs_dict.keys())[0]]["calibration"],
+        standard_name=attrs_dict[list(attrs_dict.keys())[0]]["standard_name"],
+        platform_name=attrs_dict[list(attrs_dict.keys())[0]]["platform_name"],
+        sensor=attrs_dict[list(attrs_dict.keys())[0]]["sensor"],
+        units=attrs_dict[list(attrs_dict.keys())[0]]["units"],
+    )
+
+    # remove crs from dataset
+    ds = ds.drop_vars("crs")
+    
+
+    return ds
+
+
+def preprocess_modis_image_cloud_mask(file: str) -> xr.Dataset:
+    """
+    Preprocesses a MODIS image by loading it with satpy, loading the image, converting it to xarray, and returning the xarray dataset.
+
+    Args:
+        file (str): The path to the MODIS image file with cloudmask.
+
+    Returns:
+        xarray.Dataset: The preprocessed MODIS image as an xarray dataset.
+    """
+
+    # load file with satpy
+    scn = Scene(
+        reader="modis_l2",
+        filenames=[file,]
+    )
+
+    # load image
+    list_of_datasets = scn.available_dataset_names()
+    scn.load(list_of_datasets, generate=False, resolution=1000) 
+
+    # convert to xarray
+    ds = scn.to_xarray_dataset()
+
+    return ds
+
 
 def geoprocess(
         satellite: str,
