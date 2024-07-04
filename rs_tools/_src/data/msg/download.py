@@ -150,8 +150,12 @@ def msg_download(
     return (files, successful_queries)
 
 def _download(time: datetime, data_product: str, save_dir: str, datastore):
-    products = _compile_msg_products(data_product=data_product, time=time, datastore=datastore)
-    sub_files_list = _msg_data_download(products=products, save_dir=save_dir)
+    try:
+        products = _compile_msg_products(data_product=data_product, time=time, datastore=datastore)
+        sub_files_list = _msg_data_download(products=products, save_dir=save_dir)
+    except Exception as error:
+        logger.error(f"Error downloading data: {error}")
+        sub_files_list = None
     return sub_files_list
 
 def _compile_msg_products(data_product: str, time: datetime, datastore):
@@ -162,25 +166,21 @@ def _compile_msg_products(data_product: str, time: datetime, datastore):
     return products
 
 def _msg_data_download(products, save_dir: str):
-    try:
-        for product in products:
-            for entry in product.entries:
-                if entry.endswith(".nat") or entry.endswith(".grb"): 
-                    with product.open(entry=entry) as fsrc:
-                        # Create a full file path for saving the file
-                        save_path = os.path.join(save_dir, os.path.basename(fsrc.name))
-                        # Check if file already exists
-                        if os.path.exists(save_path):
-                            print(f"File {save_path} already exists. Skipping download.")
-                            return [save_path]
-                        else:
-                            with open(save_path, mode='wb') as fdst:
-                                shutil.copyfileobj(fsrc, fdst)
-                            print(f"Successfully downloaded {entry}.")
-                            return [save_path]
-    except Exception as error:
-        print(f"Error downloading product': '{error}'")
-        pass
+    for product in products:
+        for entry in product.entries:
+            if entry.endswith(".nat") or entry.endswith(".grb"): 
+                with product.open(entry=entry) as fsrc:
+                    # Create a full file path for saving the file
+                    save_path = os.path.join(save_dir, os.path.basename(fsrc.name))
+                    # Check if file already exists
+                    if os.path.exists(save_path):
+                        print(f"File {save_path} already exists. Skipping download.")
+                        return [save_path]
+                    else:
+                        with open(save_path, mode='wb') as fdst:
+                            shutil.copyfileobj(fsrc, fdst)
+                        print(f"Successfully downloaded {entry}.")
+                        return [save_path]
 
 def _check_eumdac_login(eumdac_key: str, eumdac_secret: str) -> bool:
     """check if eumdac login is available in environment variables / as input arguments"""
