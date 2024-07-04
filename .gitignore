@@ -151,3 +151,5 @@ datasets/*
 *.xml
 *.txt
 *.nc
+.env
+*.tiff
