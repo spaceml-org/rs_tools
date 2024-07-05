@@ -121,7 +121,7 @@ def download(
         daily_window_t0=daily_window_t0,
         daily_window_t1=daily_window_t1,
         time_step=time_step,
-        save_dir=Path(save_dir).joinpath("goes16"),
+        save_dir=Path(save_dir), #.joinpath("goes16"),
     )
     logger.info("Downloading GOES 16 Data...")
     goes16_filenames = dc_goes16_download.download()

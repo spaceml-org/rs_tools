@@ -144,6 +144,7 @@ def msg_download(
         if sub_files_list is None:
             logger.info(f"Could not find data for time {itime}. Skipping to next time.")
         else:
+            logger.info(f"Successfully downloaded data for time {itime}.")
             files += sub_files_list
             successful_queries.append(itime)
 
@@ -174,7 +175,6 @@ def _msg_data_download(products, save_dir: str):
                     save_path = os.path.join(save_dir, os.path.basename(fsrc.name))
                     # Check if file already exists
                     if os.path.exists(save_path):
-                        print(f"File {save_path} already exists. Skipping download.")
                         return [save_path]
                     else:
                         with open(save_path, mode='wb') as fdst:

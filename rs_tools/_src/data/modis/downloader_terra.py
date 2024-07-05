@@ -91,7 +91,7 @@ def download(
         end_date=end_date,
         start_time=start_time,
         end_time=end_time,
-        save_dir=Path(save_dir).joinpath("terra"),
+        save_dir=Path(save_dir), #.joinpath("terra"),
         bounding_box=bounding_box,
     )
     logger.info("Downloading TERRA Data...")
