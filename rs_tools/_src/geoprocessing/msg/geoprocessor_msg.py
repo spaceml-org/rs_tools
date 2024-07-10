@@ -313,8 +313,8 @@ class MSGGeoProcessing:
                 logger.error(f"Skipping {itime} due to error loading")
                 continue
 
-             # remove crs from dataset
-            ds = ds.drop_vars('msg_seviri_fes_3km') 
+            # remove crs from dataset
+            # ds = ds.drop_vars('msg_seviri_fes_3km') # NOTE: Uncommented to keep coordinate reference system
 
             # remove attrs that cause netcdf error
             for var in ds.data_vars:
