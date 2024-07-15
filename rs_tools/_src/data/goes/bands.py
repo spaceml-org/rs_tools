@@ -1,8 +1,6 @@
 # All wavelengths in micrometers
-import numpy as np
 
-GOES16_BANDS = list(np.arange(1, 17))
-GOES16_WAVELENGTHS = {
+GOES16_BANDS_TO_WAVELENGTHS = {
     "1": 0.47,
     "2": 0.64,
     "3": 0.87,
@@ -21,7 +19,7 @@ GOES16_WAVELENGTHS = {
     "16": 13.27,
 }
 
-GOES16_CHANNELS = {
+GOES16_WAVELENGTHS_TO_BANDS = {
     0.47: 1,
     0.64: 2,
     0.87: 3,
@@ -39,3 +37,7 @@ GOES16_CHANNELS = {
     12.27: 15,
     13.27: 16,
 }   
+
+GOES16_BANDS = list(range(1, 17))
+
+GOES16_WAVELENGTHS = [GOES16_WAVELENGTHS_TO_BANDS.keys()]

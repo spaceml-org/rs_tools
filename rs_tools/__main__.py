@@ -15,14 +15,18 @@ import autoroot
 
 # TODO add option to provide config path via command line
 
-@hydra.main(config_path="../config/esl-3dclouds/", config_name="main", version_base="1.3")
+@hydra.main(config_path="../config/walkthrough/", config_name="main", version_base="1.3")
 def main(cfg):
     # instantiate the config 
     logger.debug(f"Choosing Stage...")
-    if cfg.stage == "download":
+    if cfg.stage == "query":
+        logger.info(f"Instantiating Downloader: {cfg.satellite.query['_target_']}")
+        query = hydra.utils.instantiate(cfg.satellite.query)
+    # instantiate the config 
+    elif cfg.stage == "download":
         logger.info(f"Instantiating Downloader: {cfg.satellite.download['_target_']}")
         download = hydra.utils.instantiate(cfg.satellite.download)
-        hydra.utils.call(download)
+        # hydra.utils.call(download)
 
     elif cfg.stage == "geoprocess":
         logger.info(f"Instantiating Geoprocessor: {cfg.satellite.geoprocess['_target_']}")

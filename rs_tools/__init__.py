@@ -5,5 +5,12 @@ from rs_tools._src.data.modis.bands import MODIS_VARIABLES, get_modis_channel_nu
 from rs_tools._src.geoprocessing.modis import MODIS_WAVELENGTHS
 from rs_tools._src.geoprocessing.goes import GOES_WAVELENGTHS
 from rs_tools._src.geoprocessing.msg import MSG_WAVELENGTHS
+from rs_tools._src.data.ea.query import ea_granule_to_gdf, ea_data_query, query_ea_timestamps
+from rs_tools._src.data.ea.download import ea_download_from_query
 
-__all__ = ["goes_download", "modis_download", "msg_download", "MODIS_VARIABLES", "get_modis_channel_numbers", "MODIS_WAVELENGTHS", "GOES_WAVELENGTHS", "MSG_WAVELENGTHS"]
+__all__ = [
+    "ea_granule_to_gdf",
+    "ea_data_query",
+    "ea_download_from_query",
+    "query_ea_timestamps",
+    "goes_download", "modis_download", "msg_download", "MODIS_VARIABLES", "get_modis_channel_numbers", "MODIS_WAVELENGTHS", "GOES_WAVELENGTHS", "MSG_WAVELENGTHS"]

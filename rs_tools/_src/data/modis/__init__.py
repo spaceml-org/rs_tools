@@ -3,8 +3,12 @@ from typing import List
 from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime
+import pandas as pd
+import geopandas as gpd
 import earthaccess
+import earthaccess.results
 from rs_tools._src.utils.io import get_list_filenames
+from odc.geo.geom import Geometry, polygon
 
 
 # TODO: Expand mapping to other resolutions (250m, 500m)
@@ -214,6 +218,124 @@ def modis_granule_to_datetime(granule: earthaccess.results.DataGranule) -> datet
     :return: datetime object
     """
     return datetime.strptime(granule['umm']['TemporalExtent']['RangeDateTime']['BeginningDateTime'], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def modis_granule_to_polygon(granule: earthaccess.results.DataGranule) -> Geometry:
+    """
+    Converts a MODIS granule to a polygon geometry.
+
+    Args:
+        granule (earthaccess.results.DataGranule): The MODIS granule to convert.
+
+    Returns:
+        Geometry: The polygon geometry representing the MODIS granule.
+    """
+
+    points_list = granule["umm"]["SpatialExtent"]["HorizontalSpatialDomain"]["Geometry"]["GPolygons"][0]["Boundary"]["Points"]
+    coordinates = [(point['Longitude'], point['Latitude']) for point in points_list]
+    return polygon(coordinates, crs="4326")
+
+
+def modis_granule_to_satellite_id(granule: earthaccess.results.DataGranule) -> str:
+    return granule["umm"]["CollectionReference"]["ShortName"]
+
+def modis_granule_to_filename(granule: earthaccess.results.DataGranule) -> str:
+    return granule["umm"]["DataGranule"]["Identifiers"][0]["Identifier"]
+
+
+def modis_granule_to_satellite_name(granule: earthaccess.results.DataGranule) -> str:
+    return granule["umm"]["Platforms"][0]["ShortName"].lower()
+
+
+def modis_granule_to_instrument(granule: earthaccess.results.DataGranule) -> str:
+    return granule["umm"]["Platforms"][0]["Instruments"][0]["ShortName"]
+
+def modis_granule_to_daynightflay(granule: earthaccess.results.DataGranule) -> str:
+    return granule["umm"]["DataGranule"]["DayNightFlag"]
+
+def modis_granule_to_gdf(ea_granules):
+
+    # gather all modis timestamps
+    modis_timestamps = list(map(modis_granule_to_datetime, ea_granules))
+
+    # gather all polygons
+    modis_polygons = list(map(modis_granule_to_polygon, ea_granules))
+
+    # gather satellite ids
+    modis_satellite_ids = list(map(modis_granule_to_satellite_id, ea_granules))
+
+    # gather satellite names
+    modis_satellite_names = list(map(modis_granule_to_satellite_name, ea_granules))
+
+    # gather satellite filenames
+    modis_satellite_filenames = list(map(modis_granule_to_filename, ea_granules))
+
+    # gather satellite filenames
+    modis_satellite_instruments = list(map(modis_granule_to_instrument, ea_granules))
+
+    # day
+    modis_satellite_daynightflag = list(map(modis_granule_to_instrument, ea_granules))
+
+    # create pandas geodataframe
+    df = pd.DataFrame({
+        "time": modis_timestamps,
+        "satellite_id": modis_satellite_ids,
+        "satellite_name": modis_satellite_names,
+        "filename": modis_satellite_filenames,
+        "daynight": modis_satellite_daynightflag,
+        "satellite_instrument": modis_satellite_instruments,
+        })
+
+    # convert the list of polygons into a GeoSeries
+    geometry = gpd.GeoSeries(modis_polygons)
+
+    # create a GeoDataFrame 
+    gdf = gpd.GeoDataFrame(df, geometry=geometry)
+
+    return gdf
+
+
+def parse_modis_dates_from_file(file: str):
+    """
+    Parses the date and time information from a MODIS file name.
+
+    Args:
+        file (str): The file name to parse.
+
+    Returns:
+        str: The parsed date and time in the format 'YYYYJJJHHMM'.
+    """
+    # get the date from the file
+    date = Path(file).name.split(".")[1][1:]
+    # get the time from the file
+    time = Path(file).name.split(".")[2]
+    datetime_str = f"{date}.{time}"
+
+    return datetime_str
+
+def format_modis_dates(time: str) -> str:
+    """
+    Function to format the date/time string.
+    
+    Args:
+        time (str): The time string to be formatted.
+        
+    Returns:
+        str: The formatted time string.
+    """
+    # Split the string into date and time parts
+    date_str, time_str = time.split(".")
+    # Convert the date part to a datetime object
+    date = datetime.strptime(date_str, "%Y%j")
+    # Convert the time part to a timedelta object
+    time = timedelta(hours=int(time_str[:2]), minutes=int(time_str[2:]))
+    # Add the date and time parts to get a datetime object
+    dt = date + time
+    # Convert the datetime object to a string in the format "YYYYMMDDHHMMSS"
+    str_time = dt.strftime("%Y%m%d%H%M%S")
+
+    return str_time
+
 
 
 def _check_earthdata_login() -> bool:

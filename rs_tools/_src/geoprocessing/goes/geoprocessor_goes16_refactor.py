@@ -18,9 +18,8 @@ from rs_tools._src.geoprocessing.goes.validation import correct_goes16_bands, co
 from rs_tools._src.geoprocessing.goes.reproject import add_goes16_crs
 from rs_tools._src.geoprocessing.reproject import convert_lat_lon_to_x_y, calc_latlon
 from rs_tools._src.geoprocessing.utils import check_sat_FOV
-from rs_tools._src.geoprocessing.goes import GOES_WAVELENGTHS, GOES_CHANNELS
+from rs_tools._src.data.goes.bands import GOES16_WAVELENGTHS, GOES16_BANDS
 from rs_tools._src.data.goes.io import parse_goes16_dates_from_file
-from rs_tools._src.data.goes.bands import GOES16_CHANNELS
 import pandas as pd
 import dask
 import warnings
@@ -246,7 +245,7 @@ class GOES16GeoProcessing:
                 gc.collect() # Call the garbage collector to avoid memory problems
 
         # Fix band naming
-        ds = ds.assign_coords(band=list(GOES_CHANNELS.values()))
+        ds = ds.assign_coords(band=list(GOES16_BANDS.values()))
 
         # # open multiple files as a single dataset
         # ds = [xr.open_mfdataset(ifile, preprocess=self.preprocess_fn_radiances, concat_dim="band", combine="nested") for
@@ -373,6 +372,7 @@ class GOES16GeoProcessing:
 
 
 from typing import Union
+
 
 def geoprocess_goes16_file(
         files: List[str],

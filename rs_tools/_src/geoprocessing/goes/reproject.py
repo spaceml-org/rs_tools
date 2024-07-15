@@ -2,6 +2,8 @@ import xarray as xr
 import rioxarray
 from pyproj import CRS
 
+GOES16_PYPROJ = "+proj=geos +lon_0=-75 +h=35786023 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs=True"
+
 
 def add_goes16_crs(ds: xr.Dataset) -> xr.Dataset:
     """

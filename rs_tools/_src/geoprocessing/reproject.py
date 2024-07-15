@@ -1,7 +1,11 @@
-from typing import Tuple
+from typing import Optional, Iterable, Tuple
 import numpy as np
 from pyproj import CRS, Transformer
+from rasterio.enums import Resampling
 import xarray as xr
+from rs_tools._src.geoprocessing.geometry import bbox_string_to_bbox
+from odc.geo.geom import Geometry, BoundingBox
+
 
 # TODO: To be moved to Earth System Datacube Tools
 def convert_lat_lon_to_x_y(crs: str, lon: list[float], lat: list[float]) -> Tuple[float, float]:
@@ -39,3 +43,28 @@ def calc_latlon(ds: xr.Dataset) -> xr.Dataset:
     ds.latitude.attrs["units"] = "degrees_north"
     ds.longitude.attrs["units"] = "degrees_east"
     return ds
+
+
+def rioxarray_resample(
+    ds: xr.Dataset,
+    resample_algorithm = Resampling.bilinear,
+    resolution: float = 1_000,
+    
+):
+    return ds.rio.reproject(ds.rio.crs, resolution=resolution, resampling=resample_algorithm, )
+
+
+def rioxarray_clip_from_bbox(
+    ds: xr.Dataset,
+    bbox: BoundingBox,
+):
+    return ds.rio.clip_box(*bbox.bbox, crs=bbox.crs)
+
+
+def rioxarray_clip_from_polygon(
+    ds: xr.Dataset,
+    geometry: Geometry,
+    all_touched: bool=True,
+    drop: bool=True,
+):
+    return ds.rio.clip(geometries=[geometry.polygon], crs=geometry.crs, all_touched=all_touched, drop=drop)
