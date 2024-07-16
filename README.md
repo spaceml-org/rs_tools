@@ -4,9 +4,9 @@
 
 ## What are RS-Tools?
 
-`rs_tools` is a toolbox of functions designed to 
+`rs_tools` is a toolbox of functions designed to download and preprocess remote sensing data.
 There is a high barrier to entry when working with remote sensing data for machine learning (ML) research.
-This is especially true for level 1 data which is typically raw radiance observations.
+This is especially true for level 1 data which is typically raw radiance/reflectance observations.
 There are often many domain-specific transformations that can completely make or break the success of the ML task.
 `rs_tools` seeks to lower the barrier to entry cost for ML researchers to make meaningful progress when dealing with remote sensing data. 
 It features a standardized, transparent and flexible procedure for defining data and evaluation pipelines for data-intensive level 1 data products.
