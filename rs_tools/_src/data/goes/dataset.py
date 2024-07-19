@@ -83,6 +83,9 @@ class RawGoes16:
                 # match with regex
                 match = re.match(filename_regex, str(ifile_name))
                 
+                if not match:
+                    continue
+                
                 date = match.group("date")
                 timestamp = pd.to_datetime(date, format=self.date_format)
                 

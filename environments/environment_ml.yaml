@@ -1,12 +1,18 @@
-name: rs_tools
+name: rs_tools_ml
 channels:
   - conda-forge
+  # - pytorch
+  # - nvidia
 dependencies:
   - python=3.11
   # Standard Libraries
   - numpy # Numerical Linear Algebra
-  # - scipy # Scientific Computing
-  # - scikit-image
+  - xarray
+  - rioxarray
+  - pandas # Data structure
+  - scikit-image
+  - scikit-learn # Machine Learning
+  - geopandas
   - xarray
   - rioxarray
   - goes2go
@@ -15,20 +21,20 @@ dependencies:
   - pyinterp
   - satpy
   - odc-geo
-  - pandas        # DataFrames
-  - geopandas     # Shapes & Polygons
-  - scikit-learn # Machine Learning
-  # - joblib # Parallelization
+  - rasterio
+  - pyresample
   # PLOTTING LIBRARY
   - matplotlib # standard plotting library
   - seaborn # Stats viz library
-  # - conda-forge::hvplot
+  - cartopy
   # Storage
+  - h5py
+  - zarr
   - netCDF4
   - zarr
-  # - gdal>=3.4.1,<=3.6.3
-  - h5py
-  - pyhdf
+  - h5netcdf
+  # - nvidia/label/cuda-12.2.0::cuda
+  # - pytorch-cuda
   # GUI
   - ipywidgets
   - ipykernel
@@ -38,11 +44,16 @@ dependencies:
       - toolz
       - typer
       - einops
-      - cartopy
+      - einx
+      - mlx-data
+      # PYTORCH
+      - torch>=1.8
+      - torchvision
+      - lightning
       - xrpatcher
+      - torchgeo
       - georeader-spaceml
       # formatting
-      - rasterio
       - black
       - pylint
       - isort
@@ -63,6 +74,13 @@ dependencies:
       # experiment
       - hydra-core
       - hydra-zen
+      - wandb
+      - xrpatcher
+      - toolz
+      - typer
+      # experiment
+      - hydra-core
+      - hydra-zen
       # Docs
       - mkdocs-gen-files
       - mkdocs-literate-nav
@@ -80,7 +98,5 @@ dependencies:
       - mkdocs
       - aiohttp
       # ITI
-      - git+https://github.com/spaceml-org/InstrumentToInstrument.git@development
       - wandb
-      - georeader-spaceml
       

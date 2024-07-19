@@ -52,6 +52,7 @@ def regrid_swath_to_regular(
     resample_type: str = "nn",
     fill_value: float=0.0
 ):
+    modis_swath = modis_swath.compute()
     variable_attrs = modis_swath[variable].attrs
 
     # get footprint polygon

@@ -190,6 +190,7 @@ def geoprocess_modis_aqua_terra(
         calibration: str = "radiance",
         file_path: str = "./meta.geojson",
         save_path: str = "./",
+        meta_save_path: Optional[str]=None,
         regridder: Optional[Callable] = False,
         ):
     """
@@ -299,9 +300,10 @@ def geoprocess_modis_aqua_terra(
     else:
         save_filename = Path(f"{satellite_name}_{calibration}_swath_meta.geojson")
 
-    full_path = Path(save_path).joinpath(save_filename)
-    logger.debug(f"Save Path: {full_path}")
-    geo_dateframes.to_file(full_path, driver="GeoJSON")
+    if meta_save_path is not None:
+        Path(meta_save_path).parent.mkdir(parents=True, exist_ok=True)
+        logger.debug(f"Saving Meta File: {meta_save_path}")
+        geo_dateframes.to_file(meta_save_path, driver="GeoJSON")
 
     return geo_dateframes
 
@@ -312,6 +314,7 @@ def geoprocess_modis_aqua_terra_clouds(
         calibration: str = "radiance", 
         file_path: str = "./meta.geojson", 
         save_path: str = "./",
+        meta_save_path: Optional[str]=None,
         regridder: Optional[Callable]=False,
         save_file_type: str="zarr",
         ):
@@ -455,9 +458,10 @@ def geoprocess_modis_aqua_terra_clouds(
     else:
         save_filename = Path(f"{satellite_name}_{calibration}_swath_meta.geojson")
 
-    full_path = Path(save_path).joinpath(save_filename)
-    logger.debug(f"Save Path: {full_path}")
-    geo_dateframes.to_file(full_path, driver="GeoJSON", )
+    if meta_save_path is not None:
+        Path(meta_save_path).parent.mkdir(parents=True, exist_ok=True)
+        logger.debug(f"Saving Meta File: {meta_save_path}")
+        geo_dateframes.to_file(meta_save_path, driver="GeoJSON")
 
     return geo_dateframes
 
@@ -469,6 +473,7 @@ def geoprocess_aqua_terra(
     file_path: str = "./meta.geojson",
     save_path: str = "./",
     regridder: Optional[Callable] = None,
+    meta_save_path: Optional[str]=None,
     cloud_mask: bool=False
 ):
     """
@@ -503,6 +508,7 @@ def geoprocess_aqua_terra(
                 calibration=calibration,
                 file_path=file_path,
                 save_path=save_path,
+                meta_save_path=meta_save_path,
                 regridder=regridder,
                 )
         else:
@@ -511,6 +517,7 @@ def geoprocess_aqua_terra(
                 calibration=calibration,
                 file_path=file_path,
                 save_path=save_path,
+                meta_save_path=meta_save_path,
                 regridder=regridder,
                 )
     else:

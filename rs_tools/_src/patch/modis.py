@@ -9,6 +9,7 @@ from rs_tools._src.preprocessing.nans import check_nan_count
 from tqdm import tqdm
 from rs_tools.geoprocess import calculate_xrio_footprint
 import typer
+from loguru import logger
 
 app = typer.Typer()
 
@@ -68,6 +69,7 @@ def modis_file_to_patch(
 
         # check nan counts
         if check_nan_count(ipatch.data, nan_cutoff):
+            # logger.info(f"Good data??")
 
             # fill nans with value
             ipatch = ipatch.where(ipatch != np.nan, fill_value)

@@ -31,9 +31,18 @@ brightness_temperature_attrs = dict(
     units="K"
 )
 
+cloud_mask_attrs = dict(
+    name="cloud_mask",
+    long_name="MODIS Cloud Mask and Spectral Test Results",
+    full_name="Cloud Mask",
+    fill_value=0.0,
+    units=""
+)
+
 VARIABLE_ATTRS = dict(
     reflectance=reflectance_attrs,
     radiance=radiance_attrs,
     counts=counts_attrs,
-    brightness_temperature=brightness_temperature_attrs
+    brightness_temperature=brightness_temperature_attrs,
+    cloud_mask=cloud_mask_attrs
 )

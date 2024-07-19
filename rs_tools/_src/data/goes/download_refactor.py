@@ -31,7 +31,7 @@ def goes2go_download_from_timeseries(
     satellite: int = 16,
     domain: str = "F",
     save_dir: str = "./data",
-    save_file_name: Optional[str] = None,
+    meta_save_path: Optional[str] = None
 ) -> pd.DataFrame:
     """
     Downloads GOES satellite data for the specified time series.
@@ -89,12 +89,12 @@ def goes2go_download_from_timeseries(
 
     goes_image_files = pd.concat(goes_image_files, ignore_index=True)
 
-    if save_file_name is not None:
+    if meta_save_path is not None:
         logger.info(f"Saving Meta-Information...")
-        logger.debug(f"Save Path: {save_file_name}")
-        Path(save_file_name).parent.mkdir(parents=True, exist_ok=True)
+        logger.debug(f"Save Path: {meta_save_path}")
+        Path(meta_save_path).parent.mkdir(parents=True, exist_ok=True)
         goes_image_files.to_csv(
-            save_file_name,
+            meta_save_path,
         )
 
     logger.info(f"Completed Query Script!")
@@ -110,7 +110,7 @@ def goes2go_download_from_meta(
     satellite: int = 16,
     domain: str = "F",
     save_dir: str = "./data",
-    save_file_name: Optional[str] = None,
+    meta_save_path: Optional[str] = None,
 ) -> pd.DataFrame:
     """
     Downloads GOES data based on the metadata file.
@@ -128,16 +128,17 @@ def goes2go_download_from_meta(
         pd.DataFrame: DataFrame containing the downloaded GOES data.
     """
     # load file
-    meta_file_path = Path(meta_file_path)
-    
-    assert meta_file_path.is_file()
-    
-    if meta_file_path.suffix == ".csv":
-        df = pd.read_csv(meta_file_path)
-    elif meta_file_path.suffix in [".geojson", ".json"]:
-        df = gpd.read_file(meta_file_path)
-    else:
-        raise ValueError(f"Unrecognized filepath: {meta_file_path}")
+    if meta_save_path is not None:
+        meta_file_path = Path(meta_file_path)
+        
+        assert meta_file_path.is_file()
+        
+        if meta_file_path.suffix == ".csv":
+            df = pd.read_csv(meta_file_path)
+        elif meta_file_path.suffix in [".geojson", ".json"]:
+            df = gpd.read_file(meta_file_path)
+        else:
+            raise ValueError(f"Unrecognized filepath: {meta_file_path}")
 
     df_unique_times = df["time"].unique()
 
@@ -150,7 +151,7 @@ def goes2go_download_from_meta(
         satellite=satellite,
         domain=domain,
         save_dir=save_dir,
-        save_file_name=save_file_name
+        meta_save_path=meta_save_path
     )
 
 

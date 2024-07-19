@@ -20,7 +20,7 @@ app = typer.Typer()
 def ea_download_from_query(
     file_path: str="./",
     save_path: str="./",
-    meta_save_file_name: str="meta"
+    meta_save_path: Optional[str]=None,
 ) -> gpd.GeoDataFrame:
     """
     Downloads MODIS data based on a query.
@@ -90,10 +90,10 @@ def ea_download_from_query(
     geo_dateframes = geo_dateframes.drop_duplicates().reset_index(drop=True)
     
     # save to geojson file
-    logger.info(f"Saving Meta-Information...")
-    save_path = Path(save_path).joinpath(f"{meta_save_file_name}.geojson")
-    logger.debug(f"Save Path: {save_path}")
-    geo_dateframes.to_file(save_path, driver="GeoJSON")
+    if meta_save_path is not None:
+        logger.info(f"Saving Meta-Information...")
+        logger.debug(f"Save Path: {meta_save_path}")
+        geo_dateframes.to_file(meta_save_path, driver="GeoJSON")
 
     return geo_dateframes
 

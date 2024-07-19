@@ -123,6 +123,8 @@ def ea_granule_to_gdf(ea_granules):
 
     # create a GeoDataFrame 
     gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+    
+
 
     return gdf
 
@@ -184,7 +186,7 @@ def ea_data_query(
     geo_dateframes = pd.concat(geo_dateframes, ignore_index=True)
 
     # clean the dataframe
-    geo_dateframes = geo_dateframes.drop_duplicates().reset_index()
+    geo_dateframes = geo_dateframes.drop_duplicates().reset_index(drop=True)
     
     # save to geojson file
     logger.info(f"Saving Meta-Information...")
