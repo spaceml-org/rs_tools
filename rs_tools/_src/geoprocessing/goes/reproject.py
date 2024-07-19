@@ -3,6 +3,13 @@ import rioxarray
 from pyproj import CRS
 
 GOES16_PYPROJ = "+proj=geos +lon_0=-75 +h=35786023 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs=True"
+GOES17_PYPROJ = "+proj=geos +lon_0=-137 +h=35786023 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs=True"
+
+GOES16_CRS = CRS.from_string(GOES16_PYPROJ)
+GOES17_CRS = CRS.from_string(GOES17_PYPROJ)
+
+GOES_CRS = {"16": GOES16_CRS, "17": GOES17_CRS}
+
 
 
 def add_goes16_crs(ds: xr.Dataset) -> xr.Dataset:

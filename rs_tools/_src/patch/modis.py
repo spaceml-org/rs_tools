@@ -1,14 +1,20 @@
 from xrpatcher._src.base import XRDAPatcher
 import xarray as xr
+from pathlib import Path
 import numpy as np
 from rs_tools._src.geoprocessing.crs import add_crs_from_rio
 import pandas as pd
 from datetime import datetime
 from rs_tools._src.preprocessing.nans import check_nan_count
 from tqdm import tqdm
+from rs_tools.geoprocess import calculate_xrio_footprint
+import typer
+
+app = typer.Typer()
 
 
-def modis_patch_to_file(
+@app.command()
+def modis_file_to_patch(
         file_name: str="./",
         variable: str="",
         patch_size: int=128,
@@ -19,6 +25,7 @@ def modis_patch_to_file(
         overwrite: bool=True,
         save_file_type: str="npy",
 ):
+    save_dir = Path(save_dir)
     
     if not save_dir.is_dir():
         save_dir.mkdir(parents=True, exist_ok=True)
@@ -87,6 +94,47 @@ def modis_patch_to_file(
 
     return None
 
+import geopandas as gpd
+
+@app.command()
+def modis_metafile_to_patch(
+    file_path: str="./meta.geojson",
+    variable: str="",
+    patch_size: int=128,
+    stride_size: int=128,
+    nan_cutoff: float=0.1,
+    fill_value: float=0.0,
+    save_dir: str="./",
+    overwrite: bool=True,
+    save_file_type: str="npy",
+):
+    
+    # read filelist
+    gpd_files = gpd.read_file(file_path)
+
+    # iterate through rows of dataframe
+    pbar_files = tqdm(list(gpd_files.iterrows()))
+
+    for irow, ifile in pbar_files:
+
+        pbar_files.set_description(f"Reading: {ifile['satellite_id']} | Time: {ifile['time']}")
+
+        modis_file_to_patch(
+            ifile["full_path"],
+            variable=variable,
+            patch_size=patch_size,
+            stride_size=stride_size,
+            nan_cutoff=nan_cutoff,
+            fill_value=fill_value,
+            save_dir=save_dir,
+            overwrite=overwrite,
+            save_file_type=save_file_type,
+            )
+
+
+
+    
+
 
 def _save_to_numpy(
         patch: xr.DataArray,
@@ -99,16 +147,9 @@ def _save_to_numpy(
         # save as numpy files
         np.save(save_dir.joinpath(f"{save_file_name}_{patch.name}"), patch.values)
         np.save(save_dir.joinpath(f"{save_file_name}_cloud_mask"), patch.cloud_mask.values)
+        np.save(save_dir.joinpath(f"{save_file_name}_latitude"), patch.latitude.values)
+        np.save(save_dir.joinpath(f"{save_file_name}_longitude"), patch.longitude.values)
 
-        # just in case we have curvilinear coordinates
-        if patch.longitude.ndim == 1:
-            np.save(save_dir.joinpath(f"{save_file_name}_latitude"), patch.latitude.values)
-            np.save(save_dir.joinpath(f"{save_file_name}_longitude"), patch.longitude.values)
-        else:
-            X, Y = np.meshgrid(patch.latitude.values, patch.longitude.values, indexing="ik")
-            np.save(save_dir.joinpath(f"{save_file_name}_latitude"), X)
-            np.save(save_dir.joinpath(f"{save_file_name}_longitude"), Y)
-        
 
 def _save_to_tiff(
         patch: xr.DataArray,
@@ -134,6 +175,12 @@ def _save_to_tiff(
             patch = patch.where(patch != np.nan, 4.0)
         except:
             pass
+
+        # add coordinates
+        if patch.longitude.ndim == 1:
+            LATS, LONS = np.meshgrid(patch.latitude.values, patch.longitude.values, indexing="ij")
+            patch["lat"] = (("latitude", "longitude"), LATS)
+            patch["lon"] = (("latitude", "longitude"), LONS)
         
         # save with rasterio
         patch.rio.to_raster(ifile_path)
@@ -155,7 +202,19 @@ def _save_to_zarr(
         ifile_path.unlink()
 
     patch.to_zarr(ifile_path, mode="w")
+
+    # gather meta data
+    src_crs = patch.rio.crs
+    src_bounds = patch.rio.bounds()
+    src_res = patch.rio.resolution()
+    src_transform = patch.rio.transform()
+    src_polygon = calculate_xrio_footprint(patch)
     return None
+
+def _zarr_to_meta(patch):
+
+    return # CRS
+
 
 
 def _save_to_netcdf(
@@ -174,3 +233,8 @@ def _save_to_netcdf(
     patch.to_netcdf(ifile_path, engine="netcdf4")
     return None
 
+
+            
+
+if __name__ == '__main__':
+    app()

@@ -29,18 +29,19 @@ from odc.geo.geobox import GeoBox
 dask.config.set(**{'array.slicing.split_large_chunks': False})
 warnings.filterwarnings('ignore', category=FutureWarning)
 
+
 @dataclass
 class GOES16GeoProcessing:
     """
     A class for geoprocessing GOES-16 data.
-
+    
     Attributes:
         resolution (float): The resolution in meters.
         read_path (str): The path to read the files from.
         save_path (str): The path to save the processed files to.
         region (Tuple[str]): The region of interest defined by the bounding box coordinates (lon_min, lat_min, lon_max, lat_max).
         resample_method (str): The resampling method to use.
-
+        
     Methods:
         goes_files(self) -> List[str]: Returns a list of all GOES files in the read path.
         preprocess_fn(self, ds: xr.Dataset) -> Tuple[xr.Dataset, xr.Dataset]: Preprocesses the input dataset by applying corrections, subsetting, and resampling.

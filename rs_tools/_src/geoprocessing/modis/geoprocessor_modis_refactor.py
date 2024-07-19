@@ -313,6 +313,7 @@ def geoprocess_modis_aqua_terra_clouds(
         file_path: str = "./meta.geojson", 
         save_path: str = "./",
         regridder: Optional[Callable]=False,
+        save_file_type: str="zarr",
         ):
     """
     Geoprocesses MODIS Aqua and Terra satellite data for cloud analysis.

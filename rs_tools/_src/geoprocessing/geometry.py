@@ -1,6 +1,7 @@
 import rasterio
 from georeader.window_utils import window_polygon, polygon_to_crs, compare_crs
 from odc.geo.geom import BoundingBox
+from shapely.geometry import box
 
 
 def bbox_string_to_bbox(
@@ -19,6 +20,14 @@ def bbox_string_to_bbox(
     lon_min, lat_min, lon_max, lat_max = bbox_string.split(" ")
     bbox = BoundingBox.from_xy(x=(float(lon_min), float(lon_max)), y=(float(lat_max), float(lat_min)), crs="4326")
     return bbox
+
+
+def calculate_xrio_footprint_v2(da):
+    return box(*da.rio.bounds())
+
+
+def calculate_xrio_footprint_reproject(da, dst_crs):
+    return box(*da.rio.transform_bounds(dst_crs))
 
 
 def calculate_xrio_footprint(da, dst_crs=None):

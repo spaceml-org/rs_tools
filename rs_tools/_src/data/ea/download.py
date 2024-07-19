@@ -87,7 +87,7 @@ def ea_download_from_query(
 
     
     # clean the dataframe
-    geo_dateframes = geo_dateframes.drop_duplicates().reset_index()
+    geo_dateframes = geo_dateframes.drop_duplicates().reset_index(drop=True)
     
     # save to geojson file
     logger.info(f"Saving Meta-Information...")

@@ -153,3 +153,4 @@ datasets/*
 *.nc
 .env
 *.tiff
+*.zarr
