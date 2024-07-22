@@ -68,6 +68,10 @@ class TimeSeries:
     @property
     def datetime_index(self):
         return pd.DatetimeIndex(self.ts)
+    
+    @property
+    def dt(self):
+        return pd.Timedelta(value=self.time_delta, unit=self.time_delta_unit)
 
     @property
     def tmin(self):
@@ -76,6 +80,9 @@ class TimeSeries:
     @property
     def tmax(self):
         return self.datetime_index.min()
+    
+    def __len__(self):
+        return len(self.ts)
 
     def __iter__(self):
         for timestamp in self.ts:
@@ -90,7 +97,7 @@ class TimeQuery:
 
     @property
     def time_window(self):
-        return pd.to_timedelta(self.time_delta, unit=self.time_delta_unit)
+        return pd.to_timedelta(float(self.time_delta), unit=str(self.time_delta_unit))
 
     @classmethod
     def init_from_date_string(
@@ -209,6 +216,29 @@ def resample_datetime_index(
     ts = pd.date_range(ts.min(), ts.max(), freq=freq, )
 
     return ts
+
+
+def calculate_nearest_timestamp_index(time_stamps: List[Timestamp], target_timestamp: Timestamp):
+    """
+    Calculates the index of the nearest timestamp in a list of timestamps to a target timestamp.
+
+    Args:
+        time_stamps (List[Timestamp]): A list of timestamps.
+        target_timestamp (Timestamp): The target timestamp.
+
+    Returns:
+        int: The index of the nearest timestamp to the target timestamp.
+    """
+    # create list of time stamps
+    time_stamps = pd.to_datetime(time_stamps)
+    # create target timestamp
+    target_timestamp = pd.to_datetime(target_timestamp)
+    # calculate absolute difference between each timestamp and target timestamp
+    differences = [abs(ts - target_timestamp) for ts in time_stamps]
+    # find the index of the smallest difference
+    nearest_index = differences.index(min(differences))
+    
+    return nearest_index
 
 
 def change_frequency(

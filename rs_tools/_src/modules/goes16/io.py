@@ -37,7 +37,6 @@ class GOES16FileOrg:
     def __repr__(self):
         return self.__str__()
     
-    
     @classmethod
     def init_from_str(cls, read_dir: str):
         """
@@ -266,6 +265,7 @@ def parse_goes16_dates_from_file(file: str):
     
     return datetime.strptime(timestamp[-3][1:], "%Y%j%H%M%S%f").strftime("%Y%j%H%M%S")
 
+
 def format_goes_dates(time: str) -> str:
     """
     Function to format the date/time string.
@@ -290,7 +290,6 @@ def format_goes_dates(time: str) -> str:
     str_time = dt.strftime("%Y%m%d%H%M%S")
     
     return str_time
-
 
 
 def create_metafile_from_directory(

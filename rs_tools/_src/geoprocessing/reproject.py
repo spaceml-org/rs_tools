@@ -73,6 +73,7 @@ def calculate_latlon(x, y, crs):
 def rioxarray_resample(
     ds: xr.Dataset,
     resolution: float | Tuple[float, float],
+    crs: CRS | None = None,
     resampling: Resampling = Resampling.bilinear,
 ) -> xr.Dataset:
     """
@@ -90,7 +91,7 @@ def rioxarray_resample(
     variables = list(ds.coords.keys())
     non_spatial_dims = set(ds.dims) - set([ds.rio.x_dim, ds.rio.y_dim])
     
-    ds = ds.squeeze().rio.reproject(dst_crs=ds.rio.crs, resolution=resolution, resampling=resampling)
+    ds = ds.squeeze().rio.reproject(dst_crs=crs, resolution=resolution, resampling=resampling)
     
     for idim in non_spatial_dims:
         ds = ds.expand_dims({idim: [ds[idim].values.squeeze()]})

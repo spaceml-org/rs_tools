@@ -1,375 +1,151 @@
-from typing import Optional, List, Union
-import os
-import xarray as xr
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-import tqdm
+from typing import Optional
+from pathlib import Path
+from eumdac.product import Product, ProductError
 import shutil
-import typer
-import eumdac
 from loguru import logger
-from datetime import datetime, timedelta
+from rs_tools._src.data.msg.query import msg_query_product
+import pandas as pd
+import geopandas as gpd
+from tqdm import tqdm
+import typer
 
-def msg_download(
-    start_date: str,
-    end_date: Optional[str]=None,
-    start_time: Optional[str]='00:00:00', # EUMDAC did not find any data for 00:00:00
-    end_time: Optional[str]='23:59:00', # EUMDAC did not find any data for 23:59:00
-    daily_window_t0: Optional[str]='00:00:00',
-    daily_window_t1: Optional[str]='23:59:00',
-    time_step: Optional[str]=None,
-    satellite: str="MSG",
-    instrument: str ="HRSEVIRI",
-    processing_level: Optional[str] = "L1",
-    save_dir: Optional[str] = ".",
-    eumdac_key: Optional[str]="",
-    eumdac_secret: Optional[str]="",
-):
+app = typer.Typer()
+
+MSG_EXTENSIONS = [".nat", ".grb"]
+
+
+@app.command()
+def msg_download_from_meta(
+    meta_load_path: str,
+    save_dir: str = "./",
+    meta_save_path: Optional[str]=None
+    
+) -> pd.DataFrame:
     """
-    Downloads MSG satellite data for a specified time period and set of bands.
+    Download data files based on metadata information.
 
     Args:
-        start_date (str): The start date of the data download in the format 'YYYY-MM-DD'.
-        end_date (str, optional): The end date of the data download in the format 'YYYY-MM-DD'. If not provided, the end date will be the same as the start date.
-        start_time (str, optional): The start time of the data download in the format 'HH:MM:SS'. Default is '00:00:00'.
-        end_time (str, optional): The end time of the data download in the format 'HH:MM:SS'. Default is '23:59:00'.
-        daily_window_t0 (str, optional): The start time of the daily window in the format 'HH:MM:SS'. Default is '00:00:00'. Used if e.g., only day/night measurements are required.
-        daily_window_t1 (str, optional): The end time of the daily window in the format 'HH:MM:SS'. Default is '23:59:00'. Used if e.g., only day/night measurements are required.
-        time_step (str, optional): The time step between each data download in the format 'HH:MM:SS'. If not provided, the default is 1 hour.
-        satellite (str): The satellite. Default is MSG.
-        instrument (str): The data product to download. Default is 'HRSEVIRI', also implemented for Cloud Mask (CLM).
-        processing_level (str, optional): The processing level of the data. Default is 'L1'.
-        save_dir (str, optional): The directory where the downloaded files will be saved. Default is the current directory.
-        eumdac_key (str, optional): The EUMETSAT Data Centre (EUMDAC) API key. If not provided, the user will be prompted to enter the key.
-        eumdac_secret (str, optional): The EUMETSAT Data Centre (EUMDAC) API secret. If not provided, the user will be prompted to enter the secret.
+        meta_load_path (str): The path to the metadata file.
+        save_dir (str, optional): The directory to save the downloaded files. Defaults to "./".
+        meta_save_path (str, optional): The path to save the updated metadata file. Defaults to None.
 
     Returns:
-        list: A list of file paths for the downloaded files.
-        
-    Examples:
-        # =========================
-        # MSG LEVEL 1 Test Cases
-        # =========================
-        # custom day
-        python scripts/msg-download.py 2018-10-01
-        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01
-        # custom day + end points
-        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05
-        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 09:00:00 --end-time 12:00:00
-        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:05:00 --end-time 12:05:00
-        # custom day + end points + time window
-        scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 
-        # custom day + end points + time window + timestep
-        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 --time-step 00:15:00
-        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 --time-step 00:25:00
-        # ===================================
-        # MSG CLOUD MASK Test Cases
-        # ===================================
-        # custom day
-        python scripts/msg-download.py 2018-10-01 --instrument=CLM
-        # custom day + end points
-        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --instrument=CLM 
-        # custom day + end points + time window
-        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:00:00 --end-time 12:00:00 --instrument=CLM 
-        # custom day + end points + time window + timestep
-        python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:00:00 --end-time 12:00:00 --time-step 00:25:00 --instrument=CLM
-        # ====================
-        # FAILURE TEST CASES
-        # ====================
+        pd.DataFrame: A DataFrame containing the downloaded data files' information.
+
+    Raises:
+        ValueError: If the file path extension is not recognized or the file type is unrecognized.
+
     """
-
-    # run checks
-    # check if eumdac login is available
-    token = _check_eumdac_login(eumdac_key=eumdac_key, eumdac_secret=eumdac_secret)
-    datastore = eumdac.DataStore(token)
-
-    # check if netcdf4 backend is available
-    _check_netcdf4_backend()
-
-    # check satellite details
-    _check_input_processing_level(processing_level=processing_level)
-    _check_instrument(instrument=instrument)
-    # check data product
-    data_product = f"EO:EUM:DAT:{satellite}:{instrument}"
-    logger.info(f"Data Product: {data_product}")
-    _check_data_product_name(data_product=data_product)
-
-    # check start/end dates/times
-    if end_date is None:
-        end_date = start_date
-
-    # combine date and time information
-    start_datetime_str = start_date + ' ' + start_time
-    end_datetime_str = end_date + ' ' + end_time
-    _check_datetime_format(start_datetime_str, end_datetime_str)
-    # datetime conversion 
-    start_datetime = datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M:%S")
-    end_datetime = datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
-    _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
-
-    # define time step for data query                       
-    if time_step is None: 
-        time_step = '1:00:00'
-        logger.info("No timedelta specified. Default is 1 hour.")
-    _check_timedelta_format(time_delta=time_step)
-    
-    # convert str to datetime object
-    hours, minutes, seconds = convert_str2time(time=time_step)
-    time_delta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
-    
-    _check_timedelta(time_delta=time_delta)
-    
-    # Compile list of dates/times
-    list_of_dates = np.arange(start_datetime, end_datetime, time_delta).astype(datetime)
-    print('Times to check: ',list_of_dates[0], list_of_dates[-1])
-
-    window_date = '1991-10-19' # Add arbitrary date to convert into proper datetime object
-    start_datetime_window_str = window_date + ' ' + daily_window_t0
-    end_datetime_window_str = window_date + ' ' + daily_window_t1
-    _check_start_end_times(start_datetime=start_datetime, end_datetime=end_datetime)
-    # datetime conversion 
-    daily_window_t0_datetime = datetime.strptime(start_datetime_window_str, "%Y-%m-%d %H:%M:%S")
-    daily_window_t1_datetime = datetime.strptime(end_datetime_window_str, "%Y-%m-%d %H:%M:%S")
-    _check_start_end_times(start_datetime=daily_window_t0_datetime, end_datetime=daily_window_t1_datetime)
-
-    # filter function - check that query times fall within desired time window
-    def is_in_between(date):
-       return daily_window_t0_datetime.time() <= date.time() <= daily_window_t1_datetime.time()
-
-    # compile new list of dates within desired time window
-    list_of_dates = list(filter(is_in_between, list_of_dates))
-
-    # check if save_dir is valid before attempting to download
-    _check_save_dir(save_dir=save_dir)
-
-    files = []
-
-    # create progress bars for dates and bands
-    pbar_time = tqdm.tqdm(list_of_dates)
-
-    for itime in pbar_time:
+    # load meta file
+    # load file
+    if isinstance(meta_load_path, pd.DataFrame | gpd.GeoDataFrame):
+        df = meta_load_path
         
-        pbar_time.set_description(f"Time - {itime}")
-
-        sub_files_list = _download(time=itime, data_product=data_product, save_dir=save_dir, datastore=datastore)
-        if sub_files_list is None:
-            logger.info(f"Could not find data for time {itime}. Trying to remove 5 mins from timestamp {itime}.")
-            time_delta = timedelta(hours=0, minutes=5, seconds=0)
-            itime_minus5 = itime - time_delta
-            sub_files_list = _download(time=itime_minus5, data_product=data_product, save_dir=save_dir, datastore=datastore)
-        if sub_files_list is None:
-            logger.info(f"Could not find data for time {itime_minus5}. Trying to add 5 mins to timestamp {itime}.")
-            time_delta = timedelta(hours=0, minutes=5, seconds=0)
-            itime_plus5 = itime+ time_delta
-            sub_files_list = _download(time=itime_plus5, data_product=data_product, save_dir=save_dir, datastore=datastore)
-
-        if sub_files_list is None:
-            logger.info(f"Could not find data for time {itime}. Skipping to next time.")
-        else:
-            files += sub_files_list
-
-    return files
-
-def _download(time: datetime, data_product: str, save_dir: str, datastore):
-    products = _compile_msg_products(data_product=data_product, time=time, datastore=datastore)
-    sub_files_list = _msg_data_download(products=products, save_dir=save_dir)
-    return sub_files_list
-
-def _compile_msg_products(data_product: str, time: datetime, datastore):
-    selected_collection = datastore.get_collection(data_product)
-    products = selected_collection.search(
-        dtstart=time,
-        dtend=time)
-    return products
-
-def _msg_data_download(products, save_dir: str):
-    for product in products:
-        for entry in product.entries:
-            if entry.endswith(".nat") or entry.endswith(".grb"): 
-                try:
-                    with product.open(entry=entry) as fsrc:
-                        # Create a full file path for saving the file
-                        save_path = os.path.join(save_dir, os.path.basename(fsrc.name))
-                        with open(save_path, mode='wb') as fdst:
-                            shutil.copyfileobj(fsrc, fdst)
-                        print(f"Successfully downloaded {entry}.")
-                        return [save_path]
-                except eumdac.product.ProductError as error:
-                    print(f"Could not download entry {entry} from product '{product}': '{error.msg}'")
-
-def _check_eumdac_login(eumdac_key: str, eumdac_secret: str) -> bool:
-    """check if eumdac login is available in environment variables / as input arguments"""
-    if eumdac_key and eumdac_key:
-        os.environ["EUMDAC_KEY"] = eumdac_key
-        os.environ["EUMDAC_SECRET"] = eumdac_secret
-
-    if os.environ.get("EUMDAC_KEY") is None or os.environ.get("EUMDAC_SECRET") is None:
-        msg = "Please set your EUMDAC credentials as environment variables using:"
-        msg += "\nexport EUMDAC_KEY=<your user key>"
-        msg += "\nexport EUMDAC_SECRET=<your user secret>"
-        msg += "\nOr provide them as command line arguments using:"
-        msg += "\n--eumdac-key <your user key> --eumdac-secret <your user secret>"
-        raise ValueError(msg)
-    else:
-        eumdac_key = os.environ.get("EUMDAC_KEY")
-        eumdac_secret = os.environ.get("EUMDAC_SECRET")
-    
-    # check if credentials are valid
-    credentials = (eumdac_key, eumdac_secret)
-    try:
-        token = eumdac.AccessToken(credentials)
-        logger.info(f"EUMDAC login successful. Token '{token}' expires {token.expiration}")
-        return token
-    except:
-        msg = "EUMDAC login failed."
-        msg += "\nPlease check your credentials and set them as environment variables using:"
-        msg += "\nexport EUMDAC_KEY=<your user key>"
-        msg += "\nexport EUMDAC_SECRET=<your user secret>"
-        msg += "\nOr provide them as command line arguments using:"
-        msg += "\n--eumdac-key <your user key> --eumdac-secret <your user secret>"
-        raise ValueError(msg)
-
-def _check_netcdf4_backend() -> bool:
-    """check if xarray netcdf4 backend is available"""
-    if 'netcdf4' in xr.backends.list_engines().keys():
-        return True
-    else:
-        msg = "Please install netcdf4 backend for xarray using one of the following commands:"
-        msg += "\npip install netCDF4"
-        msg += "\nconda install -c conda-forge netCDF4"
-        raise ValueError(msg)
-
-
-def _check_datetime_format(start_datetime_str: str, end_datetime_str: str) -> bool:
-    try:
-        datetime.strptime(start_datetime_str, "%Y-%m-%d %H:%M:%S")
-        datetime.strptime(end_datetime_str, "%Y-%m-%d %H:%M:%S")
-        return True
-    except Exception as e:
-        msg = "Please check date/time format"
-        msg += "\nExpected date format: %Y-%m-%d"
-        msg += "\nExpected time format: %H:%M:%S"
-        raise SyntaxError(msg)
+    elif isinstance(meta_load_path, Path | str):
+        
+        meta_load_path = Path(meta_load_path)
+        
+        assert meta_load_path.is_file()
+        
+        if meta_load_path.suffix == ".csv":
+            df = pd.read_csv(meta_load_path, index_col=0)
             
-
-def _check_start_end_times(start_datetime: datetime, end_datetime: datetime) -> bool:
-    """ check end_datetime is after start_datetime """
-    if start_datetime < end_datetime:
-        return True
+        elif meta_load_path.suffix in [".geojson", ".json"]:
+            df = gpd.read_file(meta_load_path, index_col=0)
+        else:
+            raise ValueError(f"Unrecognized filepath extension: {meta_load_path.suffix}")
     else:
-        msg = "Start datetime must be before end datetime\n"
-        msg += f"This does not hold for start = {str(start_datetime)} and end = {str(end_datetime)}"
+        msg = f"Unrecognized filetype: {meta_load_path}"
         raise ValueError(msg)
     
-def _check_timedelta_format(time_delta: str) -> bool:
+    data_frames = list()
+        
+    pbar = tqdm(list(df.iterrows()))
+    for irow, idata in pbar:
+        
+        pbar.set_description(f"Downloading: {idata['time']} | {idata['product_id']}")
+        save_path = msg_download_from_product_id(
+            product_id=idata["product_id"],
+            collection_id=idata["collection_id"],
+            save_dir=save_dir
+        )
+        idata["full_path"] = str(Path(save_path).absolute())
+        data_frames.append(idata[1:])
+    
+    data_frames = pd.DataFrame(data_frames)
+    data_frames = data_frames.drop_duplicates().reset_index(drop=True)
+    
+    if meta_save_path:
+        Path(meta_save_path).parent.mkdir(parents=True, exist_ok=True)
+        data_frames.to_csv(meta_save_path)
+    
+    return data_frames
+
+
+@app.command()
+def msg_download_from_product_id(
+    product_id: str,
+    collection_id: str,
+    save_dir: str="./",
+):
+    """
+    Downloads the MSG granule associated with the given product ID and collection ID.
+
+    Args:
+        product_id (str): The ID of the product.
+        collection_id (str): The ID of the collection.
+        save_dir (str, optional): The directory where the downloaded granule will be saved. Defaults to "./".
+
+    Returns:
+        bool: True if the granule was successfully downloaded, False otherwise.
+    """
+    product = msg_query_product(
+        product_id=product_id,
+        collection_id=collection_id
+    )
+    return msg_download_granule(product.granule, save_dir=save_dir)
+
+
+def msg_download_granule(
+    granule: Product,
+    save_dir: str="./"
+):
+    """
+    Downloads a specific file from a given granule and saves it to the specified directory.
+
+    Args:
+        granule (Product): The granule from which to download the file.
+        save_dir (str, optional): The directory where the downloaded file will be saved. Defaults to "./".
+
+    Returns:
+        str: The path to the downloaded file.
+
+    Raises:
+        ProductError: If there is an error while downloading the file.
+    """
+    entries = list(granule.entries)
+    filenames = list(filter(lambda x: Path(x).suffix in MSG_EXTENSIONS, entries))
+    
+    msg = f"No files to download"
+    msg += f"\nEntries:\n{granule.entries}"
+    assert len(filenames) == 1, msg
+    
+    filename = filenames[0]
+    
     try:
-        time_list = time_delta.split(":")
-        assert len(time_list) == 3
-        assert 0 <= int(time_list[0]) # Check that hours is >= 0, and convertible to int
-        assert 0 <= int(time_list[1]) < 60 # Check that minutes < 60, and convertible to int
-        assert 0 <= int(time_list[2]) < 60 # Check that seconds < 60, and convertible to int
+        with granule.open(entry=filename) as fsrc:
+            save_dir = Path(save_dir)
+            save_dir.mkdir(parents=True, exist_ok=True)
+            save_path = save_dir.joinpath(fsrc.name)
+            
+            with open(save_path, mode="wb") as fdst:
+                shutil.copyfileobj(fsrc, fdst)
+            return save_path
+    except ProductError as error:
+        msg = f"Could not download {filename} from '{granule}': "
+        msg += f"{error.msg}"
+        print(msg)     
 
-    except Exception as e:
-        msg = "Please check time step format"
-        msg += "\nExpected time format: %H:%M:%S"
-        raise SyntaxError(msg)
-
-def _check_timedelta(time_delta: datetime) -> bool:
-    if time_delta.days > 0: return True
-    if time_delta.seconds >= 15 * 60: return True
-
-    msg = "Time delta must not be smaller than the time resolution of the data\n"
-    msg += f"Time delta {str(time_delta)} is too small\n"
-    msg += f"The minimum required time delta is 15 min"
-    raise ValueError(msg)
-
-def _check_input_processing_level(processing_level: str) -> bool:
-    """checks processing level for MSG data"""
-    if processing_level in ["L1"]:
-        return True
-    else:
-        msg = "Unrecognized processing level"
-        msg += f"\nNeeds to be 'L1'. Others are not yet tested"
-        raise ValueError(msg)
-
-def _check_instrument(instrument: str) -> bool:
-    """checks instrument for MSG data."""
-    if instrument in ["HRSEVIRI", "CLM"]:
-        return True
-    else:
-        msg = "Unrecognized instrument"
-        msg += f"\nNeeds to be 'HRSEVIRI' or 'CLM'. Others are not yet tested"
-        raise ValueError(msg)
-    
-def _check_data_product_name(data_product: str) -> bool:
-    if data_product in ['EO:EUM:DAT:MSG:HRSEVIRI', 'EO:EUM:DAT:MSG:CLM']:
-        return True
-    else:
-        msg = f"Unrecognized data product {data_product}"
-        raise ValueError(msg)
-             
-def convert_str2time(time: str):
-    time_list = time.split(":")
-    hours = int(time_list[0])
-    minutes = int(time_list[1])
-    seconds = int(time_list[2])
-
-    return hours, minutes, seconds
-
-def delete_list_of_files(file_list: List[str]) -> None:
-    for file_path in file_list:
-        try:
-            os.remove(file_path)
-        except OSError as e:
-            print(f"Error: {file_path} : {e.strerror}")
-
-def _check_save_dir(save_dir: str) -> bool:
-    """ check if save_dir exists """
-    if os.path.isdir(save_dir):
-        return True
-    else:
-        try:
-            os.makedirs(save_dir)
-            return True
-        except:
-            msg = "Save directory does not exist"
-            msg += f"\nReceived: {save_dir}"
-            msg += "\nCould not create directory"
-            raise ValueError(msg)
-
-def main(input: str):
-
-    print(input)
 
 if __name__ == '__main__':
-    typer.run(msg_download)
-
-    """
-    # =========================
-    # MSG LEVEL 1 Test Cases
-    # =========================
-    # custom day
-    python scripts/msg-download.py 2018-10-01
-    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01
-    # custom day + end points
-    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05
-    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 09:00:00 --end-time 12:00:00
-    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:05:00 --end-time 12:05:00
-    # custom day + end points + time window
-    scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 
-    # custom day + end points + time window + timestep
-    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 --time-step 00:15:00
-    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-01 --start-time 00:05:00 --end-time 23:54:00 --daily-window-t0 09:00:00 --daily-window-t1 12:00:00 --time-step 00:25:00
-    # ===================================
-    # MSG CLOUD MASK Test Cases
-    # ===================================
-    # custom day
-    python scripts/msg-download.py 2018-10-01 --instrument=CLM
-    # custom day + end points
-    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --instrument=CLM 
-    # custom day + end points + time window
-    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:00:00 --end-time 12:00:00 --instrument=CLM 
-    # custom day + end points + time window + timestep
-    python scripts/msg-download.py 2018-10-01 --end-date 2018-10-05 --start-time 09:00:00 --end-time 12:00:00 --time-step 00:25:00 --instrument=CLM
-    """
+    app()

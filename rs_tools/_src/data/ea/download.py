@@ -6,14 +6,13 @@ from pathlib import Path
 import pandas as pd
 import geopandas as gpd
 from odc.geo.geom import BoundingBox
-from rs_tools._src.data.ea.query import query_ea_timestamps, ea_granule_to_gdf
+from rs_tools._src.data.ea.query import query_ea_timestamps
+from rs_tools._src.data.ea.meta import ea_granule_to_gdf
 from loguru import logger
 import earthaccess
 from rs_tools._src.utils.io import get_list_filenames
 
 app = typer.Typer()
-
-
 
 
 @app.command()
@@ -72,7 +71,6 @@ def ea_download_from_query(
     # list of all .hdf files in the directory
     all_files = get_list_filenames(save_path, ".hdf")
 
-
     for irow, imeta in geo_dateframes.iterrows():
         
         # search for satellite_id & time
@@ -84,7 +82,6 @@ def ea_download_from_query(
         else:
             file_query = list(set(file_query))[0]
             geo_dateframes.loc[irow, "file_path"] = str(Path(file_query))
-
     
     # clean the dataframe
     geo_dateframes = geo_dateframes.drop_duplicates().reset_index(drop=True)
