@@ -16,7 +16,7 @@ from xrpatcher._src.base import XRDAPatcher
 
 def _check_filetype(file_type: str) -> bool:
     """checks instrument for GOES data."""
-    if file_type in ["nc", "np", "tif"]:
+    if file_type in ["nc", "np", "npz", "tif"]:
         return True
     else:
         msg = "Unrecognized file type"
@@ -60,7 +60,7 @@ class PrePatcher:
         patch_size (int): The size of each patch.
         stride_size (int): The stride size for generating patches.
         nan_cutoff (float): The cutoff value for allowed NaN count in a patch.
-        save_filetype (str): The file type to save patches as. Options are [nc, np, tif].
+        save_filetype (str): The file type to save patches as. Options are [nc, np, npz, tif].
 
     Methods:
         nc_files(self) -> List[str]: Returns a list of all NetCDF filenames in the read_path directory.
@@ -189,6 +189,32 @@ class PrePatcher:
                             ipatch.longitude.values,
                         )
                         np.save(
+                            Path(self.save_path).joinpath(
+                                f"{itime}_cloudmask_patch_{i}"
+                            ),
+                            ipatch.cloud_mask.values,
+                        )
+                    elif self.save_filetype == "npz":
+                        # save as numpy files
+                        np.savez_compressed(
+                            Path(self.save_path).joinpath(
+                                f"{itime}_radiance_patch_{i}"
+                            ),
+                            data,
+                        )
+                        np.savez_compressed(
+                            Path(self.save_path).joinpath(
+                                f"{itime}_latitude_patch_{i}"
+                            ),
+                            ipatch.latitude.values,
+                        )
+                        np.savez_compressed(
+                            Path(self.save_path).joinpath(
+                                f"{itime}_longitude_patch_{i}"
+                            ),
+                            ipatch.longitude.values,
+                        )
+                        np.savez_compressed(
                             Path(self.save_path).joinpath(
                                 f"{itime}_cloudmask_patch_{i}"
                             ),
