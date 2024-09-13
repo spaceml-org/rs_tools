@@ -39,6 +39,7 @@ dependencies:
       - einops
       - cartopy
       - google-cloud-storage
+      - gcsfs
       - xrpatcher
       # formatting
       - rasterio
