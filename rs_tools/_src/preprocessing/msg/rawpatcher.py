@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import gc
 import os
+import autoroot
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -9,18 +10,20 @@ import numpy as np
 import typer
 import xarray as xr
 from loguru import logger
+from satpy import Scene
 from rs_tools._src.utils.io import get_list_filenames
+from rs_tools._src.geoprocessing.msg.reproject import add_msg_crs
 from tqdm import tqdm
 from xrpatcher._src.base import XRDAPatcher
 
 
 def _check_filetype(file_type: str) -> bool:
     """checks filetype."""
-    if file_type in ["nc", "np", "npz", "tif"]:
+    if file_type in ["np", "npz", "tif"]:
         return True
     else:
         msg = "Unrecognized file type"
-        msg += f"\nNeeds to be 'nc', 'np', 'npz' or 'tif'. Others are not yet tested"
+        msg += f"\nNeeds to be 'np', 'npz' or 'tif'. Others are not yet tested"
         raise ValueError(msg)
 
 
@@ -50,17 +53,18 @@ def _check_nan_count(arr: np.array, nan_cutoff: float) -> bool:
 
 
 @dataclass(frozen=True)
-class PrePatcher:
+class MSGRawPatcher:
     """
-    A class for preprocessing and saving patches from NetCDF files.
+    A class for preprocessing and saving patches from raw MSG files.
 
     Attributes:
-        read_path (str): The path to the directory containing the NetCDF files.
+        read_path (str): The path to the directory containing the MSG files.
         save_path (str): The path to save the patches.
         patch_size (int): The size of each patch.
         stride_size (int): The stride size for generating patches.
         nan_cutoff (float): The cutoff value for allowed NaN count in a patch.
-        save_filetype (str): The file type to save patches as. Options are [nc, np, npz, tif].
+        save_filetype (str): The file type to save patches as. Options are [np, npz, tif].
+        stack_coords (bool): Whether to stack latitude and longitude data into a single DataArray.
 
     Methods:
         nc_files(self) -> List[str]: Returns a list of all NetCDF filenames in the read_path directory.
@@ -73,52 +77,79 @@ class PrePatcher:
     stride_size: int
     nan_cutoff: float
     save_filetype: str
+    stack_coords: bool = True
 
     @property
-    def nc_files(self) -> list[str]:
+    def nat_files(self) -> list[str]:
         """
-        Returns a list of all NetCDF filenames in the read_path directory.
+        Returns a list of all native filenames in the read_path directory.
 
         Returns:
-            List[str]: A list of NetCDF filenames.
+            List[str]: A list of native filenames.
         """
         # get list of all filenames within the path
-        files = get_list_filenames(self.read_path, ".nc")
+        files = get_list_filenames(self.read_path, ".nat")
         return files
+
+    def load_file(self, filename: str) -> xr.Dataset:
+        """Function to load native MSG file using satpy.
+
+        Args:
+            filename (str): Filename of the MSG file to load.
+
+        Returns:
+            xr.Dataset: Dataset containing the MSG data.
+        """
+        scn = Scene(reader="seviri_l1b_native", filenames=[filename])
+        datasets = scn.available_dataset_names()
+        scn.load(datasets[1:], generate=False, calibration='radiance')
+        ds = scn.to_xarray()
+        return ds
+
+    def stack_data(self, ds: xr.Dataset) -> xr.DataArray:
+        """
+        Stacks band, latitude, and longitude data into a single DataArray.
+
+        Args:
+            ds (xr.Dataset): Raw MSG dataset.
+
+        Returns:
+            xr.DataArray: Data array.
+        """
+
+        variables = ['IR_016', 'IR_039', 'IR_087', 'IR_097', 'IR_108', 'IR_120', 'IR_134', 'VIS006', 'VIS008', 'WV_062', 'WV_073']
+
+        # stack all variables into one array:
+        stacked_data = np.stack([ds[var].values for var in variables], axis=0)
+        if self.stack_coords:
+            stacked_data = np.concatenate([stacked_data, ds['latitude'].values[np.newaxis, :, :]], axis=0)
+            stacked_data = np.concatenate([stacked_data, ds['longitude'].values[np.newaxis, :, :]], axis=0)
+            variables.append('latitude')
+            variables.append('longitude')
+
+        stacked_dataarray = xr.DataArray(stacked_data, dims=['band', 'y', 'x'], coords={'band': variables})
+        return stacked_dataarray
 
     def save_patches(self):
         """
         Preprocesses and saves patches from the NetCDF files.
         """
-        pbar = tqdm(self.nc_files)
+        pbar = tqdm(self.nat_files)
 
         for ifile in pbar:
             # extract & log timestamp
-            itime = str(Path(ifile).name).split("_")[0]
+            itime = str(Path(ifile).name).split(".")[0].split("-")[-1]
             pbar.set_description(f"Processing: {itime}")
             # open dataset
-            ds = xr.open_dataset(ifile, engine="netcdf4")
-
+            ds = self.load_file(ifile)
             if self.save_filetype == "tif":
-                # concatenate variables
-                ds_temp = xr.concat(
-                    [ds.cloud_mask, ds.latitude, ds.longitude], dim="band"
-                )
-                # name data variables "Rad"
-                ds_temp = ds_temp.to_dataset(name="Rad")
-                ds_temp = ds_temp.drop(["cloud_mask", "latitude", "longitude"])
-                ds_temp = ds_temp.assign_coords(
-                    band=["cloud_mask", "latitude", "longitude"]
-                )
-                # merge with original dataset
-                ds = xr.merge([ds_temp.Rad, ds.Rad])
-                # store band names to be attached to da later
-                band_names = [str(i) for i in ds.band.values]
-                del ds_temp
-                gc.collect()
+                # add CRS
+                ds = add_msg_crs(ds)
+            # stack data
+            da = self.stack_data(ds)
+
+            band_names = da.band.values
                 
-            # extract radiance data array
-            da = ds.Rad
             # define patch parameters
             patches = dict(x=self.patch_size, y=self.patch_size)
             strides = dict(x=self.stride_size, y=self.stride_size)
@@ -133,26 +164,7 @@ class PrePatcher:
                 data = ipatch.data  # extract data
                 # logger.info(f'stride size {self.stride_size} ')
                 if _check_nan_count(data, self.nan_cutoff):
-                    if self.save_filetype == "nc":
-                        # reconvert to dataset to attach band_wavelength and time
-                        ipatch = ipatch.to_dataset(name="Rad")
-                        ipatch = ipatch.assign_coords({"time": ds.time.values})
-                        ipatch = ipatch.assign_coords(
-                            {"band_wavelength": ds.band_wavelength.values}
-                        )
-                        # compile filename
-                        file_path = Path(self.save_path).joinpath(
-                            f"{itime}_patch_{i}.nc"
-                        )
-                        # remove file if it already exists
-                        if os.path.exists(file_path):
-                            os.remove(file_path)
-                        # save patch to netcdf
-                        ipatch.to_netcdf(
-                            Path(self.save_path).joinpath(f"{itime}_patch_{i}.nc"),
-                            engine="netcdf4",
-                        )
-                    elif self.save_filetype == "tif":
+                    if self.save_filetype == "tif":
                         # reconvert to dataset to attach band_wavelength and time
                         # ds.attrs['band_names'] = [str(i) for i in ds.band.values]
                         # compile filename
@@ -172,53 +184,17 @@ class PrePatcher:
                         # save as numpy files
                         np.save(
                             Path(self.save_path).joinpath(
-                                f"{itime}_radiance_patch_{i}"
+                                f"{itime}_patch_{i}"
                             ),
                             data,
-                        )
-                        np.save(
-                            Path(self.save_path).joinpath(
-                                f"{itime}_latitude_patch_{i}"
-                            ),
-                            ipatch.latitude.values,
-                        )
-                        np.save(
-                            Path(self.save_path).joinpath(
-                                f"{itime}_longitude_patch_{i}"
-                            ),
-                            ipatch.longitude.values,
-                        )
-                        np.save(
-                            Path(self.save_path).joinpath(
-                                f"{itime}_cloudmask_patch_{i}"
-                            ),
-                            ipatch.cloud_mask.values,
                         )
                     elif self.save_filetype == "npz":
                         # save as numpy files
                         np.savez_compressed(
                             Path(self.save_path).joinpath(
-                                f"{itime}_radiance_patch_{i}"
+                                f"{itime}_patch_{i}"
                             ),
                             data,
-                        )
-                        np.savez_compressed(
-                            Path(self.save_path).joinpath(
-                                f"{itime}_latitude_patch_{i}"
-                            ),
-                            ipatch.latitude.values,
-                        )
-                        np.savez_compressed(
-                            Path(self.save_path).joinpath(
-                                f"{itime}_longitude_patch_{i}"
-                            ),
-                            ipatch.longitude.values,
-                        )
-                        np.savez_compressed(
-                            Path(self.save_path).joinpath(
-                                f"{itime}_cloudmask_patch_{i}"
-                            ),
-                            ipatch.cloud_mask.values,
                         )
                 else:
                     pass
@@ -226,12 +202,12 @@ class PrePatcher:
 
 
 def prepatch(
-    read_path: str = "./",
-    save_path: str = "./",
+    read_path: str = "/home/anna.jungbluth/data/L1b/",
+    save_path: str = "/home/anna.jungbluth/data/patches/",
     patch_size: int = 256,
-    stride_size: int = 256,
+    stride_size: int = 192,
     nan_cutoff: float = 0.5,
-    save_filetype: str = "nc",
+    save_filetype: str = "npz",
 ):
     """
     Patches satellite data into smaller patches for training.
@@ -251,7 +227,7 @@ def prepatch(
     # Initialize Prepatcher
     logger.info(f"Patching Files...: {read_path}")
     logger.info(f"Initializing Prepatcher...")
-    prepatcher = PrePatcher(
+    prepatcher = MSGRawPatcher(
         read_path=read_path,
         save_path=save_path,
         patch_size=patch_size,
