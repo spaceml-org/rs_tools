@@ -169,7 +169,7 @@ class MSGRawPatcher:
                         # ds.attrs['band_names'] = [str(i) for i in ds.band.values]
                         # compile filename
                         file_path = Path(self.save_path).joinpath(
-                            f"{itime}_patch_{i}.nc"
+                            f"{itime}_patch_{i}.tif"
                         )
                         # remove file if it already exists
                         if os.path.exists(file_path):
@@ -177,9 +177,7 @@ class MSGRawPatcher:
                         # add band names as attribute
                         ipatch.attrs["band_names"] = band_names
                         # save patch to tiff
-                        ipatch.rio.to_raster(
-                            Path(self.save_path).joinpath(f"{itime}_patch_{i}.tif")
-                        )
+                        ipatch.rio.to_raster(file_path)
                     elif self.save_filetype == "np":
                         # save as numpy files
                         np.save(
