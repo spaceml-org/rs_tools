@@ -2,6 +2,6 @@ defaults:
   - download
   - geoprocess
   - patch
-  - satellite: terra
+  - satellite: goes
 
-stage: patch
+stage: download

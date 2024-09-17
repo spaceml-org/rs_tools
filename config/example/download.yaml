@@ -1,15 +1,15 @@
 # PERIOD
 period:
-  start_date: '2020-10-01'
+  start_date: '2020-01-01'
   start_time: '00:00:00'
-  end_date: '2020-10-31'
+  end_date: '2020-01-31'
   end_time: '23:59:00'
 
 # CLOUD MASK
 cloud_mask: True
   
 # PATH FOR SAVING DATA
-save_dir: data
+save_dir: /mnt/disks/data
 
 defaults:
   - _self_

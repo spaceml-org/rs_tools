@@ -5,8 +5,8 @@ download:
   start_time: ${period.start_time}
   end_date: ${period.end_date}
   end_time: ${period.end_time}
-  daily_window_t0: "14:00:00"
-  daily_window_t1: "20:00:00"
+  daily_window_t0: "00:00:00"
+  daily_window_t1: "23:59:00"
   time_step: "1:00:00"
 
 geoprocess:
