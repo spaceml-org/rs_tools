@@ -219,7 +219,7 @@ def _goes_level1_download(time,
             filepath: str = os.path.join(save_dir, ifile.file[0])
             sub_files_list += [filepath]
         
-        except IndexError:
+        except:
             logger.info(f"Band {iband} could not be downloaded for time step {time}.")
             if check_bands_downloaded:
                 logger.info(f"Deleting all other bands for time step {time}.")
