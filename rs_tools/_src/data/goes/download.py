@@ -183,7 +183,7 @@ def _goes_level2_download(time,
         # extract filepath from GOES download pandas dataframe
         filepath: str = os.path.join(save_dir, ifile.file[0])
         return [filepath]
-    except IndexError:
+    except:
         logger.info(f"Data could not be downloaded for time step {time}.")
         return []
     
