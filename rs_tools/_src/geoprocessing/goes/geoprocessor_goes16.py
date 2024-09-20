@@ -107,6 +107,7 @@ class GOES16GeoProcessing:
             ds_subset = ds
 
         if self.resolution is not None:
+            # TODO: Test how resampling impacts cloud_mask
             logger.info(f"Resampling data to resolution: {self.resolution} m")
             # resampling
             ds_subset = resample_rioxarray(ds_subset, resolution=(self.resolution, self.resolution), method=self.resample_method)
@@ -153,7 +154,8 @@ class GOES16GeoProcessing:
         # attach time coordinate
         ds_subset = ds_subset.assign_coords({"time": [time_stamp]})
         # drop variables that will no longer be needed
-        ds_subset = ds_subset.drop_vars(["t", "y_image", "x_image", "goes_imager_projection"])
+        # ds_subset = ds_subset.drop_vars(["t", "y_image", "x_image", "goes_imager_projection"])
+        ds_subset = ds_subset.drop_vars(["t", "y_image", "x_image"]) # NOTE: Keep goes_imager_projection for easier access to crs
         # assign band attributes to dataset
         ds_subset.band.attrs = band_attributes
         # assign band wavelength to each variable

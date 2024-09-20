@@ -14,7 +14,7 @@ geoprocess:
   read_path: ${read_path}/msg/raw
   save_path: ${save_path}/msg/geoprocessed
   resolution: null
-  region: "-70 -15 20 5"
+  region: null
   resample_method: bilinear
 
 # preprocess:
