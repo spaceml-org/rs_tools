@@ -11,8 +11,8 @@ download:
 
 geoprocess:
   _target_: rs_tools._src.geoprocessing.msg.geoprocessor_msg.geoprocess
-  read_path: ${read_path}/msg/raw
-  save_path: ${save_path}/msg/geoprocessed
+  read_path: ${read_path}/msg-data/msg
+  save_path: ${save_path}/msg-geoprocessed/msg
   resolution: null
   region: null
   resample_method: bilinear
