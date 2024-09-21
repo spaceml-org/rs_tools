@@ -290,6 +290,13 @@ class MSGGeoProcessing:
 
         for itime in pbar_time:
 
+            # TODO: Make it modular whether to overwrite or not
+            # skip if file already exists
+            save_filename = Path(self.save_path).joinpath(f"{itime}_msg.nc")
+            if os.path.exists(save_filename):
+                logger.info(f"File already exists. Skipping: {save_filename}")
+                continue
+
             pbar_time.set_description(f"Processing: {itime}")
 
             # get cloud mask file for specific time
@@ -299,7 +306,7 @@ class MSGGeoProcessing:
             try:
                 # load cloud mask
                 cloud_mask = self.preprocess_cloud_mask(files_cloud)
-            except AssertionError:
+            except:
                 logger.error(f"Skipping {itime} due to missing cloud mask")
                 continue
 
@@ -309,7 +316,7 @@ class MSGGeoProcessing:
             try:
                 # load radiances and attach cloud mask
                 ds = self.preprocess_radiances(files, cloud_mask=cloud_mask)
-            except AssertionError:
+            except:
                 logger.error(f"Skipping {itime} due to error loading")
                 continue
 
@@ -323,12 +330,6 @@ class MSGGeoProcessing:
             # check if save path exists, and create if not
             if not os.path.exists(self.save_path):
                 os.makedirs(self.save_path)
-        
-            # remove file if it already exists
-            save_filename = Path(self.save_path).joinpath(f"{itime}_msg.nc")
-            if os.path.exists(save_filename):
-                logger.info(f"File already exists. Overwriting file: {save_filename}")
-                os.remove(save_filename)
 
             # save to netcdf
             ds.to_netcdf(save_filename, engine="netcdf4")
