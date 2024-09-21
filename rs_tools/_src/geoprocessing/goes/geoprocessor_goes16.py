@@ -80,7 +80,7 @@ class GOES16GeoProcessing:
         try:
             # correct band coordinates to reorganize xarray dataset
             ds = correct_goes16_bands(ds) 
-        except AttributeError:
+        except:
             pass
         # assign coordinate reference system
         ds = add_goes16_crs(ds)
@@ -297,6 +297,14 @@ class GOES16GeoProcessing:
 
         for itime in pbar_time:
 
+            # TODO: Make it modular whether to overwrite or not
+            # skip if file already exists
+            itime_name = format_goes_dates(itime)
+            save_filename = Path(self.save_path).joinpath(f"{itime_name}_goes16.nc")
+            if os.path.exists(save_filename):
+                logger.info(f"File already exists. Skipping: {save_filename}")
+                continue
+
             pbar_time.set_description(f"Processing: {itime}")
 
             # get files from unique times
@@ -304,13 +312,13 @@ class GOES16GeoProcessing:
             try:
                 # load radiances
                 ds = self.preprocess_radiances(files)
-            except AssertionError:
+            except:
                 logger.error(f"Skipping {itime} due to missing bands")
                 continue
             try:
                 # load cloud mask
                 ds_clouds = self.preprocess_cloud_mask(files)["cloud_mask"]
-            except AssertionError:
+            except:
                 logger.error(f"Skipping {itime} due to missing cloud mask")
                 continue
             pbar_time.set_description(f"Loaded data...")
@@ -330,13 +338,6 @@ class GOES16GeoProcessing:
             if not os.path.exists(self.save_path):
                 os.makedirs(self.save_path)
             
-
-            # remove file if it already exists
-            itime_name = format_goes_dates(itime)
-            save_filename = Path(self.save_path).joinpath(f"{itime_name}_goes16.nc")
-            if os.path.exists(save_filename):
-                logger.info(f"File already exists. Overwriting file: {save_filename}")
-                os.remove(save_filename)
             # save to netcdf
             pbar_time.set_description(f"Saving to file...:{save_filename}")
             ds.to_netcdf(save_filename, engine="netcdf4")

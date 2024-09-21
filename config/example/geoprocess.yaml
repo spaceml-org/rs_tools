@@ -4,5 +4,7 @@ read_path: /mnt/disks
 # PATH FOR SAVING GEOPROCESSED DATA
 save_path: /mnt/disks
 
+split: 0 # TODO: remove before merging
+
 defaults:
   - _self_
