@@ -92,7 +92,7 @@ def download(
         daily_window_t0=daily_window_t0,
         daily_window_t1=daily_window_t1,
         time_step=time_step,
-        save_dir=Path(save_dir).joinpath("msg"),
+        save_dir=Path(save_dir), #.joinpath("msg"),
     )
     logger.info("Downloading MSG Data...")
     msg_filenames = dc_msg_download.download()
