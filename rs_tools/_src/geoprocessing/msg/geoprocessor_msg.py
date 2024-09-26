@@ -275,7 +275,7 @@ class MSGGeoProcessing:
 
         return ds
 
-    def preprocess_files(self):
+    def preprocess_files(self, skip_if_exists: bool = True):
         """
         Preprocesses multiple files in read path and saves processed files to save path.
         """
@@ -290,10 +290,9 @@ class MSGGeoProcessing:
 
         for itime in pbar_time:
 
-            # TODO: Make it modular whether to overwrite or not
-            # skip if file already exists
             save_filename = Path(self.save_path).joinpath(f"{itime}_msg.nc")
-            if os.path.exists(save_filename):
+            if skip_if_exists and os.path.exists(save_filename):
+                # skip if file already exists
                 logger.info(f"File already exists. Skipping: {save_filename}")
                 continue
 
@@ -340,6 +339,7 @@ def geoprocess(
         save_path: str = "./",
         region: str = None,
         resample_method: str = "bilinear",
+        skip_existing: bool = True
 ):
     """
     Geoprocesses MSG files
@@ -350,6 +350,7 @@ def geoprocess(
         save_path (str, optional): The path to save the geoprocessed files to. Defaults to "./".
         region (str, optional): The geographic region to extract ("lon_min, lat_min, lon_max, lat_max"). Defaults to None.
         resample_method (str, optional): The resampling method to use. Defaults to "bilinear".
+        skip_existing (bool, optional): Whether to skip existing files. Defaults to True.
 
     Returns:
         None
@@ -368,7 +369,7 @@ def geoprocess(
         resample_method=resample_method
         )
     logger.info(f"GeoProcessing Files...")
-    msg_geoprocessor.preprocess_files()
+    msg_geoprocessor.preprocess_files(skip_if_exists=skip_if_exists)
 
     logger.info(f"Finished MSG GeoProcessing Script...!")
 

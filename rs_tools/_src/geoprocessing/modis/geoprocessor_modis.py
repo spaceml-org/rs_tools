@@ -213,7 +213,7 @@ class MODISGeoProcessing:
         return ds
 
 
-    def preprocess_files(self):
+    def preprocess_files(self, skip_if_exists: bool = True):
         """
         Preprocesses multiple files in read path and saves processed files to save path.
         """
@@ -223,6 +223,13 @@ class MODISGeoProcessing:
         pbar_time = tqdm(unique_times)
 
         for itime in pbar_time:
+
+            itime_name = format_modis_dates(itime)
+            save_filename = Path(self.save_path).joinpath(f"{itime_name}_{self.satellite}.nc")
+            # skip if file already exists
+            if skip_if_exists and os.path.exists(save_filename):
+                logger.info(f"File already exists. Skipping: {save_filename}")
+                continue
 
             pbar_time.set_description(f"Processing: {itime}")
 
@@ -261,13 +268,6 @@ class MODISGeoProcessing:
             # check if save path exists, and create if not
             if not os.path.exists(self.save_path):
                 os.makedirs(self.save_path)
-        
-            # remove file if it already exists
-            itime_name = format_modis_dates(itime)
-            save_filename = Path(self.save_path).joinpath(f"{itime_name}_{self.satellite}.nc")
-            if os.path.exists(save_filename):
-                logger.info(f"File already exists. Overwriting file: {save_filename}")
-                os.remove(save_filename)
 
             # save to netcdf
             ds.to_netcdf(save_filename, engine="netcdf4")
@@ -275,7 +275,8 @@ class MODISGeoProcessing:
 def geoprocess(
         satellite: str,
         read_path: str = "./",
-        save_path: str = "./"
+        save_path: str = "./",
+        skip_if_exists: bool = True
 ):
     """
     Geoprocesses MODIS files
@@ -284,6 +285,7 @@ def geoprocess(
         satellite (str, optional): The satellite of the data to geoprocess.
         read_path (str, optional): The path to read the files from. Defaults to "./".
         save_path (str, optional): The path to save the geoprocessed files to. Defaults to "./".
+        skip_if_exists (bool, optional): Whether to skip if the file already exists. Defaults to True.
 
     Returns:
         None
@@ -297,7 +299,7 @@ def geoprocess(
         save_path=save_path
         )
     logger.info(f"GeoProcessing Files...")
-    modis_geoprocessor.preprocess_files()
+    modis_geoprocessor.preprocess_files(skip_if_exists=skip_if_exists)
     
     logger.info(f"Finished {satellite.upper()} GeoProcessing Script...!")
 
