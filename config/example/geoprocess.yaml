@@ -1,8 +1,8 @@
 # PATH WITH RAW DATA
-read_path: data
+read_path: /path/to/donwloaded/data
 
 # PATH FOR SAVING GEOPROCESSED DATA
-save_path: data
+save_path: /path/to/save/geoprocessed/data
 
 defaults:
   - _self_

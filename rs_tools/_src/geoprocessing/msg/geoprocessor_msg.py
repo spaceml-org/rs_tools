@@ -275,7 +275,7 @@ class MSGGeoProcessing:
 
         return ds
 
-    def preprocess_files(self):
+    def preprocess_files(self, skip_if_exists: bool = True):
         """
         Preprocesses multiple files in read path and saves processed files to save path.
         """
@@ -290,6 +290,12 @@ class MSGGeoProcessing:
 
         for itime in pbar_time:
 
+            save_filename = Path(self.save_path).joinpath(f"{itime}_msg.nc")
+            if skip_if_exists and os.path.exists(save_filename):
+                # skip if file already exists
+                logger.info(f"File already exists. Skipping: {save_filename}")
+                continue
+
             pbar_time.set_description(f"Processing: {itime}")
 
             # get cloud mask file for specific time
@@ -299,7 +305,7 @@ class MSGGeoProcessing:
             try:
                 # load cloud mask
                 cloud_mask = self.preprocess_cloud_mask(files_cloud)
-            except AssertionError:
+            except:
                 logger.error(f"Skipping {itime} due to missing cloud mask")
                 continue
 
@@ -309,7 +315,7 @@ class MSGGeoProcessing:
             try:
                 # load radiances and attach cloud mask
                 ds = self.preprocess_radiances(files, cloud_mask=cloud_mask)
-            except AssertionError:
+            except:
                 logger.error(f"Skipping {itime} due to error loading")
                 continue
 
@@ -323,12 +329,6 @@ class MSGGeoProcessing:
             # check if save path exists, and create if not
             if not os.path.exists(self.save_path):
                 os.makedirs(self.save_path)
-        
-            # remove file if it already exists
-            save_filename = Path(self.save_path).joinpath(f"{itime}_msg.nc")
-            if os.path.exists(save_filename):
-                logger.info(f"File already exists. Overwriting file: {save_filename}")
-                os.remove(save_filename)
 
             # save to netcdf
             ds.to_netcdf(save_filename, engine="netcdf4")
@@ -339,6 +339,7 @@ def geoprocess(
         save_path: str = "./",
         region: str = None,
         resample_method: str = "bilinear",
+        skip_existing: bool = True
 ):
     """
     Geoprocesses MSG files
@@ -349,6 +350,7 @@ def geoprocess(
         save_path (str, optional): The path to save the geoprocessed files to. Defaults to "./".
         region (str, optional): The geographic region to extract ("lon_min, lat_min, lon_max, lat_max"). Defaults to None.
         resample_method (str, optional): The resampling method to use. Defaults to "bilinear".
+        skip_existing (bool, optional): Whether to skip existing files. Defaults to True.
 
     Returns:
         None
@@ -367,7 +369,7 @@ def geoprocess(
         resample_method=resample_method
         )
     logger.info(f"GeoProcessing Files...")
-    msg_geoprocessor.preprocess_files()
+    msg_geoprocessor.preprocess_files(skip_if_exists=skip_if_exists)
 
     logger.info(f"Finished MSG GeoProcessing Script...!")
 

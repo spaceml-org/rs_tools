@@ -84,10 +84,10 @@ class GOES16Download:
 def download(
         start_date: str="2020-10-02",
         end_date: str="2020-10-02", 
-        start_time: str="14:00:00", 
-        end_time: str="20:00:00", 
-        daily_window_t0: str="14:00:00",  
-        daily_window_t1: str="14:30:00",  
+        start_time: str="00:00:00", 
+        end_time: str="23:59:59",
+        daily_window_t0: str="00:00:00",  
+        daily_window_t1: str="23:59:59",  
         time_step: str="00:15:00",
         save_dir: str='./data/', 
         cloud_mask: bool = True
@@ -109,10 +109,9 @@ def download(
     Returns:
         List[str]: List of downloaded file names
     """
-    logger.debug(f"Save Path: {save_dir}")
-    logger.debug(f"TIME STEP: {time_step}")
     # Initialize GOES 16 Downloader
     logger.info("Initializing GOES16 Downloader...")
+    logger.debug(f"Time Step: {time_step}")
     dc_goes16_download = GOES16Download(
         start_date=start_date,
         end_date=end_date,

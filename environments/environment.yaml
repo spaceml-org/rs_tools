@@ -38,6 +38,9 @@ dependencies:
       - typer
       - einops
       - cartopy
+      - google-cloud-storage
+      - gcsfs
+      - xrpatcher
       # formatting
       - rasterio
       - black

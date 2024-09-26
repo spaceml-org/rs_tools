@@ -80,7 +80,7 @@ class GOES16GeoProcessing:
         try:
             # correct band coordinates to reorganize xarray dataset
             ds = correct_goes16_bands(ds) 
-        except AttributeError:
+        except:
             pass
         # assign coordinate reference system
         ds = add_goes16_crs(ds)
@@ -107,6 +107,7 @@ class GOES16GeoProcessing:
             ds_subset = ds
 
         if self.resolution is not None:
+            # TODO: Test how resampling impacts cloud_mask
             logger.info(f"Resampling data to resolution: {self.resolution} m")
             # resampling
             ds_subset = resample_rioxarray(ds_subset, resolution=(self.resolution, self.resolution), method=self.resample_method)
@@ -153,7 +154,8 @@ class GOES16GeoProcessing:
         # attach time coordinate
         ds_subset = ds_subset.assign_coords({"time": [time_stamp]})
         # drop variables that will no longer be needed
-        ds_subset = ds_subset.drop_vars(["t", "y_image", "x_image", "goes_imager_projection"])
+        # ds_subset = ds_subset.drop_vars(["t", "y_image", "x_image", "goes_imager_projection"])
+        ds_subset = ds_subset.drop_vars(["t", "y_image", "x_image"]) # NOTE: Keep goes_imager_projection for easier access to crs
         # assign band attributes to dataset
         ds_subset.band.attrs = band_attributes
         # assign band wavelength to each variable
@@ -284,7 +286,7 @@ class GOES16GeoProcessing:
 
         return ds
 
-    def preprocess_files(self):
+    def preprocess_files(self, skip_if_exists: bool = True):
         """
         Preprocesses multiple files in read path and saves processed files to save path.
         """
@@ -295,6 +297,13 @@ class GOES16GeoProcessing:
 
         for itime in pbar_time:
 
+            itime_name = format_goes_dates(itime)
+            save_filename = Path(self.save_path).joinpath(f"{itime_name}_goes16.nc")
+            # skip if file already exists
+            if skip_if_exists and os.path.exists(save_filename):
+                logger.info(f"File already exists. Skipping: {save_filename}")
+                continue
+
             pbar_time.set_description(f"Processing: {itime}")
 
             # get files from unique times
@@ -302,13 +311,13 @@ class GOES16GeoProcessing:
             try:
                 # load radiances
                 ds = self.preprocess_radiances(files)
-            except AssertionError:
+            except:
                 logger.error(f"Skipping {itime} due to missing bands")
                 continue
             try:
                 # load cloud mask
                 ds_clouds = self.preprocess_cloud_mask(files)["cloud_mask"]
-            except AssertionError:
+            except:
                 logger.error(f"Skipping {itime} due to missing cloud mask")
                 continue
             pbar_time.set_description(f"Loaded data...")
@@ -328,13 +337,6 @@ class GOES16GeoProcessing:
             if not os.path.exists(self.save_path):
                 os.makedirs(self.save_path)
             
-
-            # remove file if it already exists
-            itime_name = format_goes_dates(itime)
-            save_filename = Path(self.save_path).joinpath(f"{itime_name}_goes16.nc")
-            if os.path.exists(save_filename):
-                logger.info(f"File already exists. Overwriting file: {save_filename}")
-                os.remove(save_filename)
             # save to netcdf
             pbar_time.set_description(f"Saving to file...:{save_filename}")
             ds.to_netcdf(save_filename, engine="netcdf4")
@@ -347,6 +349,7 @@ def geoprocess(
         save_path: str = "./",
         region: str = None,
         resample_method: str = "bilinear",
+        skip_if_exists: bool = True
 ):
     """
     Geoprocesses GOES 16 files
@@ -357,7 +360,8 @@ def geoprocess(
         save_path (str, optional): The path to save the geoprocessed files to. Defaults to "./".
         region (str, optional): The geographic region to extract ("lon_min, lat_min, lon_max, lat_max"). Defaults to None.
         resample_method (str, optional): The resampling method to use. Defaults to "bilinear".
-
+        skip_if_exists (bool, optional): Whether to skip if the file already exists. Defaults to True.
+        
     Returns:
         None
     """
@@ -377,7 +381,7 @@ def geoprocess(
         resample_method=resample_method
         )
     logger.info(f"GeoProcessing Files...")
-    goes16_geoprocessor.preprocess_files()
+    goes16_geoprocessor.preprocess_files(skip_if_exists=skip_if_exists)
 
     logger.info(f"Finished GOES 16 GeoProcessing Script...!")
 

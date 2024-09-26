@@ -93,7 +93,6 @@ def goes_download(
         python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/
         python scripts/goes-download.py 2018-10-01 --end-date 2018-10-01 --daily-window-t0 17:00:00 --daily-window-t1 17:14:00 --time-step 00:15:00 --save-dir /home/juanjohn/data/ --check-bands-downloaded
     """
-
     # run checks
     # check satellite details
     _check_input_processing_level(processing_level=processing_level)
@@ -184,7 +183,7 @@ def _goes_level2_download(time,
         # extract filepath from GOES download pandas dataframe
         filepath: str = os.path.join(save_dir, ifile.file[0])
         return [filepath]
-    except IndexError:
+    except:
         logger.info(f"Data could not be downloaded for time step {time}.")
         return []
     
@@ -220,7 +219,7 @@ def _goes_level1_download(time,
             filepath: str = os.path.join(save_dir, ifile.file[0])
             sub_files_list += [filepath]
         
-        except IndexError:
+        except:
             logger.info(f"Band {iband} could not be downloaded for time step {time}.")
             if check_bands_downloaded:
                 logger.info(f"Deleting all other bands for time step {time}.")
@@ -256,6 +255,8 @@ def _compile_list_of_dates(timestamp_dict: dict, predefined_timestamps: List[str
         if timestamp_dict['time_step'] is None: 
             time_step = '1:00:00'
             logger.info("No timedelta specified. Default is 1 hour.")
+        else:
+            time_step = timestamp_dict['time_step']
         _check_timedelta_format(time_delta=time_step)
         
         # convert str to datetime object
