@@ -3,9 +3,9 @@ dataloader:
 
   datasets_spec:
     msg:
-      data_path: /path/to/your/data
+      data_path: /path/to/msg/data
     goes:
-      data_path: /path/to/your/data
+      data_path: /path/to/goes/data
   load_coords: True
   load_cloudmask: True
 

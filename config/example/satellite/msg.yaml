@@ -5,8 +5,8 @@ download:
   start_time: ${period.start_time}
   end_date: ${period.end_date}
   end_time: ${period.end_time}
-  daily_window_t0: "9:00:00"
-  daily_window_t1: "17:00:00"
+  daily_window_t0: "00:00:00"
+  daily_window_t1: "23:59:00"
   time_step: "1:00:00"
 
 geoprocess:
@@ -16,8 +16,6 @@ geoprocess:
   resolution: null
   region: null
   resample_method: bilinear
-
-# preprocess:
 
 patch:
   _target_: rs_tools._src.preprocessing.prepatcher.prepatch

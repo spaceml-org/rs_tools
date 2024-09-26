@@ -1,10 +1,8 @@
 # PATH WITH RAW DATA
-read_path: /mnt/disks
+read_path: /path/to/donwloaded/data
 
 # PATH FOR SAVING GEOPROCESSED DATA
-save_path: /mnt/disks
-
-split: 0 # TODO: remove before merging
+save_path: /path/to/save/geoprocessed/data
 
 defaults:
   - _self_

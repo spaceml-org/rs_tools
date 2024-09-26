@@ -13,8 +13,6 @@ geoprocess:
   save_path: ${save_path}/terra/geoprocessed
   satellite: terra
 
-# preprocess:
-
 patch:
   _target_: rs_tools._src.preprocessing.prepatcher.prepatch
   read_path: ${read_path}/terra/geoprocessed
