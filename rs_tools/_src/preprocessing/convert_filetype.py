@@ -83,11 +83,9 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Convert files to a new format.')
     parser.add_argument('--input_dir', 
-                        default = '/home/anna.jungbluth/data/geoprocessed/msg/',
                         type=str, 
                         help='path to the files.')
     parser.add_argument('--save_dir', 
-                        default = '/home/anna.jungbluth/data/converted/msg/',
                         type=str, 
                         help='path to save the converted files.')
     parser.add_argument('--ext',
