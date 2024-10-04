@@ -36,6 +36,7 @@ class Compiler():
         ds = xr.open_dataset(filepath)
         data = ds.Rad.values
         wavelengths = ds.band_wavelength.values.tolist()
+        wavelengths = [np.round(w, 4) for w in wavelengths]
         del ds # free up memory
         return data, wavelengths
 
