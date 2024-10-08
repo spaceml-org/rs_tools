@@ -98,7 +98,8 @@ class MODISGeoProcessing:
             filenames=file
         )
         # Load radiance bands
-        channels = get_modis_channel_numbers()
+        # channels = get_modis_channel_numbers() # This assigns the wrong order of bands
+        channels = list(MODIS_WAVELENGTHS.keys())
         scn.load(channels, generate=False, calibration='radiance')
         
         # change to xarray data
