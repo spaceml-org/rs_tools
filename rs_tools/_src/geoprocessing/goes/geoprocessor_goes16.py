@@ -299,6 +299,9 @@ class GOES16GeoProcessing:
 
             # get files from unique times
             files = list(filter(lambda x: itime in x, self.goes_files))
+            # Sort files to ensure that they come in order channel 1 to 16
+            # Sorting should already have happened when compiling self.goes_files
+            files = sorted(files)
             try:
                 # load radiances
                 ds = self.preprocess_radiances(files)
