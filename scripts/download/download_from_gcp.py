@@ -16,15 +16,15 @@ def download_from_gcp(bucket_name, file_name_prefix, destination):
         destination_file_path = os.path.join(destination, blob.name.split('/')[-1])
         blob.download_to_filename(destination_file_path)
 
-# destination = "/mnt/disks/eo-data/goes/"
-# bucket_name = "iti-datasets-eo"
-# subfolders = "goes-geoprocessed/2020"
-# csv_file = "goes_2020_hourly_subset.csv"
-
-destination = "/mnt/disks/eo-data/msg/"
+destination = "/mnt/disks/eo-miniset/goes/"
 bucket_name = "iti-datasets-eo"
-subfolders = "msg-geoprocessed/2020"
-csv_file = "msg_2020_hourly_subset.csv"
+subfolders = "goes-geoprocessed/2020"
+csv_file = "goes_2020_miniset.csv"
+
+# destination = "/mnt/disks/eo-miniset/msg/"
+# bucket_name = "iti-datasets-eo"
+# subfolders = "msg-geoprocessed/2020"
+# csv_file = "msg_2020_miniset.csv"
 
 df = pd.read_csv(csv_file)
 dates = df["datetime"].values
