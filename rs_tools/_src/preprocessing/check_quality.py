@@ -36,7 +36,7 @@ class Compiler():
         ds = xr.open_dataset(filepath)
         data = ds.Rad.values
         wavelengths = ds.band_wavelength.values.tolist()
-        wavelengths = [np.round(w, 4) for w in wavelengths]
+        wavelengths = [np.round(w, 4).item() for w in wavelengths]
         del ds # free up memory
         return data, wavelengths
 
@@ -44,61 +44,33 @@ class Compiler():
         datetime_str = filepath.split('/')[-1].split('_')[0]
         return datetime_str
 
-    def mean_per_channel(self, data: np.ndarray) -> np.ndarray:
-        mean = np.nanmean(data, axis=(1, 2))
-        mean = [np.round(m, 6) for m in mean]
-        return mean
-
-    def std_per_channel(self, data: np.ndarray) -> np.ndarray:
-        std = np.nanstd(data, axis=(1, 2))
-        std = [np.round(s, 6) for s in std]
-        return std
-    
-    def max_per_channel(self, data: np.ndarray) -> np.ndarray:
-        max_ = np.nanmax(data, axis=(1, 2))
-        max_ = [np.round(m, 6) for m in max_]
-        return max_
-
-    def min_per_channel(self, data: np.ndarray) -> np.ndarray:
-        min_ = np.nanmin(data, axis=(1, 2))
-        min_ = [np.round(m, 6) for m in min_]
-        return min_
-
+    def nans_per_channel(self, data: np.ndarray) -> list:
+        nans = []
+        for i in range(data.shape[0]):
+            nans.append((np.sum(np.isnan(data[i]))).item())
+        return nans
+        
     def compile_metrics(self, files: list):
         
-        means = []
-        stds = []
-        maxs = []
-        mins = []
+        nans = []
         datetimes = []
         wavelengths = []
 
         pbar = tqdm(files)
         for file in pbar:
             data, wvls = self.load(file)
-            mean = self.mean_per_channel(data)
-            std = self.std_per_channel(data)
-            max_ = self.max_per_channel(data)
-            min_ = self.min_per_channel(data)
-            nan_count = self.nan_count_per_channel(data)
+            nan_count = self.nans_per_channel(data)
 
             datetime_str = self.extract_datetime(file)
 
-            means.append(mean)
-            stds.append(std)
-            maxs.append(max_)
-            mins.append(min_)
             datetimes.append(datetime_str)
             wavelengths.append(wvls)
-
+            nans.append(nan_count)
 
         df = pd.DataFrame({
             'datetime': datetimes,
             'wavelengths': wavelengths,
-            'mean': means,
-            'std': stds,
-            'max': maxs,
-            'min': mins,
+            'nans': nans
         })
             
         file_0 = files[0].split('/')[-1].split('_')[0]
