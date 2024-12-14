@@ -15,7 +15,7 @@ import autoroot
 
 # TODO add option to provide config path via command line
 
-@hydra.main(config_path="../config/esl-3dclouds/", config_name="main", version_base="1.3")
+@hydra.main(config_path="../config/miniset/", config_name="main", version_base="1.3")
 def main(cfg):
     # instantiate the config 
     logger.debug(f"Choosing Stage...")

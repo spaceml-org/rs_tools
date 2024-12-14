@@ -64,12 +64,19 @@ class Compiler():
         min_ = [np.round(m, 6) for m in min_]
         return min_
 
+    def nans_per_channel(self, data: np.ndarray) -> list:
+        nans = []
+        for i in range(data.shape[0]):
+            nans.append((np.sum(np.isnan(data[i]))).item())
+        return nans
+
     def compile_metrics(self, files: list):
         
         means = []
         stds = []
         maxs = []
         mins = []
+        nans = []
         datetimes = []
         wavelengths = []
 
@@ -80,7 +87,7 @@ class Compiler():
             std = self.std_per_channel(data)
             max_ = self.max_per_channel(data)
             min_ = self.min_per_channel(data)
-            nan_count = self.nan_count_per_channel(data)
+            nan_count = self.nans_per_channel(data)
 
             datetime_str = self.extract_datetime(file)
 
@@ -88,6 +95,7 @@ class Compiler():
             stds.append(std)
             maxs.append(max_)
             mins.append(min_)
+            nans.append(nan_count)
             datetimes.append(datetime_str)
             wavelengths.append(wvls)
 
@@ -99,6 +107,7 @@ class Compiler():
             'std': stds,
             'max': maxs,
             'min': mins,
+            'nans': nans,
         })
             
         file_0 = files[0].split('/')[-1].split('_')[0]
@@ -133,7 +142,7 @@ if __name__ == '__main__':
     chunk_files = np.array_split(files, cpus)
     chunk_list = [list(chunk) for chunk in chunk_files]
 
-    logger.info(f"Converting {len(chunk_files)} chunks using {multiprocessing.cpu_count()} CPUs")
+    logger.info(f"Converting {len(chunk_files)} chunks using {cpus} CPUs")
 
     with multiprocessing.Pool(cpus) as p:
         p.map(compiler.compile_metrics, chunk_list)
