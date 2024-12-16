@@ -200,8 +200,8 @@ class Patcher():
                 gc.collect()
 
 def prepatch(
-    patch_size: int,
-    num_patches: int,
+    patch_size: int = 256,
+    num_patches: int = 100,
     read_path: str = "./",
     save_path: str = "./",
     save_filetype: str = "nc",
@@ -237,7 +237,4 @@ def prepatch(
 
 
 if __name__ == "__main__":
-    """
-    python scripts/pipeline/prepatch.py --read-path "/path/to/netcdf/file" --save-path /path/to/save/patches
-    """
     typer.run(prepatch)
