@@ -8,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import typer
+import multiprocessing
 import xarray as xr
 from loguru import logger
 from rs_tools._src.utils.io import get_list_filenames
@@ -230,11 +231,22 @@ def prepatch(
         num_patches=num_patches,
         save_filetype=save_filetype,
     )
-    logger.info(f"Patching Files...: {save_path}")
-    patcher.patch()
+    # Extract files
+    files = patcher.nc_files()
+    # Define number of CPUs
+    cpus = int(multiprocessing.cpu_count() // 2)
+    # Split files into chunks
+    chunk_files = np.array_split(files, cpus)
+    chunk_list = [list(chunk) for chunk in chunk_files]
+
+    logger.info(f"Patching {len(chunk_files)} splits using {cpus} CPUs...")
+    # Patch files
+    with multiprocessing.Pool(cpus) as p:
+        p.map(patcher.patch(), chunk_list)
+        p.close()
+        p.join()
 
     logger.info(f"Finished Patching Script...!")
-
 
 if __name__ == "__main__":
     typer.run(prepatch)
