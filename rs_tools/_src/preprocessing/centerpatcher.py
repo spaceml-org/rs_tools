@@ -148,7 +148,7 @@ class Patcher():
         filename: str, 
         patch_num: int, 
         xmin: int, 
-        ymin: int) -> None:
+        ymin: int):
         """
         Saves the patch as a NetCDF file.
 
@@ -172,7 +172,7 @@ class Patcher():
             np.savez(os.path.join(save_path, save_name), stack)
 
 
-    def patch(self) -> None:
+    def patch(self):
         """
         Preprocesses and saves patches from the NetCDF files.
         """
@@ -199,6 +199,7 @@ class Patcher():
                 # clear memory
                 del patch_ds
                 gc.collect()
+        return True
 
 def prepatch(
     patch_size: int = 256,
