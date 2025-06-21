@@ -133,6 +133,7 @@ class GOES16GeoProcessing:
 
         # Extract relevant attributes from original dataset
         time_stamp = pd.to_datetime(ds.t.values) 
+        # TODO: Check whether this is correct, or if band_id should be referenced instead
         band_attributes = ds.band.attrs
         band_wavelength_attributes = ds.band_wavelength.attrs
         band_wavelength_values = ds.band_wavelength.values
