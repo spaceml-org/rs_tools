@@ -64,4 +64,5 @@ dependencies:
       - hydra-zen
       - wandb
       - xrpatcher
+      - rioxarray
       
