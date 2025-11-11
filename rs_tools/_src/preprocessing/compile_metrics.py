@@ -11,15 +11,15 @@ from rs_tools._src.utils.io import get_list_filenames
 
 def _check_input_filetype(file_type: str) -> bool:
     """checks allowed input file types."""
-    if file_type in ["nc"]:
+    if file_type in ["nc", "npy"]:
         return True
     else:
         msg = "Unrecognized file type"
-        msg += f"\nNeeds to be 'nc'. Others are not yet implemented."
+        msg += f"\nNeeds to be 'nc' or 'npy'. Others are not yet implemented."
         raise ValueError(msg)
 
 class Compiler():
-    def __init__(self, input_dir, save_dir, ext='nc'):
+    def __init__(self, input_dir, save_dir, ext):
         self.input_dir = input_dir
         self.save_dir = save_dir
         self.ext = ext
@@ -77,17 +77,23 @@ class Compiler():
         maxs = []
         mins = []
         nans = []
+        total_nans = []
         datetimes = []
         wavelengths = []
 
         pbar = tqdm(files)
         for file in pbar:
-            data, wvls = self.load(file)
+            if self.ext == 'nc':
+                data, wvls = self.load(file)
+            elif self.ext == 'npy':
+                data = np.load(file)
+                wvls = None
             mean = self.mean_per_channel(data)
             std = self.std_per_channel(data)
             max_ = self.max_per_channel(data)
             min_ = self.min_per_channel(data)
             nan_count = self.nans_per_channel(data)
+            total_nan_count = sum(nan_count)
 
             datetime_str = self.extract_datetime(file)
 
@@ -96,6 +102,7 @@ class Compiler():
             maxs.append(max_)
             mins.append(min_)
             nans.append(nan_count)
+            total_nans.append(total_nan_count)
             datetimes.append(datetime_str)
             wavelengths.append(wvls)
 
@@ -108,6 +115,7 @@ class Compiler():
             'max': maxs,
             'min': mins,
             'nans': nans,
+            'total_nans': total_nans
         })
             
         file_0 = files[0].split('/')[-1].split('_')[0]
@@ -127,7 +135,7 @@ if __name__ == '__main__':
                         type=str, 
                         help='path to save the converted files.')
     parser.add_argument('--ext',
-                        default='nc',
+                        default='npy',
                         type=str,
                         help='file extension of the input files.')
     args = parser.parse_args()
@@ -139,6 +147,7 @@ if __name__ == '__main__':
     # chunk files
     cpus = int(multiprocessing.cpu_count())
     files = compiler.files
+    logger.info(f"Found {len(files)} files to process.")
     chunk_files = np.array_split(files, cpus)
     chunk_list = [list(chunk) for chunk in chunk_files]
 
